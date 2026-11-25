@@ -6,6 +6,7 @@ on:
   push:
     branches: [main]
     paths: ["kit/skills/**", "tools/validate_skills.py", ".github/workflows/skills-validate.yml"]
+  workflow_dispatch:
 
 jobs:
   validate:
