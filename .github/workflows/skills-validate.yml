@@ -1,0 +1,33 @@
+name: 스킬 형식 검사
+
+on:
+  pull_request:
+    paths: ["kit/skills/**", "tools/validate_skills.py", ".github/workflows/skills-validate.yml"]
+  push:
+    branches: [main]
+    paths: ["kit/skills/**", "tools/validate_skills.py", ".github/workflows/skills-validate.yml"]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Python 설치
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 팀 검사 (명세 규칙 + 참조 파일 존재 여부)
+        run: python3 tools/validate_skills.py
+
+      - name: 공식 참조 검사기 skills-ref 설치
+        run: pip install "git+https://github.com/agentskills/agentskills.git#subdirectory=skills-ref"
+
+      - name: skills-ref validate
+        run: |
+          for d in kit/skills/*/; do
+            echo "== $d"
+            skills-ref validate "$d"
+          done
