@@ -15,7 +15,7 @@
 ## 케이스 1. 커넥션 풀 고갈
 - **만드는 법**: 협의 목록 조회(`GET /api/negotiations`)에 sleep 없이 동시 300명, 60초 (데이터 변경 없음)
   - 원래 계획은 주문 생성이었지만 테스트 계정 장바구니가 비어 있어서(채우려면 DB 쓰기 필요) 조회 API로 바꿨다
-  - 스크립트: `pool-exhaust.js` (아직 레포에 없음. 0단계 확정 시 `evals/incident-analysis/`로 옮긴다)
+  - 스크립트: `evals/incident-analysis/k6/pool-exhaust.js`
   - 참고: sleep(1)이 있는 `k6/negotiation-list-warm.js`(200명)로는 풀이 차지 않았다 (p95 26ms, 대기 0)
 - **스킬에 줄 입력**: "오늘 21:17~21:20 사이에 협의 목록 조회(GET /api/negotiations)가 갑자기 느려졌어. 원인 분석해줘"
 - **정답**: 동시 요청이 커넥션 풀(최대 10개)을 넘어 커넥션 대기가 생김
@@ -36,7 +36,7 @@
 
 ## 케이스 2. 행 락 경합
 - **만드는 법**: `k6 run k6/oversell-test.js` (20명이 같은 상품 재고에 동시 주문)
-  - 준비: 20명 장바구니에 옵션 120001을 앱 API(`POST /api/carts`, 수량 37 = MOQ)로 담는다. 스크립트 `fill-oversell-carts.js` (아직 레포에 없음)
+  - 준비: 20명 장바구니에 옵션 120001을 앱 API(`POST /api/carts`, 수량 37 = MOQ)로 담는다. 스크립트 `evals/incident-analysis/k6/fill-oversell-carts.js`
   - 한 번 돌리면 장바구니가 비고 재고가 줄어서, 다시 하려면 준비부터 반복해야 한다
 - **스킬에 줄 입력**: "오늘 21:32쯤 주문 생성(POST /api/buyer/orders)에서 일부 요청만 유독 느렸어. 왜 그래?"
 - **정답**: 같은 재고 행(`product_options` 120001)을 동시에 UPDATE하면서 행 락 대기가 생김. 400 응답 7건은 재고 부족으로 인한 **정상 거부**다(장애 아님)
@@ -56,7 +56,7 @@
   1. `ALTER TABLE orders ALTER INDEX idx_orders_buyer_created INVISIBLE;`
      - `DROP INDEX`는 안 된다. `buyer_id`가 외래 키이고 이 인덱스가 `buyer_id`로 시작하는 유일한 인덱스라 MySQL이 삭제를 거부한다
      - INVISIBLE(숨김)은 즉시 적용·복구되고, 옵티마이저만 인덱스를 못 쓰게 된다
-  2. 구매자 주문 목록 조회(`GET /api/buyer/orders`)에 부하: `buyer-order-list.js` (주문 많은 구매자 20명, 5 VU, sleep 1초. 아직 레포에 없음)
+  2. 구매자 주문 목록 조회(`GET /api/buyer/orders`)에 부하: `evals/incident-analysis/k6/buyer-order-list.js` (주문 많은 구매자 20명, 5 VU, sleep 1초)
   3. 복구: `ALTER TABLE orders ALTER INDEX idx_orders_buyer_created VISIBLE;`
 - **사전 측정**: 구매자 1명 조회 쿼리가 인덱스 사용 시 0.19초, `IGNORE INDEX`로 전체 스캔 시 3.4초 (EXPLAIN `type=ALL`, rows 97만, filesort)
 - **정상 구간 (인덱스 있음)**: 2026-11-25 21:41:26 ~ 21:42:10, p95 770ms, 평균 384ms, 에러 0%, 145회 (구매자당 주문 약 4,500건을 전부 반환해서 원래도 무거운 API)
@@ -74,5 +74,14 @@
   - 반영한 개선:
     - SKILL.md: 최근 변경에 DB 스키마·인덱스 변경(digest의 DDL 기록, `IS_VISIBLE`)을 포함. "같은 대상이 직전에는 정상이었다"는 반대 근거가 있으면 그사이 무엇이 바뀌었는지 찾기 전에는 결론 내리지 않음
     - db_query.sh: 따옴표 안 문자열(`LIKE 'ALTER%'`)까지 쓰기 키워드로 오인하던 문제 수정
+- **재시험 (스킬 보완 후)**
+  - 실행 (인덱스 숨김 상태): 2026-11-25 21:56:07 ~ 21:57:09
+  - 측정값: p95 3.7초, 평균 2.57초, 에러 0%, 70회 / 최근 3분 슬로우 쿼리 72건 / Grafana 알림 21:56:50 발생
+  - 스킬 결과 (2026-11-25, 새 세션, Slack 알림 메시지를 입력으로 줌):
+    - 1순위 "21:55:54 인덱스 INVISIBLE로 전체 스캔". 근거는 DDL 기록, `visible=NO`, EXPLAIN `type=ALL`·`possible_keys=NULL`·filesort, 1회당 약 94만 행, 시각 일치, 인덱스를 끄기 전 같은 API 400ms vs 이후 3,280ms 비교
+    - 즉시 조치로 `ALTER INDEX … VISIBLE`을 **사람 승인 필요**로 제안하고 직접 실행하지 않음. 코드 수정(불필요한 조인, 페이징)은 부차적 개선으로만 제시
+    - "실험 중이었다면 알림이 기대대로 동작한 것"이라고 상황 가능성까지 짚음
+    - 사소한 부정확: 일부 DDL 시각을 digest의 FIRST/LAST_SEEN 기준으로 적어 실제 시각과 조금 다름 (결론에는 영향 없음)
+  - 통과 여부: **통과**. 보완한 두 규칙(DB 스키마 변경 확인, 정상 구간과 비교)이 그대로 작동함
 - **정답**: `orders`(100만 건) 조회가 `buyer_id` 인덱스를 못 써서(인덱스 숨김) 전체 스캔함
 - **나와야 할 근거**: `slow_queries` 증가, 해당 API p95만 상승, 쿼리 통계의 `rows_examined` 급증, `EXPLAIN`에서 `type=ALL`, **21:43:30 `ALTER INDEX … INVISIBLE` 기록 또는 `IS_VISIBLE=NO`**
