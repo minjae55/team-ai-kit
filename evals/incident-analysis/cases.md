@@ -36,17 +36,43 @@
 
 ## 케이스 2. 행 락 경합
 - **만드는 법**: `k6 run k6/oversell-test.js` (20명이 같은 상품 재고에 동시 주문)
-- **스킬에 줄 입력**: "<시작>~<끝> 주문 생성에서 일부 요청만 유독 느렸어. 왜 그래?"
-- **정답**: 같은 재고 행(`product_options`)을 동시에 UPDATE하면서 행 락 대기가 생김
-- **나와야 할 근거**: `innodb_row_lock_waits` 증가, `order_create_step_seconds{step="4_stock"}` 증가, (실행 중이면) `sys.innodb_lock_waits`
-- **기록**: 실행 시각 / 결과 / 통과 여부
+  - 준비: 20명 장바구니에 옵션 120001을 앱 API(`POST /api/carts`, 수량 37 = MOQ)로 담는다. 스크립트 `fill-oversell-carts.js` (아직 레포에 없음)
+  - 한 번 돌리면 장바구니가 비고 재고가 줄어서, 다시 하려면 준비부터 반복해야 한다
+- **스킬에 줄 입력**: "오늘 21:32쯤 주문 생성(POST /api/buyer/orders)에서 일부 요청만 유독 느렸어. 왜 그래?"
+- **정답**: 같은 재고 행(`product_options` 120001)을 동시에 UPDATE하면서 행 락 대기가 생김. 400 응답 7건은 재고 부족으로 인한 **정상 거부**다(장애 아님)
+- **나와야 할 근거**: `innodb_row_lock_waits` 증가, `order_create_step_seconds{step="4_stock"}`이 전체 시간의 대부분, 400을 재고 부족 정상 거부로 해석
+- **기록**
+  - 실행: 2026-11-25 21:32:16 ~ 21:32:18 (2초)
+  - 측정값: 200 13건, 400 7건(재고 498개 중 13×37=481개 판매 후 부족) / 행 락 대기 약 21회(30초 기준) / 최대 소요 `0_service_total` 0.55초 중 `4_stock` 0.39초
+  - 스킬 결과 (2026-11-25, 케이스 1을 했던 세션에서 이어서 실행):
+    - 1순위 "같은 재고 행의 락 대기". 근거는 행 락 대기 0→19회, 락 대기 합계 3,809ms, 13건 모두 옵션 120001, `4_stock` 평균 211ms(다른 단계 10~20ms), 로그상 약 30ms 간격으로 하나씩 끝나는 패턴
+    - 400 7건을 `OUT_OF_STOCK` 정상 거부로 정확히 해석함
+    - 2순위로 커넥션 풀 포화(active 10/10, 대기 10건)가 함께 작용했다고 짚음. `1_user` 단계가 느린 이유를 `provider_disables_autocommit` 설정에 따른 커넥션 획득 대기로 설명함 (정답에 없던 내용이지만 지표와 맞음)
+  - 통과 여부: **통과**. 단, 케이스 1 맥락이 있는 세션이라 새 세션보다 유리했을 수 있음
+  - 발견된 문제: 스크립트 경로를 변수에 담아 실행하다 zsh에서 실패하고 다시 시도함 → SKILL.md에 "전체 경로로 직접 호출" 추가
 
 ## 케이스 3. 인덱스 누락으로 인한 슬로우 쿼리
-- **만드는 법** (사람이 직접, 끝나면 반드시 복구):
-  1. `ALTER TABLE orders DROP INDEX idx_orders_buyer_created;`
-  2. 구매자 주문 목록 조회에 부하 (k6 스크립트가 없으므로 `k6-scenario-generator` 스킬로 만든다)
-  3. 복구: `ALTER TABLE orders ADD INDEX idx_orders_buyer_created (buyer_id, created_at);`
-- **스킬에 줄 입력**: "슬로우 쿼리 알림이 왔어. <시작>~<끝> 상황 분석해줘"
-- **정답**: `orders`(100만 건) 조회가 `buyer_id` 인덱스 없이 전체 스캔함
-- **나와야 할 근거**: `slow_queries` 증가, 해당 API p95만 상승, digest 통계의 `no_index`·`rows_examined` 급증, `EXPLAIN`에서 `type=ALL`
-- **기록**: 실행 시각 / 결과 / 통과 여부
+- **만드는 법** (사람이 root로 직접, 끝나면 반드시 복구):
+  1. `ALTER TABLE orders ALTER INDEX idx_orders_buyer_created INVISIBLE;`
+     - `DROP INDEX`는 안 된다. `buyer_id`가 외래 키이고 이 인덱스가 `buyer_id`로 시작하는 유일한 인덱스라 MySQL이 삭제를 거부한다
+     - INVISIBLE(숨김)은 즉시 적용·복구되고, 옵티마이저만 인덱스를 못 쓰게 된다
+  2. 구매자 주문 목록 조회(`GET /api/buyer/orders`)에 부하: `buyer-order-list.js` (주문 많은 구매자 20명, 5 VU, sleep 1초. 아직 레포에 없음)
+  3. 복구: `ALTER TABLE orders ALTER INDEX idx_orders_buyer_created VISIBLE;`
+- **사전 측정**: 구매자 1명 조회 쿼리가 인덱스 사용 시 0.19초, `IGNORE INDEX`로 전체 스캔 시 3.4초 (EXPLAIN `type=ALL`, rows 97만, filesort)
+- **정상 구간 (인덱스 있음)**: 2026-11-25 21:41:26 ~ 21:42:10, p95 770ms, 평균 384ms, 에러 0%, 145회 (구매자당 주문 약 4,500건을 전부 반환해서 원래도 무거운 API)
+- **스킬에 줄 입력**: Slack에 온 슬로우 쿼리 알림 메시지를 그대로 붙이고 "이 알림 원인 분석해줘" (나중에 알림 → 자동 실행 단계의 입력과 같은 형태)
+- **기록**
+  - 실행 (인덱스 숨김 상태): 2026-11-25 21:44:05 ~ 21:45:13
+  - 측정값: p95 7.84초(정상 770ms의 약 10배), 평균 3.64초, 에러 0%, 55회 / 슬로우 쿼리 누적 57건 / Grafana 알림 21:44:50 발생(firing)
+  - 블라인드 분석은 인덱스를 숨긴 채로 진행한다 (실제 장애처럼 상태가 남아 있어야 `EXPLAIN` 근거를 확인할 수 있음). 분석이 끝나면 복구한다
+  - 스킬 결과 (2026-11-25, 새 세션, Slack 알림 메시지를 입력으로 줌):
+    - 맞힌 것: 범인 API·쿼리(`findByBuyer_UserIdOrderByCreatedAtDesc`), EXPLAIN `type=ALL`·filesort, 회당 129만 행 검사, 슬로우 쿼리 증가와 시각 일치, 직접 실행한 실험 쿼리 2건 구분
+    - **틀린 것 (1순위 원인)**: "쿼리 조건이 조인한 users.user_id에 걸려서 인덱스를 못 탄다, 인덱스는 이미 있으니 쿼리만 고치면 된다"고 결론냄. 실제로는 21:43:30에 인덱스가 숨김(INVISIBLE) 처리됐고, 같은 쿼리가 직전(21:41~42)에는 빨랐다
+    - 스킬 스스로 "21:41~42에는 빨랐다"는 반대 근거를 적고도 해소하지 않은 채 결론냄. digest에 `ALTER INDEX … INVISIBLE` 기록이 있었지만 DB 스키마 변경은 확인하지 않음 (최근 변경을 git만 봄)
+    - 제안한 해결책(코드 수정)은 이번 문제를 고치지 못함. 사람이 승인 없이 따랐다면 헛수고였을 것
+  - 통과 여부: **불통과** (채점 기준 1번 실패. 근거 제시·형식·읽기 전용·승인 요청은 충족)
+  - 반영한 개선:
+    - SKILL.md: 최근 변경에 DB 스키마·인덱스 변경(digest의 DDL 기록, `IS_VISIBLE`)을 포함. "같은 대상이 직전에는 정상이었다"는 반대 근거가 있으면 그사이 무엇이 바뀌었는지 찾기 전에는 결론 내리지 않음
+    - db_query.sh: 따옴표 안 문자열(`LIKE 'ALTER%'`)까지 쓰기 키워드로 오인하던 문제 수정
+- **정답**: `orders`(100만 건) 조회가 `buyer_id` 인덱스를 못 써서(인덱스 숨김) 전체 스캔함
+- **나와야 할 근거**: `slow_queries` 증가, 해당 API p95만 상승, 쿼리 통계의 `rows_examined` 급증, `EXPLAIN`에서 `type=ALL`, **21:43:30 `ALTER INDEX … INVISIBLE` 기록 또는 `IS_VISIBLE=NO`**
