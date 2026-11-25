@@ -25,7 +25,9 @@ esac
 if printf '%s' "$trimmed" | grep -q ';'; then
   echo "거부: 문장은 하나만 허용됩니다 (; 금지)" >&2; exit 3
 fi
-if printf '%s' "$upper" | grep -Eqw 'INSERT|UPDATE|DELETE|DROP|ALTER|TRUNCATE|GRANT|REVOKE|RENAME|LOAD|HANDLER|CALL'; then
+# 키워드 검사는 따옴표 안 문자열('ALTER%' 같은 검색어)을 빼고 한다
+no_literals="$(printf '%s' "$upper" | sed -E "s/'[^']*'//g")"
+if printf '%s' "$no_literals" | grep -Eqw 'INSERT|UPDATE|DELETE|DROP|ALTER|TRUNCATE|GRANT|REVOKE|RENAME|LOAD|HANDLER|CALL'; then
   echo "거부: 쓰기·변경 키워드가 들어 있습니다" >&2; exit 3
 fi
 if printf '%s' "$upper" | grep -Eq 'EXPLAIN[[:space:]]+ANALYZE|INTO[[:space:]]+(OUT|DUMP)FILE|FOR[[:space:]]+UPDATE|LOCK[[:space:]]+IN[[:space:]]+SHARE|SLEEP[[:space:]]*\(|BENCHMARK[[:space:]]*\('; then

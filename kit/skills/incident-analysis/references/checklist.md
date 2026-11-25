@@ -46,6 +46,13 @@
 - 권한이 없어 실패하면 "권한 부족으로 확인 못 함"으로 기록하고 넘어간다.
 
 ## 최근 변경
+DB 스키마 변경 (db_query.sh):
+| 목적 | SQL |
+|---|---|
+| 최근 DDL 기록 | `SELECT LEFT(DIGEST_TEXT, 120) AS q, COUNT_STAR, FIRST_SEEN, LAST_SEEN FROM performance_schema.events_statements_summary_by_digest WHERE DIGEST_TEXT REGEXP '^(ALTER|DROP|CREATE|RENAME|TRUNCATE)' ORDER BY LAST_SEEN DESC LIMIT 20` — 앱 재시작 때 Hibernate `ddl-auto`가 낸 ALTER도 섞여 나오니 시각으로 구분한다 |
+| 인덱스 상태 | `SELECT INDEX_NAME, GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX) AS cols, MAX(IS_VISIBLE) AS visible FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = '<테이블>' GROUP BY INDEX_NAME` — `visible=NO`면 옵티마이저가 그 인덱스를 쓰지 않는다 |
+
+코드 변경:
 ```bash
 git log --since="<시작 2시간 전>" --until="<끝>" --stat --oneline
 git log -5 --oneline -- <대상 API 관련 경로>
