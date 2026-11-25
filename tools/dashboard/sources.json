@@ -1,0 +1,15 @@
+{
+  "claude_projects_dir": "~/.claude/projects",
+  "days": 7,
+  "targets": "~/study/stylehub-b2b-perf/docs/perf/targets.json",
+  "runs": "~/study/stylehub-b2b-perf/docs/perf/runs.json",
+  "improvements": [
+    "~/study/stylehub-b2b-perf/docs/evidence/*/comparison.json"
+  ],
+  "evals": [
+    "~/study/team-ai-kit/evals/*/results.json"
+  ],
+  "ai_corrections": "~/study/team-ai-kit/evals/ai-corrections.json",
+  "grafana_url": "http://127.0.0.1:3000",
+  "output": "~/study/team-ai-kit/out/dashboard.html"
+}

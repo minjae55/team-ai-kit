@@ -1,0 +1,12 @@
+{
+  "skill": "incident-analysis",
+  "updated": "2026-11-25",
+  "source": "evals/incident-analysis/cases.md",
+  "runs": [
+    {"case": 1, "title": "커넥션 풀 고갈 (캐시 동시 만료)", "variant": "자세한 입력", "date": "2026-11-25", "session": "4b58da92", "result": "pass", "note": "원인 메커니즘은 맞힘. 용어는 '스탬피드'로 부정확"},
+    {"case": 1, "title": "커넥션 풀 고갈 (캐시 동시 만료)", "variant": "대충 입력", "date": "2026-11-25", "session": "7e20ab03", "result": "pass", "note": "시간대를 스스로 찾아냄"},
+    {"case": 2, "title": "행 락 경합", "variant": "자세한 입력", "date": "2026-11-25", "session": "3bb6a371", "result": "pass", "note": "400 응답을 재고 부족 정상 거부로 해석"},
+    {"case": 3, "title": "인덱스 숨김으로 인한 슬로우 쿼리", "variant": "Slack 알림 입력", "date": "2026-11-25", "session": "314aa3e3", "result": "fail", "note": "인덱스 숨김을 놓치고 코드 수정을 제안"},
+    {"case": 3, "title": "인덱스 숨김으로 인한 슬로우 쿼리", "variant": "Slack 알림 입력 (보완 후 재시험)", "date": "2026-11-25", "session": "4b71bfe8", "result": "pass", "note": "DDL 기록과 visible=NO로 원인 확인, 복구는 승인 요청"}
+  ]
+}

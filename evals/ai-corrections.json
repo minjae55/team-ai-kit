@@ -1,0 +1,32 @@
+{
+  "note": "AI가 틀렸거나 부정확했던 제안과, 무엇으로 잡아냈는지 기록한다. 그대로 따랐을 때의 영향도 적는다.",
+  "items": [
+    {
+      "date": "2026-11-25",
+      "context": "슬로우 쿼리 알림 원인 분석 (eval 케이스 3)",
+      "ai_said": "JPA 쿼리가 조인한 users 테이블에 조건을 걸어 인덱스를 못 탄다. 인덱스는 이미 있으니 쿼리만 고치면 된다",
+      "actual": "21:43에 인덱스가 숨김(INVISIBLE) 처리된 것이 원인. 같은 쿼리가 직전에는 400ms로 빨랐다",
+      "caught_by": "DB의 DDL 기록(performance_schema digest)과 정상 구간 비교",
+      "impact_if_followed": "코드를 고쳐도 문제가 그대로 남음 (헛수고)",
+      "fixed_in_skill": "최근 변경에 DB 스키마 확인 추가, '직전엔 정상' 반대 근거가 있으면 결론 보류"
+    },
+    {
+      "date": "2026-11-25",
+      "context": "협의 목록 지연 원인 분석 (eval 케이스 1)",
+      "ai_said": "캐시 스탬피드(같은 키에 요청이 몰림)가 원인",
+      "actual": "사용자별 서로 다른 키 300개가 TTL 60초 고정으로 동시에 만료된 것 (캐시 애벌런치)",
+      "caught_by": "Redis 키 구조(negotiationList:{userId})와 부하 시나리오(사용자당 VU 1개) 확인",
+      "impact_if_followed": "같은 키 요청 병합을 넣었다면 효과가 없었음. 실제 해결책은 TTL jitter",
+      "fixed_in_skill": "eval 정답과 기록을 '동시 만료'로 정정"
+    },
+    {
+      "date": "2026-11-25",
+      "context": "협의 목록 지연 원인 분석 (eval 케이스 1, 대충 입력)",
+      "ai_said": "HTTP 히스토그램 버킷이 수집되지 않아 PromQL로 p95를 볼 수 없다",
+      "actual": "버킷은 수집되고 있었고 p95 조회도 정상",
+      "caught_by": "count by (uri) (http_server_requests_seconds_bucket)로 지표 존재 확인",
+      "impact_if_followed": "불필요하게 로그로 p95를 계산하고, 모니터링 설정이 고장 난 줄 오해",
+      "fixed_in_skill": "결론 전에 라벨 없이 지표 존재 여부부터 확인하도록 체크리스트 추가"
+    }
+  ]
+}
