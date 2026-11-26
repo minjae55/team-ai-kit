@@ -16,14 +16,17 @@
 |---|---|
 | [`incident-analysis`](kit/skills/incident-analysis/SKILL.md) | 장애·지표 이상의 원인을 지표 → DB → 로그 → 최근 변경 순서로 근거를 모아 분석 (읽기 전용) |
 
-## 설치 (배포 CLI, 개발 중)
-Java 8 이상과 git, 키트 레포 접근 권한(SSH)이 필요하다.
+## 설치
+Java 8 이상과 git, 키트 레포 접근 권한(SSH)이 필요하다. 처음 한 번만:
 ```bash
-cd cli && ./gradlew fatJar      # 처음 한 번 빌드
-./kit install                    # 감지된 도구(Claude Code, Codex)에 스킬과 공통 지식 설치
-./kit doctor                     # 설치 상태 점검 (아무것도 바꾸지 않음)
-./kit sync                       # 최신 버전으로 맞추기
-./kit uninstall                  # 키트가 설치한 것만 제거
+git clone git@github.com:minjae55/team-ai-kit.git ~/.kit/repo && ~/.kit/repo/install.sh
+```
+`install.sh`가 kit 실행 파일을 `~/.kit/bin`에 넣고, PATH 등록 여부를 물은 뒤, `kit install`까지 실행한다. 그다음부터는 아무 폴더에서:
+```bash
+kit sync        # 최신 버전으로 맞추기
+kit doctor      # 설치 상태 점검 (아무것도 바꾸지 않음)
+kit list        # 설치된 버전과 스킬
+kit uninstall   # 키트가 설치한 것만 제거
 ```
 - 스킬은 `~/.claude/skills/`, `~/.agents/skills/`에 링크로, 공통 지식은 `~/.claude/CLAUDE.md`(import), `~/.codex/AGENTS.md`(복사)의 자동 관리 구역에 들어간다
 - 키트가 만든 것만 건드린다. 같은 이름의 개인 스킬과 직접 쓴 지침은 그대로 둔다

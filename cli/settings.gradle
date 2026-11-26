@@ -1,1 +1,6 @@
+plugins {
+    // JDK 17이 없는 PC에서도 빌드되도록, 필요하면 Gradle이 JDK 17을 자동으로 받는다
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.9.0'
+}
+
 rootProject.name = 'kit'
