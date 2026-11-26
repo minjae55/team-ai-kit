@@ -87,6 +87,7 @@ button:disabled{opacity:.5;cursor:default}
 const TOKEN = "__KIT_TOKEN__";
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const jsq = s => esc(JSON.stringify(String(s == null ? "" : s)));
 const md = s => esc(s).replace(/`([^`]+)`/g, '<code style="font-size:12px;background:var(--soft);padding:1px 5px;border-radius:5px">$1</code>');
 const fmtTime = t => { if (!t) return ""; if (t.length <= 10) return t.slice(5); const d = new Date(t); return isNaN(d) ? t : (d.getMonth()+1).toString().padStart(2,"0")+"-"+d.getDate().toString().padStart(2,"0")+" "+d.getHours().toString().padStart(2,"0")+":"+d.getMinutes().toString().padStart(2,"0"); };
 
@@ -137,9 +138,36 @@ function renderStrip(s) {
     </div>${update}`;
 }
 
+function proposeRule(title, desc) {
+  $("toastTitle").textContent = "📝 팀 원칙으로 제안하기";
+  $("toastBody").textContent = "팀 공통 원칙(kit/context/AGENTS.md)에 아래 한 줄을 추가하는 PR을 올려 주세요.\n\n- " + desc
+    + "\n\n팀장이 승인하면 다음 업데이트부터 모든 팀원의 AI가 이 원칙을 지켜요.";
+  $("toast").style.display = "block";
+}
 function renderRecs(s) {
-  $("recs").innerHTML = s.recommendations.length ? "" :
-    `<div class="empty">준비 중이에요. 다음 업데이트에서 세션 기록을 분석해 반복 작업을 찾아 드려요.</div>`;
+  if (!s.recommendations.length) {
+    $("recs").innerHTML = `<div class="empty">최근 14일 기록에서 스킬로 만들 만한 반복 작업을 찾지 못했어요. 이미 스킬이 있거나 반복이 적다는 뜻이에요.</div>`;
+    return;
+  }
+  $("recs").innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">` +
+    s.recommendations.map(r => `
+    <div style="border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+        <span class="t1" style="font-size:15px">${esc(r.title)}</span>
+        <span class="chip ${r.kind === "skill" ? "blue" : ""}">${r.kind === "skill" ? "스킬 후보" : "팀 원칙 후보"}</span>
+      </div>
+      <div class="t2">${esc(r.description)}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <span class="chip">🔁 ${r.prompts}번 요청</span><span class="chip">🗂 세션 ${r.sessions}개</span>${r.kind === "skill" && r.avgSteps ? `<span class="chip">🪜 요청당 약 ${r.avgSteps}단계</span>` : ""}
+      </div>
+      ${r.examples.length ? `<div style="font-size:13px;color:var(--sub);border-left:2px solid var(--line);padding-left:10px">${r.examples.map(e => "\"" + esc(e) + "\"").join("<br>")}</div>` : ""}
+      <div style="display:flex;gap:8px;margin-top:auto">
+        ${r.kind === "skill"
+          ? `<button class="primary" onclick="act(${jsq(r.title + ' 초안 만들기')}, '/api/draft', {id:${jsq(r.id)}}, this)">스킬 초안 만들기</button>`
+          : `<button class="primary" onclick="proposeRule(${jsq(r.title)}, ${jsq(r.description)})">원칙으로 제안</button>`}
+        <button onclick="act(${jsq(r.title + ' 숨기기')}, '/api/dismiss', {id:${jsq(r.id)}}, this)">나중에</button>
+      </div>
+    </div>`).join("") + `</div>`;
 }
 
 const expanded = {};

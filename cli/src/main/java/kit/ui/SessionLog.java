@@ -35,6 +35,10 @@ public final class SessionLog {
         public String start;
         public String end;
         public int prompts;
+        /** 사람이 보낸 요청 (태그 제거, 최대 300자) — 반복 패턴 찾기용 */
+        public List<String> promptTexts = new ArrayList<String>();
+        /** AI가 도구를 쓴 횟수 — 작업이 몇 단계였는지 가늠 */
+        public int toolUses;
         public Set<String> skills = new LinkedHashSet<String>();
         /** 실패한 명령 설명 → 실패 횟수 */
         public Map<String, Integer> failedCommands = new HashMap<String, Integer>();
@@ -117,6 +121,10 @@ public final class SessionLog {
                     }
                     if (isRealPrompt(e, text.toString())) {
                         s.prompts++;
+                        String full = strip(text.toString());
+                        if (!full.isEmpty()) {
+                            s.promptTexts.add(full.length() > 300 ? full.substring(0, 300) : full);
+                        }
                         if (s.firstPrompt.isEmpty()) {
                             s.firstPrompt = clean(text.toString());
                         }
@@ -126,6 +134,7 @@ public final class SessionLog {
                         if (!"tool_use".equals(b.path("type").asText())) {
                             continue;
                         }
+                        s.toolUses++;
                         String tool = b.path("name").asText();
                         if ("Skill".equals(tool)) {
                             String skill = b.path("input").path("skill").asText("");
@@ -155,6 +164,11 @@ public final class SessionLog {
         String t = text.trim();
         return !t.isEmpty() && !t.startsWith("<task-notification") && !t.startsWith("[Request interrupted")
                 && !t.startsWith("<system-reminder") && !t.startsWith("Base directory for this skill");
+    }
+
+    /** 붙여넣은 내용·시스템 태그를 빼고 공백을 정리한 요청 본문 */
+    static String strip(String text) {
+        return TAGS.matcher(text).replaceAll("").replaceAll("\\s+", " ").trim();
     }
 
     static String clean(String text) {

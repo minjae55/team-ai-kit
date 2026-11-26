@@ -52,11 +52,36 @@ public final class UiData {
         m.put("health", health(lock, repo));
         m.put("skills", repo ? skills(lock) : Collections.emptyList());
         m.put("news", repo ? news() : Collections.emptyList());
-        List<SessionLog.Session> sessions = SessionLog.recent(env.home().resolve(".claude").resolve("projects"), 14);
+        List<SessionLog.Session> sessions = sessions();
         m.put("activity", activity(sessions));
         m.put("notes", notes(sessions));
-        m.put("recommendations", Collections.emptyList());
+        m.put("recommendations", new Recommender(env).recommend(sessions, dismissed()));
         return m;
+    }
+
+    public List<SessionLog.Session> sessions() throws IOException {
+        return SessionLog.recent(env.home().resolve(".claude").resolve("projects"), 14);
+    }
+
+    /** [나중에]로 숨긴 후보 (~/.kit/ui-state.json) */
+    public Set<String> dismissed() throws IOException {
+        Set<String> out = new TreeSet<String>();
+        Path f = env.kitDir().resolve("ui-state.json");
+        if (Files.exists(f)) {
+            for (JsonNode n : JSON.readTree(f.toFile()).path("dismissed")) {
+                out.add(n.asText());
+            }
+        }
+        return out;
+    }
+
+    public void dismiss(String id) throws IOException {
+        Set<String> d = dismissed();
+        d.add(id);
+        Map<String, Object> state = new LinkedHashMap<String, Object>();
+        state.put("dismissed", d);
+        Files.createDirectories(env.kitDir());
+        JSON.writerWithDefaultPrettyPrinter().writeValue(env.kitDir().resolve("ui-state.json").toFile(), state);
     }
 
     private static Set<String> allSkills(LockFile lock) {

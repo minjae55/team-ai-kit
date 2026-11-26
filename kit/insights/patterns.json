@@ -1,0 +1,152 @@
+{
+  "note": "kit ui의 '스킬로 만들면 좋을 반복 작업'이 쓰는 패턴. 팀이 자주 하는 일을 여기에 추가하면 팀원 화면에서 후보로 잡힌다. keywords 중 하나라도 들어간 요청을 센다(대소문자 무시). coveredBy에 적힌 스킬이 이미 있으면 추천하지 않는다. 규칙(kind: rule)은 coveredByContext 문구가 팀 공통 원칙(kit/context/AGENTS.md)에 이미 있으면 추천하지 않는다.",
+  "minPrompts": 3,
+  "minSessions": 2,
+  "patterns": [
+    {
+      "id": "query-analysis",
+      "kind": "skill",
+      "title": "SQL 쿼리 분석",
+      "description": "느린 SQL의 실행 계획을 보고 인덱스나 쿼리 수정을 제안한다",
+      "keywords": [
+        "쿼리",
+        "sql",
+        "실행 계획",
+        "explain",
+        "인덱스",
+        "슬로우 쿼리"
+      ],
+      "coveredBy": [
+        "query-analysis"
+      ]
+    },
+    {
+      "id": "perf-evidence",
+      "kind": "skill",
+      "title": "성능 측정과 전후 증거 수집",
+      "description": "같은 조건으로 고치기 전후를 측정하고 지표·스레드 덤프·JFR·그래프 캡처를 남긴다",
+      "keywords": [
+        "k6",
+        "부하",
+        "p95",
+        "측정",
+        "jfr",
+        "스레드 덤프",
+        "캡처",
+        "전후"
+      ],
+      "coveredBy": [
+        "perf-improvement",
+        "perf-evidence"
+      ]
+    },
+    {
+      "id": "test-code",
+      "kind": "skill",
+      "title": "테스트 코드 작성",
+      "description": "대상 클래스를 분석해 정상·예외 케이스 테스트를 만든다",
+      "keywords": [
+        "테스트 코드",
+        "단위 테스트",
+        "junit",
+        "mockito",
+        "테스트 작성"
+      ],
+      "coveredBy": [
+        "test-code-generator"
+      ]
+    },
+    {
+      "id": "commit-pr",
+      "kind": "skill",
+      "title": "커밋·PR 작성",
+      "description": "팀 규칙(한글 Conventional Commits)대로 커밋 메시지와 PR 설명을 쓴다",
+      "keywords": [
+        "커밋",
+        "pr ",
+        "pr을",
+        "pr 만들",
+        "풀 리퀘스트"
+      ],
+      "coveredBy": [
+        "commit-pr-writer"
+      ]
+    },
+    {
+      "id": "code-review",
+      "kind": "skill",
+      "title": "코드 리뷰",
+      "description": "팀 기준으로 변경 사항의 버그·구조·테스트 누락을 검토한다",
+      "keywords": [
+        "리뷰",
+        "검토해",
+        "코드 봐줘"
+      ],
+      "coveredBy": [
+        "code-review",
+        "pr-review"
+      ]
+    },
+    {
+      "id": "incident",
+      "kind": "skill",
+      "title": "장애·지표 이상 분석",
+      "description": "느려짐·에러·알림의 원인을 지표 → DB → 로그 → 최근 변경 순서로 찾는다",
+      "keywords": [
+        "느려",
+        "장애",
+        "알림",
+        "타임아웃",
+        "에러가"
+      ],
+      "coveredBy": [
+        "incident-analysis"
+      ]
+    },
+    {
+      "id": "doc-writing",
+      "kind": "skill",
+      "title": "기술 문서·블로그 작성",
+      "description": "작업 내용을 정해진 형식과 문체로 문서나 블로그 글로 정리한다",
+      "keywords": [
+        "블로그",
+        "문서로",
+        "글로 정리",
+        "포트폴리오",
+        "정리해줘"
+      ],
+      "coveredBy": [
+        "doc-writer",
+        "blog-writer"
+      ]
+    },
+    {
+      "id": "rule-commit-preview",
+      "kind": "rule",
+      "title": "\"커밋 전에 메시지 먼저 보여 줘\"",
+      "description": "커밋 전에 메시지와 대상 파일을 먼저 보여 주고 확인받는다",
+      "keywords": [
+        "커밋 메세지",
+        "커밋 메시지",
+        "메시지 어떻게",
+        "메세지 어떻게"
+      ],
+      "coveredBy": [],
+      "coveredByContext": "커밋 전에 메시지"
+    },
+    {
+      "id": "rule-concise",
+      "kind": "rule",
+      "title": "\"핵심만 짧게 말해 줘\"",
+      "description": "핵심부터, 짧게, 우선순위 순으로 말한다",
+      "keywords": [
+        "핵심만",
+        "간결",
+        "짧게",
+        "핵심 위주"
+      ],
+      "coveredBy": [],
+      "coveredByContext": "핵심부터, 짧게"
+    }
+  ]
+}

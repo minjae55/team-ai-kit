@@ -15,6 +15,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -93,6 +94,33 @@ public final class UiServer {
                 return;
             }
             Map<String, String> form = parse(new String(readAll(ex.getRequestBody()), StandardCharsets.UTF_8));
+            if ("/api/dismiss".equals(path) || "/api/draft".equals(path)) {
+                String id = form.get("id");
+                if (id == null || !id.matches("[a-z0-9-]+")) {
+                    send(ex, 400, "application/json", "{\"error\":\"id\"}");
+                    return;
+                }
+                Map<String, Object> res = new LinkedHashMap<String, Object>();
+                UiData data = new UiData(env);
+                if ("/api/dismiss".equals(path)) {
+                    data.dismiss(id);
+                    res.put("code", 0);
+                    res.put("output", "숨겼어요. 다시 보려면 ~/.kit/ui-state.json 에서 지우면 돼요");
+                } else {
+                    try {
+                        Path skill = new Recommender(env).createDraft(id, data.sessions());
+                        res.put("code", 0);
+                        res.put("output", "개인 스킬 초안을 만들었어요: " + skill
+                                + "\n\nAI 세션에서 \"이 스킬 초안을 다듬어줘\"라고 하면 절차를 채워 줘요."
+                                + "\n충분히 써 보고 괜찮으면 팀 스킬로 PR을 올려 주세요.");
+                    } catch (IOException e) {
+                        res.put("code", 1);
+                        res.put("output", e.getMessage());
+                    }
+                }
+                json(ex, 200, res);
+                return;
+            }
             List<String> args = new ArrayList<String>();
             if ("/api/sync".equals(path)) {
                 args.add("sync");
