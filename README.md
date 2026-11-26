@@ -8,19 +8,26 @@
 |---|---|---|
 | 0 | `incident-analysis` 스킬 작성·검증 (eval 3건) | 완료 |
 | 0.5 | 분석 → 승인 → 수정 → 전후 증거 → PR 흐름 시험 | 완료 |
-| 1 | 레포 정리, 공통 지식, 스킬 형식 검사 CI | 진행 중 |
-| 2 | 배포 CLI `kit install / sync / doctor` | 예정 |
+| 1 | 레포 정리, 공통 지식, 스킬 형식 검사 CI | 완료 |
+| 2 | 배포 CLI `kit install / sync / doctor` | 다음 |
 
 ## 스킬
 | 스킬 | 하는 일 |
 |---|---|
 | [`incident-analysis`](kit/skills/incident-analysis/SKILL.md) | 장애·지표 이상의 원인을 지표 → DB → 로그 → 최근 변경 순서로 근거를 모아 분석 (읽기 전용) |
 
-## 지금 쓰는 방법 (CLI 전)
-스킬 폴더를 프로젝트의 `.claude/skills/`에 링크한다. 2단계 CLI가 나오면 `kit install` 하나로 대체된다.
+## 설치 (배포 CLI, 개발 중)
+Java 8 이상과 git, 키트 레포 접근 권한(SSH)이 필요하다.
 ```bash
-ln -s "$PWD/kit/skills/incident-analysis" <프로젝트>/.claude/skills/incident-analysis
+cd cli && ./gradlew fatJar      # 처음 한 번 빌드
+./kit install                    # 감지된 도구(Claude Code, Codex)에 스킬과 공통 지식 설치
+./kit doctor                     # 설치 상태 점검 (아무것도 바꾸지 않음)
+./kit sync                       # 최신 버전으로 맞추기
+./kit uninstall                  # 키트가 설치한 것만 제거
 ```
+- 스킬은 `~/.claude/skills/`, `~/.agents/skills/`에 링크로, 공통 지식은 `~/.claude/CLAUDE.md`(import), `~/.codex/AGENTS.md`(복사)의 자동 관리 구역에 들어간다
+- 키트가 만든 것만 건드린다. 같은 이름의 개인 스킬과 직접 쓴 지침은 그대로 둔다
+- 설계: [docs/cli-design.md](docs/cli-design.md)
 
 ## 도구
 - `tools/validate_skills.py`: 스킬 형식 검사

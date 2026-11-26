@@ -1,0 +1,55 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'kit'
+version = '0.1.0'
+
+java {
+    // 개발은 JDK 17로 한다
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    // 결과물은 Java 8 이상 어디서나 실행되게 빌드한다 (Java 9+ 문법·API 금지)
+    options.release = 8
+    options.encoding = 'UTF-8'
+    options.compilerArgs += ['-Xlint:-options']
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'info.picocli:picocli:4.7.6'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.2'
+
+    testImplementation platform('org.junit:junit-bom:5.10.3')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+application {
+    mainClass = 'kit.Main'
+    applicationName = 'kit'
+}
+
+// 의존성까지 한 파일에 담은 실행 jar: build/libs/kit-<version>-all.jar
+tasks.register('fatJar', Jar) {
+    archiveClassifier = 'all'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest { attributes 'Main-Class': 'kit.Main' }
+    from sourceSets.main.output
+    dependsOn configurations.runtimeClasspath
+    from { configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) } }
+    exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'module-info.class', 'META-INF/versions/**'
+}
+
+test {
+    useJUnitPlatform()
+    testLogging { events 'failed'; exceptionFormat 'full' }
+}

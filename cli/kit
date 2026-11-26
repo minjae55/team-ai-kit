@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# kit 실행 스크립트: Java 버전을 확인한 뒤 jar를 실행한다.
+# jar 위치: KIT_JAR 환경 변수 > 이 스크립트 옆 kit.jar > cli/build/libs/kit-*-all.jar
+set -euo pipefail
+
+if ! command -v java >/dev/null 2>&1; then
+  echo "Java가 없습니다. Java 8 이상을 설치하세요." >&2
+  exit 1
+fi
+ver="$(java -version 2>&1 | awk -F '"' '/version/ {print $2; exit}')"
+major="${ver%%.*}"
+[ "$major" = "1" ] && major="$(echo "$ver" | cut -d. -f2)"   # 1.8.0_x → 8
+if [ -z "$major" ] || [ "$major" -lt 8 ] 2>/dev/null; then
+  echo "Java $ver 은(는) 지원하지 않습니다. Java 8 이상을 설치하세요." >&2
+  exit 1
+fi
+
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+jar="${KIT_JAR:-}"
+[ -z "$jar" ] && [ -f "$here/kit.jar" ] && jar="$here/kit.jar"
+[ -z "$jar" ] && jar="$(ls "$here"/build/libs/kit-*-all.jar 2>/dev/null | head -1 || true)"
+if [ -z "$jar" ] || [ ! -f "$jar" ]; then
+  echo "kit.jar를 찾지 못했습니다. cli 폴더에서 ./gradlew fatJar 로 빌드하세요." >&2
+  exit 1
+fi
+exec java -jar "$jar" "$@"

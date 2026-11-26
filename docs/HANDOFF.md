@@ -9,7 +9,7 @@
 - **0단계 완료**: `incident-analysis` 스킬을 stylehub 로컬 성능 환경에서 eval 3건(커넥션 풀 고갈, 행 락 경합, 인덱스 숨김)으로 검증. 케이스 3은 1차 불통과 → 스킬 보완(DB 스키마 변경 확인, 정상 구간 비교) → 재시험 통과. 기록: `evals/incident-analysis/cases.md`
 - **0.5단계 완료 (로드맵에 추가)**: 분석 → 수정안 → 사람 승인 → 수정 → 같은 시나리오로 전후 측정 → PR까지 한 바퀴. stylehub 협의 목록 캐시 동시 만료를 TTL jitter로 해결(커넥션 대기 88 → 0). stylehub PR #4, 증거 `docs/evidence/2026-11-25-negotiation-cache-ttl-jitter/`
 - **개인 대시보드 v1**: `tools/dashboard/build.py`. 서버·배포 없이 내 PC 기록으로 HTML 생성. API 목표 현황, 개선 사례, 알림 → 원인 파악 시간, AI 제안 검증, 로그. 실용성은 "누가, 언제, 보고 나서 무엇을 하나" 기준으로 재설계 필요
-- **1단계 진행 중**: 레포 규칙(AGENTS.md), 팀 공통 지식(`kit/context/AGENTS.md`), 스킬 형식 검사(`tools/validate_skills.py` + CI). GitHub 원격 저장소는 아직 없음
+- **1단계 완료**: 레포 규칙(AGENTS.md), 팀 공통 지식(`kit/context/AGENTS.md`), 스킬 형식 검사(`tools/validate_skills.py` + CI). GitHub `minjae55/team-ai-kit`(private, SSH)에 푸시, CI에서 `skills-ref validate` 통과. 빈 저장소 첫 푸시에서는 경로 필터 때문에 CI가 돌지 않아 `workflow_dispatch`를 추가함
 - 배운 점
   - 스킬의 가치는 "틀린 걸 한 번 고치면 다음부터 안 틀린다"에 있다 (케이스 3 재시험)
   - eval 정답도 틀릴 수 있다. 케이스 1 정답을 처음엔 "스탬피드"로 적었다가 "동시 만료"로 정정함
@@ -70,7 +70,7 @@
 |---|---|---|
 | **0** ✅ | `incident-analysis` 스킬과 데이터 수집 스크립트를 작성하고, stylehub에서 Claude Code로 검증 | 실제 장애나 지표 이상 3건에서 쓸 만한 분석 결과가 나옴 (로컬 환경이라 k6로 만든 이상 상황 3건으로 대체) |
 | 0.5 ✅ | 분석 → 승인 → 수정 → 전후 증거 → PR 흐름 시험 | 같은 시나리오 전후 수치로 개선 증명 |
-| 1 🔶 | team-ai-kit 레포 구조와 공통 AGENTS.md 작성, 스킬 형식 검증 CI | `skills-ref validate` 통과 |
+| 1 ✅ | team-ai-kit 레포 구조와 공통 AGENTS.md 작성, 스킬 형식 검증 CI | `skills-ref validate` 통과 (2026-11-25 CI #1) |
 | 2 | **CLI MVP**: `kit install / sync / doctor`. Claude와 Codex 지원 | 새 PC에서 명령 하나로 스킬·지침·MCP 설정이 설치됨 |
 | 3 | 자동 sync, 버전 고정과 롤백, 훅 기반 사용 추적 | 스킬을 수정하면 팀원 환경에 자동 반영되고 사용 기록이 남음 |
 | 4 | eval 파이프라인 | 스킬 PR이 eval을 통과해야만 배포됨 |
@@ -82,7 +82,7 @@
 3. 회사 플랜에서 Gemini CLI를 쓸 수 있는지. 공식 문서에 따르면 2026-06-18부터 무료 티어와 Google One 사용자는 Antigravity CLI로 대체되었다
 4. Gemini를 사람 없이 실행할 때 `activate_skill` 확인 프롬프트가 어떻게 처리되는지
 5. Codex `exec`에서 `$name`으로 명시 호출이 되는지
-6. ~~Claude Code가 심링크로 연결한 스킬 폴더를 인식하는지~~ → **확인됨**: 프로젝트 `.claude/skills/`에 심링크한 스킬을 새 세션이 자동으로 꺼내 씀 (2026-11-25)
+6. ~~Claude Code가 심링크로 연결한 스킬 폴더를 인식하는지~~ → **확인됨**: 프로젝트 `.claude/skills/`(2026-11-25)와 사용자 `~/.claude/skills/`(2026-11-26) 모두 심링크 스킬을 인식. `~/.claude/CLAUDE.md`의 `@~/...` import도 동작. Codex는 문서상 `~/.agents/skills/` 링크 지원, AGENTS.md import는 미지원 (`docs/cli-design.md` 8절)
 7. 도구 전용 frontmatter 필드를 다른 도구가 오류 없이 무시하는지
 
 ## 9. 권장 구조
@@ -104,7 +104,7 @@ team-ai-kit/
 ```
 
 ## 10. 다음 작업 (2026-11-25 갱신)
-1. GitHub에 team-ai-kit 저장소를 만들고 푸시한 뒤, CI(`skills-validate.yml`)의 `skills-ref validate`가 통과하는지 확인한다 (1단계 완료 기준)
+1. ~~GitHub 저장소 만들고 CI 통과 확인~~ → 완료
 2. 2단계 CLI 설계: `kit install`이 할 일을 정한다. 스킬 → `~/.claude/skills/`, `~/.agents/skills/`(Codex), 공통 지식 → 사용자 지침 파일 연결, 버전 lock 파일
 3. 병행 후보: stylehub 주문 생성 성능 개선 (Mac 환경 기준 측정부터, `docs/perf/runs.json`에 기록)
 4. 대시보드 재설계: 누가, 언제, 보고 나서 무엇을 하는지부터 정한다
