@@ -3,16 +3,19 @@ package kit;
 import kit.command.DoctorCommand;
 import kit.command.InstallCommand;
 import kit.command.ListCommand;
+import kit.command.SkillCommand;
 import kit.command.SyncCommand;
+import kit.command.UiCommand;
 import kit.command.UninstallCommand;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 @Command(name = "kit",
         mixinStandardHelpOptions = true,
-        version = "kit 0.1.0",
+        version = "kit 0.2.0",
         description = "팀 AI 키트: 팀 스킬과 공통 지식을 AI 도구(Claude Code, Codex)에 설치하고 최신으로 유지한다",
-        subcommands = {InstallCommand.class, SyncCommand.class, DoctorCommand.class, ListCommand.class, UninstallCommand.class})
+        subcommands = {UiCommand.class, InstallCommand.class, SyncCommand.class, DoctorCommand.class, ListCommand.class,
+                SkillCommand.class, UninstallCommand.class})
 public class KitCommand implements Runnable {
 
     @Option(names = "--home", hidden = true, description = "홈 폴더 대신 쓸 경로 (테스트용)")

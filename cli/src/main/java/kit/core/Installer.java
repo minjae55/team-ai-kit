@@ -88,6 +88,7 @@ public final class Installer {
         LockFile.ToolState st = lock.tool(tool.id());
         Set<String> managed = new HashSet<String>(st.skills);
         List<String> want = repoSkills();
+        want.removeAll(lock.disabled);
         List<String> nowManaged = new ArrayList<String>();
         Path dir = tool.skillsDir(env);
         String mode = copy ? "copy" : "link";
@@ -125,7 +126,7 @@ public final class Installer {
             if (!want.contains(name)) {
                 Path target = dir.resolve(name);
                 if (Files.exists(target, LinkOption.NOFOLLOW_LINKS)) {
-                    out.info(tool.displayName() + ": 키트에서 빠진 스킬 제거 " + name);
+                    out.info(tool.displayName() + ": " + (lock.disabled.contains(name) ? "꺼 둔 스킬 제거 " : "키트에서 빠진 스킬 제거 ") + name);
                     deleteManaged(target, lock.mode);
                 }
             }

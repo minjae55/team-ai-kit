@@ -15,15 +15,27 @@ import java.util.List;
 /** 명령들이 같이 쓰는 것: 환경, 출력, 도구 선택 */
 abstract class Common {
 
+    /** 바로 위 명령 (kit 또는 kit skill) */
     @ParentCommand
-    KitCommand parent;
+    Object parentCommand;
 
     PrintStream stdout = System.out;
     int warnings;
     int errors;
 
+    KitCommand root() {
+        if (parentCommand instanceof KitCommand) {
+            return (KitCommand) parentCommand;
+        }
+        if (parentCommand instanceof SkillCommand) {
+            return ((SkillCommand) parentCommand).parent;
+        }
+        return new KitCommand();
+    }
+
     KitEnv env() {
-        return KitEnv.resolve(parent.home, parent.repo);
+        KitCommand r = root();
+        return KitEnv.resolve(r.home, r.repo);
     }
 
     Installer.Out out() {

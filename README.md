@@ -24,6 +24,7 @@ git clone git@github.com:minjae55/team-ai-kit.git ~/.kit/repo && ~/.kit/repo/ins
 ```
 `install.sh`가 kit 실행 파일을 `~/.kit/bin`에 넣고, PATH 등록 여부를 물은 뒤, `kit install`까지 실행한다. 그다음부터는 아무 폴더에서:
 ```bash
+kit ui          # 브라우저 화면: 업데이트, 점검, 스킬 켜기·끄기, 활동 기록 (내 PC에서만 열림)
 kit sync        # 최신 버전으로 맞추기
 kit doctor      # 설치 상태 점검 (아무것도 바꾸지 않음)
 kit list        # 설치된 버전과 스킬

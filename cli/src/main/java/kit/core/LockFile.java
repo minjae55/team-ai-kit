@@ -22,6 +22,8 @@ public final class LockFile {
     public String commit;
     public String installedAt;
     public String mode = "link";
+    /** 내 PC에서 꺼 둔 팀 스킬. 설치·sync 때 건너뛴다 (팀 레포와 다른 팀원에게는 영향 없음) */
+    public List<String> disabled = new ArrayList<String>();
     public Map<String, ToolState> tools = new LinkedHashMap<String, ToolState>();
 
     @JsonIgnoreProperties(ignoreUnknown = true)

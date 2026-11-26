@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>팀 AI 키트</title>
+<style>
+:root{--bg:#f6f6f3;--card:#fff;--ink:#1d1d1b;--sub:#5f5e5a;--mut:#8a8984;--line:#e7e5de;--soft:#efeee9;
+  --blue:#2a78d6;--blue-bg:#e6f0fb;--blue-ink:#14508f;--green:#0f7a3d;--green-bg:#e4f4ea;--red:#b42318;--red-bg:#fcebea;--amber:#9a6200;--amber-bg:#fbf1dc}
+@media (prefers-color-scheme:dark){:root{--bg:#141414;--card:#1e1e1e;--ink:#f0efec;--sub:#c3c2b7;--mut:#8a8984;--line:#2d2d2b;--soft:#262624;
+  --blue:#4a92ea;--blue-bg:#16263a;--blue-ink:#9cc4f5;--green:#4ade80;--green-bg:#14281c;--red:#f87171;--red-bg:#331a1a;--amber:#f0b44a;--amber-bg:#30260f}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+main{max-width:1040px;margin:0 auto;padding:24px 20px 48px;display:flex;flex-direction:column;gap:16px}
+button{font:inherit;font-size:13px;padding:6px 14px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button:hover{background:var(--soft)}
+button.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+button.primary:hover{filter:brightness(1.07)}
+button:disabled{opacity:.5;cursor:default}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
+.h{font-size:16px;font-weight:600;margin:0;display:flex;align-items:center;gap:8px}
+.desc{font-size:13px;color:var(--sub);margin:3px 0 14px}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:2px 9px;border-radius:999px;background:var(--soft);color:var(--sub);white-space:nowrap}
+.chip.blue{background:var(--blue-bg);color:var(--blue-ink)}.chip.green{background:var(--green-bg);color:var(--green)}.chip.red{background:var(--red-bg);color:var(--red)}
+.mut{color:var(--mut);font-size:12px}
+.strip{display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 20px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px}
+.grid2{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px}
+@media (max-width:820px){.grid2{grid-template-columns:1fr}.strip{flex-direction:column;align-items:flex-start}}
+.tl{list-style:none;margin:0;padding:0 0 0 20px}
+.tl li{position:relative;padding:0 0 16px}
+.tl li::before{content:'';position:absolute;left:-16px;top:8px;width:9px;height:9px;border-radius:50%;background:var(--c,var(--mut))}
+.tl li::after{content:'';position:absolute;left:-12px;top:20px;bottom:0;width:1px;background:var(--line)}
+.tl li:last-child::after{display:none}
+.t1{font-size:14px;font-weight:600}.t2{font-size:13px;color:var(--sub)}
+.row{display:flex;align-items:center;gap:14px;padding:12px 0;border-top:1px solid var(--line)}
+.row:first-child{border-top:none;padding-top:2px}
+.sw{position:relative;width:40px;height:23px;border-radius:12px;background:var(--soft);border:1px solid var(--line);cursor:pointer;flex:none;transition:background .15s}
+.sw::after{content:'';position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:left .15s}
+.sw.on{background:var(--blue);border-color:var(--blue)}.sw.on::after{left:19px}
+.empty{border:1px dashed var(--line);border-radius:12px;padding:18px;text-align:center;color:var(--sub);font-size:13px}
+.health{font-size:13px;line-height:1.9;margin-top:10px}
+#toast{position:fixed;right:20px;bottom:20px;max-width:520px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:0 8px 24px rgba(0,0,0,.15);display:none}
+#toast pre{margin:8px 0 0;font:12px/1.5 ui-monospace,Menlo,monospace;white-space:pre-wrap;max-height:260px;overflow:auto;color:var(--sub)}
+</style>
+</head>
+<body>
+<main>
+  <div class="strip" id="strip"><span class="mut">불러오는 중…</span></div>
+
+  <section class="card">
+    <p class="h">✨ 스킬로 만들면 좋을 반복 작업</p>
+    <p class="desc">스킬 없이 여러 번 반복한 일을 찾아 보여 드려요. 스킬로 만들면 다음부터 한 줄로 끝나요.</p>
+    <div id="recs"></div>
+  </section>
+
+  <div class="grid2">
+    <section class="card">
+      <p class="h">🕘 내 활동 기록</p>
+      <p class="desc">내가 개선한 것(초록)과 AI로 한 작업(파랑) · 최근 14일</p>
+      <ul class="tl" id="activity"></ul>
+      <div id="activityMore"></div>
+    </section>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <section class="card">
+        <p class="h">📒 AI 실수 노트</p>
+        <p class="desc">AI가 틀렸거나 계속 실패한 곳. 고치면 팀 전체가 같은 실수를 안 해요.</p>
+        <div id="notes"></div>
+        <div id="notesMore"></div>
+      </section>
+      <section class="card">
+        <p class="h">📣 팀 새 소식</p>
+        <div id="news" style="margin-top:10px"></div>
+      </section>
+    </div>
+  </div>
+
+  <section class="card">
+    <p class="h">🧩 팀 스킬</p>
+    <p class="desc">팀이 검증해서 배포한 스킬이에요. 끄면 내 AI에서만 빠지고, 다시 켜면 돌아와요.</p>
+    <div id="skills"></div>
+  </section>
+</main>
+<div id="toast"><div id="toastTitle" class="t1"></div><pre id="toastBody"></pre><div style="text-align:right;margin-top:8px"><button onclick="document.getElementById('toast').style.display='none'">닫기</button></div></div>
+
+<script>
+const TOKEN = "__KIT_TOKEN__";
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const md = s => esc(s).replace(/`([^`]+)`/g, '<code style="font-size:12px;background:var(--soft);padding:1px 5px;border-radius:5px">$1</code>');
+const fmtTime = t => { if (!t) return ""; if (t.length <= 10) return t.slice(5); const d = new Date(t); return isNaN(d) ? t : (d.getMonth()+1).toString().padStart(2,"0")+"-"+d.getDate().toString().padStart(2,"0")+" "+d.getHours().toString().padStart(2,"0")+":"+d.getMinutes().toString().padStart(2,"0"); };
+
+async function api(path, body) {
+  const opt = { method: body ? "POST" : "GET", headers: { "X-Kit-Token": TOKEN } };
+  if (body) { opt.headers["Content-Type"] = "application/x-www-form-urlencoded"; opt.body = new URLSearchParams(body).toString(); }
+  const r = await fetch(path, opt);
+  if (!r.ok) throw new Error("요청 실패 " + r.status);
+  return r.json();
+}
+
+async function act(title, path, body, btn) {
+  if (btn) { btn.disabled = true; btn.dataset.label = btn.textContent; btn.textContent = "진행 중…"; }
+  try {
+    const res = await api(path, body);
+    $("toastTitle").textContent = (res.code === 0 ? "✅ " : "⚠️ ") + title;
+    $("toastBody").textContent = res.output || res.error || "";
+    $("toast").style.display = "block";
+  } catch (e) {
+    $("toastTitle").textContent = "⚠️ " + title; $("toastBody").textContent = e.message; $("toast").style.display = "block";
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = btn.dataset.label; }
+    load();
+  }
+}
+
+function renderStrip(s) {
+  const bad = s.health.filter(h => h.level === "error").length, warn = s.health.filter(h => h.level === "warn").length;
+  const status = bad ? `<span style="color:var(--red)"><span class="dot" style="background:var(--red)"></span>문제 ${bad}개</span>`
+    : warn ? `<span style="color:var(--amber)"><span class="dot" style="background:var(--amber)"></span>확인 필요 ${warn}개</span>`
+    : `<span style="color:var(--green)"><span class="dot" style="background:var(--green)"></span>정상</span>`;
+  const tools = s.tools.filter(t => t.installed).map(t => t.name).join(", ") || "연결된 도구 없음";
+  const healthList = s.health.map(h => {
+    const icon = {ok:"✅", warn:"⚠️", error:"❌", info:"·"}[h.level] || "·";
+    const btn = h.installTool ? ` <button onclick="act('${esc(h.installTool)} 설치', '/api/install', {tool:'${esc(h.installTool)}'}, this)">설치</button>` : "";
+    return `<div>${icon} ${esc(h.text)}${btn}</div>`;
+  }).join("");
+  const update = s.updateAvailable
+    ? `<div style="text-align:right"><span class="chip blue">새 버전 ${esc(s.latest)}</span> <button class="primary" onclick="act('업데이트', '/api/sync', {}, this)">업데이트</button>
+       <div class="mut" style="margin-top:4px">${(s.updatePreview || []).filter(l => !l.startsWith("  ") && l !== "변경 내역:").map(esc).join(" · ")}</div></div>`
+    : `<div class="mut">최신 버전이에요</div>`;
+  $("strip").innerHTML = `
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="font-size:24px">📦</div>
+      <div><div style="font-size:16px;font-weight:600">팀 AI 키트 <span style="font-weight:400;color:var(--sub)">${esc(s.version || "미설치")}</span></div>
+      <div class="t2">${status} · ${esc(tools)} <a href="#" onclick="this.closest('.strip').querySelector('.health').toggleAttribute('hidden');return false" style="color:var(--blue);font-size:12px;margin-left:6px">점검 자세히</a></div>
+      <div class="health" hidden>${healthList}</div></div>
+    </div>${update}`;
+}
+
+function renderRecs(s) {
+  $("recs").innerHTML = s.recommendations.length ? "" :
+    `<div class="empty">준비 중이에요. 다음 업데이트에서 세션 기록을 분석해 반복 작업을 찾아 드려요.</div>`;
+}
+
+const expanded = {};
+function moreButton(key, total, shown) {
+  if (total <= shown && !expanded[key]) return "";
+  return `<button style="margin-top:4px" onclick="expanded['${key}']=!expanded['${key}'];renderAll(lastState)">${expanded[key] ? "접기" : "전체 보기 (" + total + ")"}</button>`;
+}
+function renderActivity(s) {
+  const all = s.activity, list = expanded.activity ? all : all.slice(0, 5);
+  $("activityMore").innerHTML = moreButton("activity", all.length, 5);
+  $("activity").innerHTML = all.length ? list.map(a => `
+    <li style="--c:${a.kind === "improve" ? "var(--green)" : "var(--blue)"}">
+      <div class="t1">${esc(a.title)}</div>
+      <div class="t2">${esc(a.detail)}</div>
+      <div class="mut">${esc(fmtTime(a.time))}${a.project ? " · " + esc(a.project) : ""}</div>
+    </li>`).join("") : `<div class="empty">최근 14일 기록이 없어요</div>`;
+}
+
+function renderNotes(s) {
+  const all = s.notes, list = expanded.notes ? all : all.slice(0, 3);
+  $("notesMore").innerHTML = moreButton("notes", all.length, 3);
+  $("notes").innerHTML = all.length ? list.map(n => `
+    <div class="row">
+      <div style="font-size:16px" title="${n.source === "auto" ? "자동 발견" : "직접 등록"}">${n.source === "auto" ? "🤖" : "🙋"}</div>
+      <div style="flex:1;min-width:0"><div style="font-size:13px">${esc(n.text)}</div>${n.actual ? `<div class="mut">실제: ${esc(n.actual)}</div>` : ""}</div>
+      ${n.reflected ? `<span class="chip green">스킬에 반영</span>` : `<span class="chip">아직</span>`}
+    </div>`).join("") : `<div class="empty">기록된 실수가 없어요</div>`;
+}
+
+function renderNews(s) {
+  $("news").innerHTML = s.news.length ? s.news.map((n, i) => `
+    <div style="display:flex;gap:10px;padding:6px 0">
+      <span class="chip ${i === 0 ? "blue" : ""}" style="height:22px">${esc(n.version)}</span>
+      <div style="font-size:13px">${n.items.map(md).join("<br>")}<div class="mut">${esc(n.date)}</div></div>
+    </div>`).join("") : `<div class="mut">소식이 없어요</div>`;
+}
+
+function renderSkills(s) {
+  $("skills").innerHTML = s.skills.length ? s.skills.map(k => `
+    <div class="row">
+      <div style="flex:1;min-width:0">
+        <div class="t1">${esc(k.name)}</div>
+        <div class="t2">${esc(k.description)}</div>
+        <div class="mut">${k.verifiedCases ? "검증 상황 " + k.verifiedCases + "개" + (k.verifiedDate ? " · " + esc(k.verifiedDate) : "") : "검증 기록 없음"}</div>
+      </div>
+      <div class="sw ${k.enabled ? "on" : ""}" role="switch" aria-checked="${k.enabled}" aria-label="${esc(k.name)} 켜기"
+        onclick="act('${esc(k.name)} ${k.enabled ? "끄기" : "켜기"}', '/api/skill', {name:'${esc(k.name)}', on:${!k.enabled}})"></div>
+    </div>`).join("") : `<div class="empty">설치된 스킬이 없어요</div>`;
+}
+
+let lastState = null;
+function renderAll(s) {
+  if (!s) return;
+  renderStrip(s); renderRecs(s); renderActivity(s); renderNotes(s); renderNews(s); renderSkills(s);
+}
+async function load() {
+  if (location.protocol === "file:" || TOKEN.startsWith("__")) {
+    $("strip").innerHTML = `<span class="t2">이 화면은 터미널에서 <b>kit ui</b> 명령으로 열어야 데이터가 보여요.</span>`;
+    return;
+  }
+  try {
+    lastState = await api("/api/state");
+    renderAll(lastState);
+  } catch (e) {
+    $("strip").innerHTML = `<span style="color:var(--red)">불러오지 못했어요: ${esc(e.message)} (kit ui 를 다시 실행해 보세요)</span>`;
+  }
+}
+load();
+</script>
+</body>
+</html>

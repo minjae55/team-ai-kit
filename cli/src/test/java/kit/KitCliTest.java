@@ -193,6 +193,80 @@ class KitCliTest {
         assertFalse(Files.exists(home.resolve(".agents/skills")));
     }
 
+    @Test
+    void disabled_skill_is_removed_and_stays_off_after_sync() throws IOException {
+        assertEquals(0, kit("install"));
+        Path link = home.resolve(".claude/skills/incident-analysis");
+
+        assertEquals(0, kit("skill", "disable", "incident-analysis"));
+        assertFalse(Files.exists(link, java.nio.file.LinkOption.NOFOLLOW_LINKS));
+        assertEquals(0, kit("sync"));
+        assertFalse(Files.exists(link, java.nio.file.LinkOption.NOFOLLOW_LINKS), "sync 해도 꺼 둔 스킬은 다시 생기지 않음");
+
+        assertEquals(0, kit("skill", "enable", "incident-analysis"));
+        assertTrue(Files.isSymbolicLink(link));
+        assertEquals(1, kit("skill", "disable", "no-such-skill"));
+    }
+
+    @Test
+    void ui_server_requires_token_and_serves_state_and_toggles() throws Exception {
+        assertEquals(0, kit("install"));
+        kit.ui.UiServer server = new kit.ui.UiServer(new kit.core.KitEnv(home, origin.toString()));
+        int port = server.start(0);
+        try {
+            String base = "http://127.0.0.1:" + port;
+            assertEquals(403, http("GET", base + "/?t=wrong", null, null).code);
+            assertEquals(403, http("GET", base + "/api/state", null, null).code);
+
+            Http page = http("GET", base + "/?t=" + server.token(), null, null);
+            assertEquals(200, page.code);
+            assertTrue(page.body.contains(server.token()) && page.body.contains("팀 AI 키트"));
+
+            Http state = http("GET", base + "/api/state", server.token(), null);
+            assertEquals(200, state.code);
+            assertTrue(state.body.contains("\"version\":\"v0.1.0\""));
+            assertTrue(state.body.contains("\"name\":\"incident-analysis\""));
+
+            Http off = http("POST", base + "/api/skill", server.token(), "name=incident-analysis&on=false");
+            assertEquals(200, off.code);
+            assertTrue(off.body.contains("껐습니다"));
+            assertFalse(Files.exists(home.resolve(".claude/skills/incident-analysis"), java.nio.file.LinkOption.NOFOLLOW_LINKS));
+        } finally {
+            server.stop();
+        }
+    }
+
+    static final class Http {
+        int code;
+        String body;
+    }
+
+    private static Http http(String method, String url, String token, String form) throws IOException {
+        java.net.HttpURLConnection c = (java.net.HttpURLConnection) new java.net.URL(url).openConnection();
+        c.setRequestMethod(method);
+        if (token != null) {
+            c.setRequestProperty("X-Kit-Token", token);
+        }
+        if (form != null) {
+            c.setDoOutput(true);
+            c.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            c.getOutputStream().write(form.getBytes(StandardCharsets.UTF_8));
+        }
+        Http h = new Http();
+        h.code = c.getResponseCode();
+        java.io.InputStream in = h.code < 400 ? c.getInputStream() : c.getErrorStream();
+        java.io.ByteArrayOutputStream buf = new java.io.ByteArrayOutputStream();
+        if (in != null) {
+            byte[] b = new byte[8192];
+            int n;
+            while ((n = in.read(b)) != -1) {
+                buf.write(b, 0, n);
+            }
+        }
+        h.body = new String(buf.toByteArray(), StandardCharsets.UTF_8);
+        return h;
+    }
+
     private void commitAndTag(String tag) throws IOException {
         git(origin, "add", "-A");
         git(origin, "commit", "--quiet", "-m", tag);
