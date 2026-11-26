@@ -71,7 +71,7 @@
 | **0** ✅ | `incident-analysis` 스킬과 데이터 수집 스크립트를 작성하고, stylehub에서 Claude Code로 검증 | 실제 장애나 지표 이상 3건에서 쓸 만한 분석 결과가 나옴 (로컬 환경이라 k6로 만든 이상 상황 3건으로 대체) |
 | 0.5 ✅ | 분석 → 승인 → 수정 → 전후 증거 → PR 흐름 시험 | 같은 시나리오 전후 수치로 개선 증명 |
 | 1 ✅ | team-ai-kit 레포 구조와 공통 AGENTS.md 작성, 스킬 형식 검증 CI | `skills-ref validate` 통과 (2026-11-25 CI #1) |
-| 2 | **CLI MVP**: `kit install / sync / doctor`. Claude와 Codex 지원 | 새 PC에서 명령 하나로 스킬·지침·MCP 설정이 설치됨 |
+| 2 ✅ | **CLI MVP**: `kit install / sync / doctor`. Claude와 Codex 지원 | 새 PC에서 명령 하나로 스킬·지침이 설치됨 (2026-11-26, `install.sh`로 실제 PC 설치 → 다른 폴더의 새 세션에서 스킬 인식 확인. MCP 설정은 3단계 이후로 미룸) |
 | 3 | 자동 sync, 버전 고정과 롤백, 훅 기반 사용 추적 | 스킬을 수정하면 팀원 환경에 자동 반영되고 사용 기록이 남음 |
 | 4 | eval 파이프라인 | 스킬 PR이 eval을 통과해야만 배포됨 |
 | 5 | Gemini 지원, 팀원 온보딩 | 2명 이상이 실제로 사용 |

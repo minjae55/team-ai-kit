@@ -9,7 +9,8 @@
 | 0 | `incident-analysis` 스킬 작성·검증 (eval 3건) | 완료 |
 | 0.5 | 분석 → 승인 → 수정 → 전후 증거 → PR 흐름 시험 | 완료 |
 | 1 | 레포 정리, 공통 지식, 스킬 형식 검사 CI | 완료 |
-| 2 | 배포 CLI `kit install / sync / doctor` | 다음 |
+| 2 | 배포 CLI `kit install / sync / doctor` | 완료 (v0.1.x) |
+| 3 | 자동 sync, 버전 고정·롤백, 사용 기록 | 다음 |
 
 ## 스킬
 | 스킬 | 하는 일 |

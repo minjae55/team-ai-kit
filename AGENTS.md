@@ -27,6 +27,10 @@ python3 tools/validate_skills.py
 ```
 PR마다 CI(`.github/workflows/skills-validate.yml`)가 같은 검사와 `skills-ref validate`를 실행한다.
 
+## 배포 (버전 태그)
+- 팀원에게 반영할 변경을 모았으면 `CHANGELOG.md` 맨 위에 새 버전 절을 쓰고, 같은 커밋에서 태그(`v0.x.y`)를 붙여 푸시한다
+- `kit sync`가 그 절을 팀원에게 그대로 보여 주므로, 팀원이 알아야 할 것만 사람이 읽는 말로 쓴다
+
 ## 커밋
 - 한글 Conventional Commits (`feat:`, `fix:`, `docs:`, `test:`, `chore:`), 본문은 불릿
 - 커밋 전에 메시지와 대상 파일을 사람에게 먼저 보여 준다

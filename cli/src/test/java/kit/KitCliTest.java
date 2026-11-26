@@ -130,7 +130,9 @@ class KitCliTest {
         assertEquals(0, kit("install"));
 
         write(origin.resolve("kit/skills/query-analysis/SKILL.md"), "---\nname: query-analysis\ndescription: test\n---\n");
+        write(origin.resolve("kit/skills/incident-analysis/SKILL.md"), "---\nname: incident-analysis\ndescription: test v2\n---\n");
         write(origin.resolve("kit/context/AGENTS.md"), "# 팀 공통 원칙\n- 근거를 붙인다\n");
+        write(origin.resolve("CHANGELOG.md"), "# 변경 기록\n\n## v0.2.0 (2026-11-27)\n- 새 스킬: query-analysis\n\n## v0.1.0\n- 첫 버전\n");
         commitAndTag("v0.2.0");
 
         assertEquals(0, kit("sync"));
@@ -138,7 +140,32 @@ class KitCliTest {
         assertTrue(Files.isSymbolicLink(home.resolve(".claude/skills/query-analysis")));
         assertTrue(ManagedBlock.read(home.resolve(".codex/AGENTS.md")).contains("근거를 붙인다"), "Codex 복사본도 갱신");
         assertEquals("v0.2.0", LockFile.readOrNull(home.resolve(".kit/kit.lock.json")).version);
-        assertTrue(output().contains("v0.1.0 → v0.2.0"));
+        String out = output();
+        assertTrue(out.contains("바뀐 내용 (v0.1.0 → v0.2.0)"));
+        assertTrue(out.contains("새 스킬: query-analysis"));
+        assertTrue(out.contains("바뀐 스킬: incident-analysis"));
+        assertTrue(out.contains("팀 공통 지식(kit/context)이 바뀌었습니다"));
+        assertTrue(out.contains("- v0.2.0"), "변경 내역에 커밋 제목");
+        assertTrue(out.contains("- 새 스킬: query-analysis"), "CHANGELOG 절");
+        assertFalse(out.contains("첫 버전"), "다른 버전의 CHANGELOG는 안 보여 줌");
+        assertFalse(out.contains("kit 명령 자체가 업데이트"), "cli를 안 바꿨으면 안내하지 않음");
+    }
+
+    @Test
+    void sync_tells_when_kit_command_itself_changed() throws IOException {
+        assertEquals(0, kit("install"));
+        write(origin.resolve("install.sh"), "#!/usr/bin/env bash\necho new\n");
+        commitAndTag("v0.1.1");
+
+        assertEquals(0, kit("sync"));
+        assertTrue(output().contains("kit 명령 자체가 업데이트되었습니다"));
+    }
+
+    @Test
+    void sync_says_up_to_date_when_nothing_changed() {
+        assertEquals(0, kit("install"));
+        assertEquals(0, kit("sync"));
+        assertTrue(output().contains("이미 최신입니다: v0.1.0"));
     }
 
     @Test
