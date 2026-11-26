@@ -38,6 +38,7 @@ public final class UiData {
         Map<String, Object> m = new LinkedHashMap<String, Object>();
         LockFile lock = LockFile.readOrNull(env.lockFile());
         boolean repo = Git.isRepo(env.repoDir());
+        m.put("user", userName());
         m.put("installed", lock != null);
         m.put("version", lock == null ? null : lock.version);
         String latest = repo ? Git.latestTag(env.repoDir()) : null;
@@ -56,7 +57,30 @@ public final class UiData {
         m.put("activity", activity(sessions));
         m.put("notes", notes(sessions));
         m.put("recommendations", new Recommender(env).recommend(sessions, dismissed()));
+        m.put("metrics", new Metrics(env).read());
         return m;
+    }
+
+    private static String userName() {
+        try {
+            Git.Result r = Git.run(null, "config", "--global", "user.name");
+            if (r.ok() && !r.out.trim().isEmpty()) {
+                return r.out.trim();
+            }
+        } catch (IOException ignored) {
+            // git이 없으면 시스템 사용자 이름
+        }
+        return System.getProperty("user.name", "");
+    }
+
+    /** 스킬 설명 속 따옴표 문구를 "이렇게 말하면 돼요" 예시로 쓴다 */
+    static List<String> examples(String description) {
+        List<String> out = new ArrayList<String>();
+        java.util.regex.Matcher mt = java.util.regex.Pattern.compile("[\"“]([^\"”]{2,40})[\"”]").matcher(description);
+        while (mt.find() && out.size() < 4) {
+            out.add(mt.group(1));
+        }
+        return out;
     }
 
     public List<SessionLog.Session> sessions() throws IOException {
@@ -153,10 +177,16 @@ public final class UiData {
     private List<Map<String, Object>> skills(LockFile lock) throws IOException {
         List<Map<String, Object>> out = new ArrayList<Map<String, Object>>();
         Installer inst = new Installer(env, null, true);
+        Map<String, int[]> rated = new Ratings(env).bySkill();
         for (String name : inst.repoSkills()) {
             Map<String, Object> s = new LinkedHashMap<String, Object>();
             s.put("name", name);
+            String full = fullDescription(env.skillsSource().resolve(name).resolve("SKILL.md"));
             s.put("description", description(env.skillsSource().resolve(name).resolve("SKILL.md")));
+            s.put("examples", examples(full));
+            int[] mine = rated.get(name);
+            s.put("myUp", mine == null ? 0 : mine[0]);
+            s.put("myDown", mine == null ? 0 : mine[1]);
             s.put("enabled", lock == null || !lock.disabled.contains(name));
             Path results = env.repoDir().resolve("evals").resolve(name).resolve("results.json");
             if (Files.exists(results)) {
@@ -179,6 +209,12 @@ public final class UiData {
     }
 
     static String description(Path skillMd) throws IOException {
+        String d = fullDescription(skillMd);
+        int dot = d.indexOf(". ");
+        return dot > 0 ? d.substring(0, dot + 1) : d;
+    }
+
+    static String fullDescription(Path skillMd) throws IOException {
         if (!Files.exists(skillMd)) {
             return "";
         }
@@ -195,9 +231,7 @@ public final class UiData {
             }
             sb.append(' ').append(line.trim());
         }
-        String d = sb.toString().trim();
-        int dot = d.indexOf(". ");
-        return dot > 0 ? d.substring(0, dot + 1) : d;
+        return sb.toString().trim();
     }
 
     /** CHANGELOG.md 최근 절 4개 */
@@ -247,9 +281,13 @@ public final class UiData {
             a.put("project", f.getParent().getParent().getParent().getParent().getFileName().toString());
             out.add(a);
         }
+        com.fasterxml.jackson.databind.node.ObjectNode ratings = new Ratings(env).all();
         for (SessionLog.Session s : sessions) {
             Map<String, Object> a = new LinkedHashMap<String, Object>();
             a.put("kind", "ai");
+            a.put("id", s.id);
+            a.put("skills", new ArrayList<String>(s.skills));
+            a.put("rating", ratings.path(s.id).path("rating").asText(null));
             a.put("title", s.title.isEmpty() ? s.firstPrompt : s.title);
             a.put("detail", (s.skills.isEmpty() ? "" : String.join(", ", s.skills) + " · ") + "요청 " + s.prompts + "개");
             a.put("time", s.start);
@@ -302,6 +340,18 @@ public final class UiData {
                 n.put("actual", c.path("actual").asText());
                 n.put("reflected", c.hasNonNull("fixed_in_skill") && !c.path("fixed_in_skill").asText().isEmpty());
                 out.add(n);
+            }
+        }
+        java.util.Iterator<Map.Entry<String, JsonNode>> it = new Ratings(env).all().fields();
+        while (it.hasNext()) {
+            JsonNode r = it.next().getValue();
+            if ("wrong".equals(r.path("rating").asText())) {
+                Map<String, Object> n = new LinkedHashMap<String, Object>();
+                n.put("source", "manual");
+                n.put("text", r.path("skill").asText("") + " 결과가 틀림 (내가 표시)");
+                n.put("actual", r.path("note").asText(""));
+                n.put("reflected", false);
+                out.add(0, n);
             }
         }
         Map<String, Integer> failed = new HashMap<String, Integer>();

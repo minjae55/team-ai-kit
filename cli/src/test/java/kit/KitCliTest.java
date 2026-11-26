@@ -227,6 +227,13 @@ class KitCliTest {
             assertTrue(state.body.contains("\"version\":\"v0.1.0\""));
             assertTrue(state.body.contains("\"name\":\"incident-analysis\""));
 
+            Http rate = http("POST", base + "/api/rate", server.token(), "session=abc12345&skill=incident-analysis&rating=wrong&note=%EC%9D%B8%EB%8D%B1%EC%8A%A4");
+            assertEquals(200, rate.code);
+            String ratings = ManagedBlock.read(home.resolve(".kit/ratings.json"));
+            assertTrue(ratings.contains("\"rating\" : \"wrong\"") && ratings.contains("인덱스"));
+            assertEquals(400, http("POST", base + "/api/rate", server.token(), "session=abc&rating=bogus").code);
+            assertTrue(http("GET", base + "/api/state", server.token(), null).body.contains("결과가 틀림"), "AI 실수 노트에 나타남");
+
             Http off = http("POST", base + "/api/skill", server.token(), "name=incident-analysis&on=false");
             assertEquals(200, off.code);
             assertTrue(off.body.contains("껐습니다"));

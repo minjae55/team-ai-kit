@@ -94,6 +94,21 @@ public final class UiServer {
                 return;
             }
             Map<String, String> form = parse(new String(readAll(ex.getRequestBody()), StandardCharsets.UTF_8));
+            if ("/api/rate".equals(path)) {
+                String session = form.get("session");
+                String rating = form.get("rating");
+                if (session == null || !session.matches("[A-Za-z0-9-]+") || rating == null || !rating.matches("up|down|wrong")) {
+                    send(ex, 400, "application/json", "{\"error\":\"rate\"}");
+                    return;
+                }
+                String note = form.get("note");
+                new Ratings(env).rate(session, form.get("skill"), rating, note == null ? "" : note.substring(0, Math.min(note.length(), 300)));
+                Map<String, Object> res = new LinkedHashMap<String, Object>();
+                res.put("code", 0);
+                res.put("output", "wrong".equals(rating) ? "AI 실수 노트에 기록했어요. 팀에 알려 스킬을 고치면 모두가 같은 실수를 안 해요." : "평가를 남겼어요.");
+                json(ex, 200, res);
+                return;
+            }
             if ("/api/dismiss".equals(path) || "/api/draft".equals(path)) {
                 String id = form.get("id");
                 if (id == null || !id.matches("[a-z0-9-]+")) {

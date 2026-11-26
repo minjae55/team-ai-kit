@@ -3,85 +3,140 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>팀 AI 키트</title>
+<title>AI Kit</title>
 <style>
-:root{--bg:#f6f6f3;--card:#fff;--ink:#1d1d1b;--sub:#5f5e5a;--mut:#8a8984;--line:#e7e5de;--soft:#efeee9;
-  --blue:#2a78d6;--blue-bg:#e6f0fb;--blue-ink:#14508f;--green:#0f7a3d;--green-bg:#e4f4ea;--red:#b42318;--red-bg:#fcebea;--amber:#9a6200;--amber-bg:#fbf1dc}
-@media (prefers-color-scheme:dark){:root{--bg:#141414;--card:#1e1e1e;--ink:#f0efec;--sub:#c3c2b7;--mut:#8a8984;--line:#2d2d2b;--soft:#262624;
-  --blue:#4a92ea;--blue-bg:#16263a;--blue-ink:#9cc4f5;--green:#4ade80;--green-bg:#14281c;--red:#f87171;--red-bg:#331a1a;--amber:#f0b44a;--amber-bg:#30260f}}
+:root{--bg:#f3f5fb;--panel:#ffffff;--ink:#111827;--sub:#4b5563;--mut:#8b93a1;--line:#e6e9f2;--soft:#f1f4fb;
+  --blue:#2f6fed;--blue2:#5b8cff;--blue-bg:#e8f0ff;--blue-ink:#1f4fc4;--green:#16a34a;--green-bg:#e7f6ed;--red:#dc2626;--red-bg:#fdecec;--amber:#b7791f;--amber-bg:#fdf3e1;--violet:#7c5cff;
+  --shadow:0 1px 2px rgba(17,24,39,.04),0 8px 24px rgba(17,24,39,.06);--r:18px}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1219;--panel:#171b24;--ink:#eef1f7;--sub:#b6bdcb;--mut:#7c8494;--line:#262c38;--soft:#1e2430;
+  --blue:#5b8cff;--blue2:#7ea4ff;--blue-bg:#1b2742;--blue-ink:#a9c2ff;--green:#4ade80;--green-bg:#13281c;--red:#f87171;--red-bg:#331b1b;--amber:#f2b552;--amber-bg:#30260f;--shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25)}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
-main{max-width:1040px;margin:0 auto;padding:24px 20px 48px;display:flex;flex-direction:column;gap:16px}
-button{font:inherit;font-size:13px;padding:6px 14px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+svg.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+button{font:inherit;font-size:13px;padding:8px 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
 button:hover{background:var(--soft)}
 button.primary{background:var(--blue);border-color:var(--blue);color:#fff}
-button.primary:hover{filter:brightness(1.07)}
+button.ghost{border:none;background:none;color:var(--blue);padding:4px 6px}
 button:disabled{opacity:.5;cursor:default}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
-.h{font-size:16px;font-weight:600;margin:0;display:flex;align-items:center;gap:8px}
-.desc{font-size:13px;color:var(--sub);margin:3px 0 14px}
-.chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:2px 9px;border-radius:999px;background:var(--soft);color:var(--sub);white-space:nowrap}
+.app{display:grid;grid-template-columns:232px minmax(0,1fr);min-height:100vh}
+.side{background:var(--panel);border-right:1px solid var(--line);padding:22px 16px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh}
+.logo{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:700;padding:4px 10px 22px}
+.nav a{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;color:var(--sub);text-decoration:none;font-size:14px;font-weight:500;cursor:pointer}
+.nav a:hover{background:var(--soft)}
+.nav a.on{background:var(--blue-bg);color:var(--blue-ink)}
+.me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px;border-radius:14px;background:var(--soft)}
+.av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--blue2),var(--blue));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex:none}
+.main{padding:24px 32px 48px;max-width:1180px;width:100%}
+.top{display:flex;justify-content:flex-end;align-items:center;gap:14px;margin-bottom:8px}
+.search{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 16px;width:320px;color:var(--mut)}
+.search input{border:none;outline:none;background:none;font:inherit;font-size:14px;color:var(--ink);width:100%}
+.hero{position:relative;overflow:hidden;padding:18px 4px 26px}
+.hero h1{font-size:30px;margin:0 0 6px;font-weight:700;letter-spacing:-.5px}
+.hero p{margin:0;color:var(--sub);font-size:16px}
+.hero::after{content:'';position:absolute;right:-60px;top:-40px;width:520px;height:220px;background:radial-gradient(closest-side,rgba(91,140,255,.28),transparent),radial-gradient(closest-side at 70% 60%,rgba(124,92,255,.18),transparent);filter:blur(6px);pointer-events:none}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:20px 22px}
+.h2{display:flex;justify-content:space-between;align-items:center;margin:26px 0 12px}
+.h2 b{font-size:18px}
+.banner{display:flex;align-items:center;gap:16px;background:linear-gradient(90deg,var(--blue-bg),var(--panel));border:1px solid var(--line);border-radius:var(--r);padding:16px 20px;box-shadow:var(--shadow)}
+.new{background:var(--blue);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:8px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:18px;cursor:pointer;display:flex;flex-direction:column;gap:6px;transition:transform .12s,box-shadow .12s}
+.tile:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(47,111,237,.14)}
+.tico{width:44px;height:44px;border-radius:12px;background:var(--blue-bg);color:var(--blue);display:flex;align-items:center;justify-content:center;margin-bottom:6px}
+.tile b{font-size:16px}
+.tile .s{font-size:13px;color:var(--mut);display:flex;justify-content:space-between;align-items:center;gap:6px}
+.go{width:26px;height:26px;border-radius:50%;background:var(--blue-bg);color:var(--blue);display:inline-flex;align-items:center;justify-content:center;flex:none}
+.g2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin-top:16px}
+@media (max-width:980px){.app{grid-template-columns:1fr}.side{display:none}.g2{grid-template-columns:1fr}.search{width:100%}}
+.act{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.act:first-child{border-top:none}
+.dot{width:9px;height:9px;border-radius:50%;flex:none}
+.mut{color:var(--mut);font-size:12px}.sub{color:var(--sub);font-size:13px}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:3px 10px;border-radius:999px;background:var(--soft);color:var(--sub);white-space:nowrap}
 .chip.blue{background:var(--blue-bg);color:var(--blue-ink)}.chip.green{background:var(--green-bg);color:var(--green)}.chip.red{background:var(--red-bg);color:var(--red)}
-.mut{color:var(--mut);font-size:12px}
-.strip{display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 20px}
-.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px}
-.grid2{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px}
-@media (max-width:820px){.grid2{grid-template-columns:1fr}.strip{flex-direction:column;align-items:flex-start}}
-.tl{list-style:none;margin:0;padding:0 0 0 20px}
-.tl li{position:relative;padding:0 0 16px}
-.tl li::before{content:'';position:absolute;left:-16px;top:8px;width:9px;height:9px;border-radius:50%;background:var(--c,var(--mut))}
-.tl li::after{content:'';position:absolute;left:-12px;top:20px;bottom:0;width:1px;background:var(--line)}
-.tl li:last-child::after{display:none}
-.t1{font-size:14px;font-weight:600}.t2{font-size:13px;color:var(--sub)}
-.row{display:flex;align-items:center;gap:14px;padding:12px 0;border-top:1px solid var(--line)}
-.row:first-child{border-top:none;padding-top:2px}
-.sw{position:relative;width:40px;height:23px;border-radius:12px;background:var(--soft);border:1px solid var(--line);cursor:pointer;flex:none;transition:background .15s}
-.sw::after{content:'';position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:left .15s}
-.sw.on{background:var(--blue);border-color:var(--blue)}.sw.on::after{left:19px}
-.empty{border:1px dashed var(--line);border-radius:12px;padding:18px;text-align:center;color:var(--sub);font-size:13px}
-.health{font-size:13px;line-height:1.9;margin-top:10px}
-#toast{position:fixed;right:20px;bottom:20px;max-width:520px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:0 8px 24px rgba(0,0,0,.15);display:none}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:4px}
+.metric{padding:6px 12px;border-left:1px solid var(--line)}.metric:first-child{border-left:none}
+.metric .v{font-size:24px;font-weight:700}
+.sw{position:relative;width:42px;height:24px;border-radius:12px;background:var(--line);cursor:pointer;flex:none;transition:background .15s}
+.sw::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .15s}
+.sw.on{background:var(--blue)}.sw.on::after{left:21px}
+.grid-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.empty{border:1px dashed var(--line);border-radius:14px;padding:20px;text-align:center;color:var(--sub);font-size:13px}
+.rate{display:flex;gap:6px;flex:none}
+.rate button{padding:4px 9px;font-size:12px}
+.rate button.sel{background:var(--blue-bg);border-color:var(--blue);color:var(--blue-ink)}
+#modal{position:fixed;inset:0;background:rgba(15,18,25,.45);display:none;align-items:center;justify-content:center;padding:20px;z-index:10}
+#modal .card{max-width:520px;width:100%}
+#toast{position:fixed;right:22px;bottom:22px;max-width:520px;z-index:11;display:none}
 #toast pre{margin:8px 0 0;font:12px/1.5 ui-monospace,Menlo,monospace;white-space:pre-wrap;max-height:260px;overflow:auto;color:var(--sub)}
+.page{display:none}.page.on{display:block}
 </style>
 </head>
 <body>
-<main>
-  <div class="strip" id="strip"><span class="mut">불러오는 중…</span></div>
+<div class="app">
+  <aside class="side">
+    <div class="logo"><svg viewBox="0 0 32 32" width="30" height="30"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7ea4ff"/><stop offset="1" stop-color="#2f6fed"/></linearGradient></defs><path d="M16 3l11 6.5v13L16 29 5 22.5v-13z" fill="url(#lg)"/><circle cx="16" cy="16" r="4.5" fill="#fff" opacity=".9"/></svg>AI Kit</div>
+    <nav class="nav" id="nav">
+      <a data-p="home" class="on"><svg class="i" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>홈</a>
+      <a data-p="library"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>스킬 라이브러리</a>
+      <a data-p="activity"><svg class="i" viewBox="0 0 24 24"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>활동 기록</a>
+      <a data-p="settings"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>설정</a>
+    </nav>
+    <div class="me"><div class="av" id="meAv">·</div><div style="min-width:0"><div style="font-size:14px;font-weight:600" id="meName">-</div><div class="mut" id="meVer">팀 AI 키트</div></div></div>
+  </aside>
 
-  <section class="card">
-    <p class="h">✨ 스킬로 만들면 좋을 반복 작업</p>
-    <p class="desc">스킬 없이 여러 번 반복한 일을 찾아 보여 드려요. 스킬로 만들면 다음부터 한 줄로 끝나요.</p>
-    <div id="recs"></div>
-  </section>
-
-  <div class="grid2">
-    <section class="card">
-      <p class="h">🕘 내 활동 기록</p>
-      <p class="desc">내가 개선한 것(초록)과 AI로 한 작업(파랑) · 최근 14일</p>
-      <ul class="tl" id="activity"></ul>
-      <div id="activityMore"></div>
-    </section>
-    <div style="display:flex;flex-direction:column;gap:16px">
-      <section class="card">
-        <p class="h">📒 AI 실수 노트</p>
-        <p class="desc">AI가 틀렸거나 계속 실패한 곳. 고치면 팀 전체가 같은 실수를 안 해요.</p>
-        <div id="notes"></div>
-        <div id="notesMore"></div>
-      </section>
-      <section class="card">
-        <p class="h">📣 팀 새 소식</p>
-        <div id="news" style="margin-top:10px"></div>
-      </section>
+  <main class="main">
+    <div class="top">
+      <label class="search"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" placeholder="스킬, 활동을 검색해 보세요…" autocomplete="off"></label>
+      <div class="av" id="topAv">·</div>
     </div>
-  </div>
 
-  <section class="card">
-    <p class="h">🧩 팀 스킬</p>
-    <p class="desc">팀이 검증해서 배포한 스킬이에요. 끄면 내 AI에서만 빠지고, 다시 켜면 돌아와요.</p>
-    <div id="skills"></div>
-  </section>
-</main>
-<div id="toast"><div id="toastTitle" class="t1"></div><pre id="toastBody"></pre><div style="text-align:right;margin-top:8px"><button onclick="document.getElementById('toast').style.display='none'">닫기</button></div></div>
+    <section class="page on" id="p-home">
+      <div class="hero"><h1 id="hello">안녕하세요 👋</h1><p>오늘도 AI와 함께 더 스마트하게 일해 보세요.</p></div>
+      <div id="banner"></div>
+      <div class="h2"><b>빠른 실행</b><button class="ghost" onclick="go('library')">전체 보기 →</button></div>
+      <div class="tiles" id="tiles"></div>
+      <div class="g2">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><b style="font-size:16px">최근 활동</b><button class="ghost" onclick="go('activity')">전체 보기 →</button></div>
+          <div id="recent"></div>
+        </div>
+        <div class="card" id="system"></div>
+      </div>
+      <div class="h2"><b>✨ 스킬로 만들면 좋을 작업</b><button class="ghost" onclick="go('library')">전체 보기 →</button></div>
+      <div id="homeRecs"></div>
+    </section>
+
+    <section class="page" id="p-library">
+      <div class="hero"><h1>스킬 라이브러리</h1><p>팀이 검증해서 배포한 스킬이에요. 끄면 내 AI에서만 빠지고, 다시 켜면 돌아와요.</p></div>
+      <div class="grid-cards" id="skills"></div>
+      <div class="h2"><b>✨ 스킬로 만들면 좋을 반복 작업</b><span class="mut">최근 14일 기록 · AI 호출 없이 분석</span></div>
+      <div id="recs"></div>
+    </section>
+
+    <section class="page" id="p-activity">
+      <div class="hero"><h1>활동 기록</h1><p>내가 개선한 것과 AI로 한 작업이에요. 스킬을 쓴 결과는 평가해 주세요.</p></div>
+      <div class="card"><div id="activity"></div></div>
+      <div class="h2"><b>📒 AI 실수 노트</b><span class="mut">AI가 틀렸거나 계속 실패한 곳 · 고치면 팀 전체가 같은 실수를 안 해요</span></div>
+      <div class="card"><div id="notes"></div></div>
+    </section>
+
+    <section class="page" id="p-settings">
+      <div class="hero"><h1>설정</h1><p>설치 상태와 버전, 팀 소식을 확인해요.</p></div>
+      <div class="g2" style="margin-top:0">
+        <div class="card"><b style="font-size:16px">점검</b><div id="health" style="margin-top:10px"></div></div>
+        <div class="card"><b style="font-size:16px">팀 새 소식</b><div id="news" style="margin-top:10px"></div></div>
+      </div>
+      <div class="card" style="margin-top:16px"><b style="font-size:16px">파일 위치</b>
+        <div class="sub" style="margin-top:8px;line-height:1.9">설치 기록 <code>~/.kit/kit.lock.json</code> · 내 평가 <code>~/.kit/ratings.json</code> · 화면 설정(시스템 현황 지표, 개선 기록 폴더) <code>~/.kit/ui.json</code></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="modal" onclick="if(event.target===this)this.style.display='none'"><div class="card" id="modalBody"></div></div>
+<div id="toast" class="card"><div id="toastTitle" style="font-weight:600"></div><pre id="toastBody"></pre><div style="text-align:right;margin-top:8px"><button onclick="$('toast').style.display='none'">닫기</button></div></div>
 
 <script>
 const TOKEN = "__KIT_TOKEN__";
@@ -89,151 +144,169 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const jsq = s => esc(JSON.stringify(String(s == null ? "" : s)));
 const md = s => esc(s).replace(/`([^`]+)`/g, '<code style="font-size:12px;background:var(--soft);padding:1px 5px;border-radius:5px">$1</code>');
-const fmtTime = t => { if (!t) return ""; if (t.length <= 10) return t.slice(5); const d = new Date(t); return isNaN(d) ? t : (d.getMonth()+1).toString().padStart(2,"0")+"-"+d.getDate().toString().padStart(2,"0")+" "+d.getHours().toString().padStart(2,"0")+":"+d.getMinutes().toString().padStart(2,"0"); };
-
+const ICONS = {
+  incident: '<path d="M3 12h4l3-8 4 16 3-8h4"/>',
+  query: '<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/>',
+  perf: '<path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/>',
+  doc: '<path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
+  code: '<path d="M8 6l-6 6 6 6M16 6l6 6-6 6"/>',
+  commit: '<circle cx="12" cy="12" r="3"/><path d="M3 12h6M15 12h6"/>',
+  spark: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>'
+};
+const iconFor = name => ICONS[/incident|장애/.test(name) ? "incident" : /query|sql|쿼리/.test(name) ? "query" : /perf|성능/.test(name) ? "perf" : /doc|문서|블로그/.test(name) ? "doc" : /commit|커밋|pr/i.test(name) ? "commit" : /review|리뷰|code|코드/.test(name) ? "code" : "spark"];
+const svg = p => `<svg class="i" viewBox="0 0 24 24">${p}</svg>`;
+function ago(t) {
+  if (!t) return "";
+  const d = new Date(t); if (isNaN(d)) return t;
+  const m = Math.round((Date.now() - d) / 60000);
+  if (m < 1) return "방금"; if (m < 60) return m + "분 전"; if (m < 1440) return Math.round(m / 60) + "시간 전";
+  const days = Math.round(m / 1440); return days < 7 ? days + "일 전" : (d.getMonth() + 1) + "월 " + d.getDate() + "일";
+}
 async function api(path, body) {
   const opt = { method: body ? "POST" : "GET", headers: { "X-Kit-Token": TOKEN } };
   if (body) { opt.headers["Content-Type"] = "application/x-www-form-urlencoded"; opt.body = new URLSearchParams(body).toString(); }
-  const r = await fetch(path, opt);
-  if (!r.ok) throw new Error("요청 실패 " + r.status);
-  return r.json();
+  const r = await fetch(path, opt); if (!r.ok) throw new Error("요청 실패 " + r.status); return r.json();
 }
-
+function toast(title, body) { $("toastTitle").textContent = title; $("toastBody").textContent = body || ""; $("toast").style.display = "block"; }
 async function act(title, path, body, btn) {
-  if (btn) { btn.disabled = true; btn.dataset.label = btn.textContent; btn.textContent = "진행 중…"; }
-  try {
-    const res = await api(path, body);
-    $("toastTitle").textContent = (res.code === 0 ? "✅ " : "⚠️ ") + title;
-    $("toastBody").textContent = res.output || res.error || "";
-    $("toast").style.display = "block";
-  } catch (e) {
-    $("toastTitle").textContent = "⚠️ " + title; $("toastBody").textContent = e.message; $("toast").style.display = "block";
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = btn.dataset.label; }
-    load();
-  }
+  if (btn) { btn.disabled = true; btn.dataset.l = btn.textContent; btn.textContent = "진행 중…"; }
+  try { const r = await api(path, body); toast((r.code === 0 ? "✅ " : "⚠️ ") + title, r.output || r.error); }
+  catch (e) { toast("⚠️ " + title, e.message); }
+  finally { if (btn) { btn.disabled = false; btn.textContent = btn.dataset.l; } load(); }
+}
+function go(p) {
+  document.querySelectorAll(".page").forEach(x => x.classList.toggle("on", x.id === "p-" + p));
+  document.querySelectorAll("#nav a").forEach(a => a.classList.toggle("on", a.dataset.p === p));
+  window.scrollTo(0, 0);
+}
+$("nav").addEventListener("click", e => { const a = e.target.closest("a"); if (a) go(a.dataset.p); });
+
+let S = null, query = "";
+const match = (...xs) => !query || xs.join(" ").toLowerCase().includes(query);
+$("q").addEventListener("input", e => { query = e.target.value.trim().toLowerCase(); if (query && document.querySelector("#p-home.on")) go("library"); render(); });
+
+function openSkill(name) {
+  const k = S.skills.find(x => x.name === name); if (!k) return;
+  const ex = k.examples.length ? k.examples : ["(이 스킬이 하는 일)을 해줘"];
+  $("modalBody").innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div class="tico" style="margin:0">${svg(iconFor(k.name))}</div><div><b style="font-size:18px">${esc(k.name)}</b><div class="sub">${esc(k.description)}</div></div></div>
+    <div class="sub" style="margin:12px 0 6px">AI 도구에서 이렇게 말하면 이 스킬이 자동으로 실행돼요</div>
+    ${ex.map(e => `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px"><span style="flex:1">"${esc(e)}"</span><button onclick="navigator.clipboard.writeText(${jsq(e)});this.textContent='복사됨'">복사</button></div>`).join("")}
+    <div class="mut" style="margin-top:8px">직접 부르려면 Claude Code에서 <code>/${esc(k.name)}</code>, Codex에서 <code>$${esc(k.name)}</code></div>
+    <div style="text-align:right;margin-top:14px"><button onclick="$('modal').style.display='none'">닫기</button></div>`;
+  $("modal").style.display = "flex";
 }
 
-function renderStrip(s) {
-  const bad = s.health.filter(h => h.level === "error").length, warn = s.health.filter(h => h.level === "warn").length;
-  const status = bad ? `<span style="color:var(--red)"><span class="dot" style="background:var(--red)"></span>문제 ${bad}개</span>`
-    : warn ? `<span style="color:var(--amber)"><span class="dot" style="background:var(--amber)"></span>확인 필요 ${warn}개</span>`
-    : `<span style="color:var(--green)"><span class="dot" style="background:var(--green)"></span>정상</span>`;
-  const tools = s.tools.filter(t => t.installed).map(t => t.name).join(", ") || "연결된 도구 없음";
-  const healthList = s.health.map(h => {
-    const icon = {ok:"✅", warn:"⚠️", error:"❌", info:"·"}[h.level] || "·";
-    const btn = h.installTool ? ` <button onclick="act('${esc(h.installTool)} 설치', '/api/install', {tool:'${esc(h.installTool)}'}, this)">설치</button>` : "";
-    return `<div>${icon} ${esc(h.text)}${btn}</div>`;
-  }).join("");
-  const update = s.updateAvailable
-    ? `<div style="text-align:right"><span class="chip blue">새 버전 ${esc(s.latest)}</span> <button class="primary" onclick="act('업데이트', '/api/sync', {}, this)">업데이트</button>
-       <div class="mut" style="margin-top:4px">${(s.updatePreview || []).filter(l => !l.startsWith("  ") && l !== "변경 내역:").map(esc).join(" · ")}</div></div>`
-    : `<div class="mut">최신 버전이에요</div>`;
-  $("strip").innerHTML = `
-    <div style="display:flex;align-items:center;gap:14px">
-      <div style="font-size:24px">📦</div>
-      <div><div style="font-size:16px;font-weight:600">팀 AI 키트 <span style="font-weight:400;color:var(--sub)">${esc(s.version || "미설치")}</span></div>
-      <div class="t2">${status} · ${esc(tools)} <a href="#" onclick="this.closest('.strip').querySelector('.health').toggleAttribute('hidden');return false" style="color:var(--blue);font-size:12px;margin-left:6px">점검 자세히</a></div>
-      <div class="health" hidden>${healthList}</div></div>
-    </div>${update}`;
+function renderHome() {
+  $("hello").textContent = `안녕하세요${S.user ? ", " + S.user + "님" : ""}! 👋`;
+  const init = (S.user || "?").trim().slice(-2, -1) || (S.user || "?")[0];
+  $("meAv").textContent = $("topAv").textContent = (S.user || "?")[0].toUpperCase();
+  $("meName").textContent = S.user || "사용자"; $("meVer").textContent = "팀 AI 키트 " + (S.version || "미설치");
+  $("banner").innerHTML = S.updateAvailable
+    ? `<div class="banner"><span class="new">NEW</span><div style="flex:1"><b>${esc(S.latest)} 업데이트가 나왔어요</b><div class="sub">${(S.updatePreview || []).filter(l => !l.startsWith("  ") && l !== "변경 내역:").map(esc).join(" · ")}</div></div><button class="primary" onclick="act('업데이트', '/api/sync', {}, this)">업데이트</button></div>`
+    : `<div class="banner"><span class="new" style="background:var(--green)">최신</span><div style="flex:1"><b>${esc(S.version || "")} 사용 중</b><div class="sub">${esc((S.news[0] || {items: [""]}).items[0] ? "" : "")}팀 스킬과 공통 원칙이 최신이에요</div></div><button class="ghost" onclick="go('settings')">새 소식 보기 →</button></div>`;
+  const tiles = S.skills.filter(k => k.enabled).map(k => `
+    <div class="tile" onclick="openSkill(${jsq(k.name)})"><div class="tico">${svg(iconFor(k.name))}</div><b>${esc(k.name)}</b><div class="s"><span>${esc(k.description.length > 26 ? k.description.slice(0, 26) + "…" : k.description)}</span><span class="go">→</span></div></div>`);
+  const cand = S.recommendations.filter(r => r.kind === "skill").slice(0, Math.max(0, 4 - tiles.length)).map(r => `
+    <div class="tile" style="border-style:dashed" onclick="go('library')"><div class="tico" style="background:var(--amber-bg);color:var(--amber)">${svg(iconFor(r.id + r.title))}</div><b>${esc(r.title)}</b><div class="s"><span>스킬 후보 · ${r.prompts}번 반복</span><span class="go" style="background:var(--amber-bg);color:var(--amber)">+</span></div></div>`);
+  $("tiles").innerHTML = tiles.concat(cand).join("") || `<div class="empty">켜진 스킬이 없어요</div>`;
+  $("recent").innerHTML = S.activity.slice(0, 5).map(a => `
+    <div class="act"><span class="dot" style="background:${a.kind === "improve" ? "var(--green)" : "var(--blue)"}"></span><div style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(a.title)}</div><span class="mut">${esc(ago(a.time))}</span></div>`).join("") || `<div class="empty">최근 활동이 없어요</div>`;
+  renderSystem();
+  const recs = S.recommendations.slice(0, 2);
+  $("homeRecs").innerHTML = recs.length ? `<div class="grid-cards">${recs.map(recCard).join("")}</div>` : `<div class="empty">지금은 추천할 반복 작업이 없어요</div>`;
 }
 
-function proposeRule(title, desc) {
-  $("toastTitle").textContent = "📝 팀 원칙으로 제안하기";
-  $("toastBody").textContent = "팀 공통 원칙(kit/context/AGENTS.md)에 아래 한 줄을 추가하는 PR을 올려 주세요.\n\n- " + desc
-    + "\n\n팀장이 승인하면 다음 업데이트부터 모든 팀원의 AI가 이 원칙을 지켜요.";
-  $("toast").style.display = "block";
+function spark(points, color) {
+  if (!points || points.length < 2) return "";
+  const w = 120, h = 34, lo = Math.min(...points), hi = Math.max(...points), span = hi - lo || 1;
+  const pts = points.map((v, i) => `${(i / (points.length - 1) * w).toFixed(1)},${(h - 3 - (v - lo) / span * (h - 6)).toFixed(1)}`).join(" ");
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="display:block;margin-top:6px"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
 }
-function renderRecs(s) {
-  if (!s.recommendations.length) {
-    $("recs").innerHTML = `<div class="empty">최근 14일 기록에서 스킬로 만들 만한 반복 작업을 찾지 못했어요. 이미 스킬이 있거나 반복이 적다는 뜻이에요.</div>`;
+function fmt(v, unit) { if (v == null) return "-"; const n = Math.abs(v) >= 100 ? Math.round(v) : Math.round(v * 10) / 10; return n.toLocaleString() + unit; }
+function renderSystem() {
+  const m = S.metrics || {};
+  if (!m.configured) {
+    $("system").innerHTML = `<b style="font-size:16px">시스템 현황</b><div class="empty" style="margin-top:12px">보여 줄 지표가 설정되지 않았어요.<br><code>~/.kit/ui.json</code>에 Prometheus 주소와 지표를 적으면 여기에 나와요.</div>`;
     return;
   }
-  $("recs").innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">` +
-    s.recommendations.map(r => `
-    <div style="border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:8px">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-        <span class="t1" style="font-size:15px">${esc(r.title)}</span>
-        <span class="chip ${r.kind === "skill" ? "blue" : ""}">${r.kind === "skill" ? "스킬 후보" : "팀 원칙 후보"}</span>
-      </div>
-      <div class="t2">${esc(r.description)}</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <span class="chip">🔁 ${r.prompts}번 요청</span><span class="chip">🗂 세션 ${r.sessions}개</span>${r.kind === "skill" && r.avgSteps ? `<span class="chip">🪜 요청당 약 ${r.avgSteps}단계</span>` : ""}
-      </div>
-      ${r.examples.length ? `<div style="font-size:13px;color:var(--sub);border-left:2px solid var(--line);padding-left:10px">${r.examples.map(e => "\"" + esc(e) + "\"").join("<br>")}</div>` : ""}
-      <div style="display:flex;gap:8px;margin-top:auto">
-        ${r.kind === "skill"
-          ? `<button class="primary" onclick="act(${jsq(r.title + ' 초안 만들기')}, '/api/draft', {id:${jsq(r.id)}}, this)">스킬 초안 만들기</button>`
-          : `<button class="primary" onclick="proposeRule(${jsq(r.title)}, ${jsq(r.description)})">원칙으로 제안</button>`}
-        <button onclick="act(${jsq(r.title + ' 숨기기')}, '/api/dismiss', {id:${jsq(r.id)}}, this)">나중에</button>
-      </div>
-    </div>`).join("") + `</div>`;
+  const status = m.reachable ? `<span class="chip green">● 정상 수집 중</span>` : `<span class="chip red">● 연결 안 됨</span>`;
+  $("system").innerHTML = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><b style="font-size:16px">${esc(m.title)}</b>${status}<span class="mut" style="margin-left:auto">최근 30분</span></div>
+    <div class="metrics">${m.items.map(it => {
+      let delta = "";
+      if (it.value != null && it.first != null && it.first !== 0) {
+        const pct = Math.round((it.value - it.first) / Math.abs(it.first) * 100);
+        const good = it.lowerIsBetter ? pct <= 0 : pct >= 0;
+        delta = `<div style="font-size:12px;font-weight:600;color:${good ? "var(--green)" : "var(--red)"}">${pct > 0 ? "↑" : pct < 0 ? "↓" : "→"} ${Math.abs(pct)}%</div>`;
+      }
+      return `<div class="metric"><div class="mut">${esc(it.label)}</div><div class="v">${fmt(it.value, it.unit)}</div>${delta}${spark(it.points, "#5b8cff")}</div>`;
+    }).join("")}</div>`;
 }
 
-const expanded = {};
-function moreButton(key, total, shown) {
-  if (total <= shown && !expanded[key]) return "";
-  return `<button style="margin-top:4px" onclick="expanded['${key}']=!expanded['${key}'];renderAll(lastState)">${expanded[key] ? "접기" : "전체 보기 (" + total + ")"}</button>`;
-}
-function renderActivity(s) {
-  const all = s.activity, list = expanded.activity ? all : all.slice(0, 5);
-  $("activityMore").innerHTML = moreButton("activity", all.length, 5);
-  $("activity").innerHTML = all.length ? list.map(a => `
-    <li style="--c:${a.kind === "improve" ? "var(--green)" : "var(--blue)"}">
-      <div class="t1">${esc(a.title)}</div>
-      <div class="t2">${esc(a.detail)}</div>
-      <div class="mut">${esc(fmtTime(a.time))}${a.project ? " · " + esc(a.project) : ""}</div>
-    </li>`).join("") : `<div class="empty">최근 14일 기록이 없어요</div>`;
+function recCard(r) {
+  return `<div class="card" style="display:flex;flex-direction:column;gap:8px">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div style="display:flex;align-items:center;gap:10px"><div class="tico" style="margin:0;width:38px;height:38px;background:var(--amber-bg);color:var(--amber)">${svg(iconFor(r.id + r.title))}</div><b style="font-size:15px">${esc(r.title)}</b></div><span class="chip ${r.kind === "skill" ? "blue" : ""}">${r.kind === "skill" ? "스킬 후보" : "팀 원칙 후보"}</span></div>
+    <div class="sub">${esc(r.description)}</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip">🔁 ${r.prompts}번 요청</span><span class="chip">🗂 세션 ${r.sessions}개</span>${r.kind === "skill" && r.avgSteps ? `<span class="chip">🪜 요청당 약 ${r.avgSteps}단계</span>` : ""}</div>
+    ${r.examples.length ? `<div class="sub" style="border-left:2px solid var(--line);padding-left:10px">${r.examples.map(e => "\"" + esc(e) + "\"").join("<br>")}</div>` : ""}
+    <div style="display:flex;gap:8px;margin-top:auto">
+      ${r.kind === "skill" ? `<button class="primary" onclick="act(${jsq(r.title + ' 초안 만들기')}, '/api/draft', {id:${jsq(r.id)}}, this)">스킬 초안 만들기</button>`
+        : `<button class="primary" onclick="toast('📝 팀 원칙으로 제안하기', '팀 공통 원칙(kit/context/AGENTS.md)에 아래 한 줄을 추가하는 PR을 올려 주세요.\\n\\n- ' + ${jsq(r.description)})">원칙으로 제안</button>`}
+      <button onclick="act(${jsq(r.title + ' 숨기기')}, '/api/dismiss', {id:${jsq(r.id)}}, this)">나중에</button>
+    </div></div>`;
 }
 
-function renderNotes(s) {
-  const all = s.notes, list = expanded.notes ? all : all.slice(0, 3);
-  $("notesMore").innerHTML = moreButton("notes", all.length, 3);
-  $("notes").innerHTML = all.length ? list.map(n => `
-    <div class="row">
-      <div style="font-size:16px" title="${n.source === "auto" ? "자동 발견" : "직접 등록"}">${n.source === "auto" ? "🤖" : "🙋"}</div>
-      <div style="flex:1;min-width:0"><div style="font-size:13px">${esc(n.text)}</div>${n.actual ? `<div class="mut">실제: ${esc(n.actual)}</div>` : ""}</div>
-      ${n.reflected ? `<span class="chip green">스킬에 반영</span>` : `<span class="chip">아직</span>`}
-    </div>`).join("") : `<div class="empty">기록된 실수가 없어요</div>`;
+function renderLibrary() {
+  const ks = S.skills.filter(k => match(k.name, k.description));
+  $("skills").innerHTML = ks.map(k => `
+    <div class="card" style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:center;gap:12px"><div class="tico" style="margin:0">${svg(iconFor(k.name))}</div><div style="flex:1;min-width:0"><b style="font-size:16px">${esc(k.name)}</b><div class="mut">${k.verifiedCases ? "검증 상황 " + k.verifiedCases + "개 · " + esc(k.verifiedDate || "") : "검증 기록 없음"}</div></div>
+        <div class="sw ${k.enabled ? "on" : ""}" role="switch" aria-checked="${k.enabled}" aria-label="${esc(k.name)} 켜기" onclick="act(${jsq(k.name + (k.enabled ? ' 끄기' : ' 켜기'))}, '/api/skill', {name:${jsq(k.name)}, on:${!k.enabled}})"></div></div>
+      <div class="sub">${esc(k.description)}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center"><span class="mut">내 평가 👍 ${k.myUp} · 👎 ${k.myDown}</span><button class="ghost" onclick="openSkill(${jsq(k.name)})">사용법 보기 →</button></div>
+    </div>`).join("") || `<div class="empty">검색 결과가 없어요</div>`;
+  const rs = S.recommendations.filter(r => match(r.title, r.description));
+  $("recs").innerHTML = rs.length ? `<div class="grid-cards">${rs.map(recCard).join("")}</div>` : `<div class="empty">지금은 추천할 반복 작업이 없어요</div>`;
 }
 
-function renderNews(s) {
-  $("news").innerHTML = s.news.length ? s.news.map((n, i) => `
-    <div style="display:flex;gap:10px;padding:6px 0">
-      <span class="chip ${i === 0 ? "blue" : ""}" style="height:22px">${esc(n.version)}</span>
-      <div style="font-size:13px">${n.items.map(md).join("<br>")}<div class="mut">${esc(n.date)}</div></div>
-    </div>`).join("") : `<div class="mut">소식이 없어요</div>`;
+function rateButtons(a) {
+  if (a.kind !== "ai" || !a.skills || !a.skills.length) return "";
+  const sk = a.skills[0], sel = v => a.rating === v ? "sel" : "";
+  return `<div class="rate">
+    <button class="${sel("up")}" title="도움이 됐어요" onclick="act('평가', '/api/rate', {session:${jsq(a.id)}, skill:${jsq(sk)}, rating:'up'})">👍</button>
+    <button class="${sel("down")}" title="별로였어요" onclick="act('평가', '/api/rate', {session:${jsq(a.id)}, skill:${jsq(sk)}, rating:'down'})">👎</button>
+    <button class="${sel("wrong")}" onclick="const n=prompt('실제 원인이나 정답은 무엇이었나요? (AI 실수 노트에 기록돼요)'); if(n!==null) act('AI가 틀렸어요', '/api/rate', {session:${jsq(a.id)}, skill:${jsq(sk)}, rating:'wrong', note:n})">AI가 틀렸어요</button>
+  </div>`;
+}
+function renderActivity() {
+  const list = S.activity.filter(a => match(a.title, a.detail, a.project));
+  $("activity").innerHTML = list.map(a => `
+    <div class="act" style="align-items:flex-start;padding:14px 0">
+      <span class="dot" style="margin-top:7px;background:${a.kind === "improve" ? "var(--green)" : "var(--blue)"}"></span>
+      <div style="flex:1;min-width:0"><div style="font-weight:600">${esc(a.title)}</div><div class="sub">${esc(a.detail)}</div><div class="mut">${esc(ago(a.time))}${a.project ? " · " + esc(a.project) : ""}</div></div>
+      ${rateButtons(a)}
+    </div>`).join("") || `<div class="empty">기록이 없어요</div>`;
+  $("notes").innerHTML = S.notes.map(n => `
+    <div class="act"><span style="font-size:18px" title="${n.source === "auto" ? "자동 발견" : "직접 등록"}">${n.source === "auto" ? "🤖" : "🙋"}</span>
+      <div style="flex:1;min-width:0"><div style="font-size:14px">${esc(n.text)}</div>${n.actual ? `<div class="mut">실제: ${esc(n.actual)}</div>` : ""}</div>
+      ${n.reflected ? `<span class="chip green">스킬에 반영</span>` : `<span class="chip">아직</span>`}</div>`).join("") || `<div class="empty">기록된 실수가 없어요</div>`;
 }
 
-function renderSkills(s) {
-  $("skills").innerHTML = s.skills.length ? s.skills.map(k => `
-    <div class="row">
-      <div style="flex:1;min-width:0">
-        <div class="t1">${esc(k.name)}</div>
-        <div class="t2">${esc(k.description)}</div>
-        <div class="mut">${k.verifiedCases ? "검증 상황 " + k.verifiedCases + "개" + (k.verifiedDate ? " · " + esc(k.verifiedDate) : "") : "검증 기록 없음"}</div>
-      </div>
-      <div class="sw ${k.enabled ? "on" : ""}" role="switch" aria-checked="${k.enabled}" aria-label="${esc(k.name)} 켜기"
-        onclick="act('${esc(k.name)} ${k.enabled ? "끄기" : "켜기"}', '/api/skill', {name:'${esc(k.name)}', on:${!k.enabled}})"></div>
-    </div>`).join("") : `<div class="empty">설치된 스킬이 없어요</div>`;
+function renderSettings() {
+  $("health").innerHTML = S.health.map(h => {
+    const icon = {ok: "✅", warn: "⚠️", error: "❌", info: "·"}[h.level] || "·";
+    const btn = h.installTool ? ` <button style="padding:3px 10px" onclick="act(${jsq(h.installTool + ' 설치')}, '/api/install', {tool:${jsq(h.installTool)}}, this)">설치</button>` : "";
+    return `<div style="padding:5px 0">${icon} ${esc(h.text)}${btn}</div>`;
+  }).join("") + `<div class="mut" style="margin-top:10px">설치 ${esc(S.version || "-")} · 받아 둔 최신 ${esc(S.latest || "-")} ${S.updateAvailable ? `<button style="padding:3px 10px;margin-left:6px" class="primary" onclick="act('업데이트', '/api/sync', {}, this)">업데이트</button>` : ""}</div>`;
+  $("news").innerHTML = S.news.map((n, i) => `
+    <div style="display:flex;gap:10px;padding:7px 0"><span class="chip ${i === 0 ? "blue" : ""}" style="height:24px">${esc(n.version)}</span><div style="font-size:13px">${n.items.map(md).join("<br>")}<div class="mut">${esc(n.date)}</div></div></div>`).join("") || `<div class="mut">소식이 없어요</div>`;
 }
 
-let lastState = null;
-function renderAll(s) {
-  if (!s) return;
-  renderStrip(s); renderRecs(s); renderActivity(s); renderNotes(s); renderNews(s); renderSkills(s);
-}
+function render() { if (!S) return; renderHome(); renderLibrary(); renderActivity(); renderSettings(); }
 async function load() {
-  if (location.protocol === "file:" || TOKEN.startsWith("__")) {
-    $("strip").innerHTML = `<span class="t2">이 화면은 터미널에서 <b>kit ui</b> 명령으로 열어야 데이터가 보여요.</span>`;
-    return;
-  }
-  try {
-    lastState = await api("/api/state");
-    renderAll(lastState);
-  } catch (e) {
-    $("strip").innerHTML = `<span style="color:var(--red)">불러오지 못했어요: ${esc(e.message)} (kit ui 를 다시 실행해 보세요)</span>`;
-  }
+  if (location.protocol === "file:" || TOKEN.startsWith("__")) { $("hello").textContent = "터미널에서 kit ui 명령으로 열어야 데이터가 보여요"; return; }
+  try { S = await api("/api/state"); render(); }
+  catch (e) { $("hello").textContent = "불러오지 못했어요: " + e.message + " (kit ui 를 다시 실행해 보세요)"; }
 }
 load();
 </script>
