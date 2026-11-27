@@ -29,7 +29,13 @@ python3 tools/eval/run.py --skill <이름>               # AI eval (claude CLI �
 ```
 - PR마다 CI가 형식 검사(`skills-validate.yml`)와 eval(`evals.yml`)을 돌린다. AI eval은 저장소 비밀값 `ANTHROPIC_API_KEY`가 있을 때만 돈다
 - 스킬을 바꾸면 eval 시나리오(`evals/<스킬>/scenarios/`)가 모두 통과해야 병합한다
-- 새 시나리오는 `case.json`(요청, 정답, 확인 항목) + `fixtures/`(장애 당시 지표·DB·로그 기록)로 만든다. 실제로 AI가 틀렸던 답변은 `grader-tests/`에 남겨 채점기가 계속 잡아내는지 확인한다
+- `kit/skills/`의 스킬마다 `evals/<스킬>/scenarios/<시나리오>/case.json`이 하나 이상 있어야 한다. 없으면 CI가 실패한다
+- 새 시나리오는 `case.json`(요청, 정답, 확인 항목) + `fixtures/`(장애 당시 지표·DB·로그 기록, 작업할 프로젝트)로 만든다. 무엇을 확인할지는 사람이 정한다
+- 확인 항목(`checks`)의 `scope`는 스킬 유형에 맞게 고른다
+  - 분석형: `first_cause`·`answer`(답변에 들어 있어야 할 말 `any`, 없어야 할 말 `none`), `commands`(실행하면 안 되는 명령)
+  - 생성형: `files`(`path` glob에 맞는 파일이 있고 내용이 맞는지), `script`(`run` 명령이 종료 코드 0이면 통과. 예: `./gradlew test`)
+  - 파일을 만들어야 하는 시나리오는 `"allow_tools": ["Edit", "Write", "Bash(./gradlew *)"]`처럼 필요한 도구만 연다 (기본은 읽기와 스크립트 실행만)
+- 실제로 AI가 틀렸던 답변은 `grader-tests/`에 남겨 채점기가 계속 잡아내는지 확인한다
 
 ## 배포 (버전 태그)
 - 팀원에게 반영할 변경을 모았으면 `CHANGELOG.md` 맨 위에 새 버전 절을 쓰고, 같은 커밋에서 태그(`v0.x.y`)를 붙여 푸시한다

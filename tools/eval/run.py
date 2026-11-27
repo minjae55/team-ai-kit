@@ -5,7 +5,7 @@
   1. 임시 폴더에 가짜 프로젝트(AGENTS.md, 로그, 코드, git 기록)를 만들고, 시험할 스킬을 .claude/skills/ 에 복사
   2. KIT_EVAL_FIXTURES 를 켜서 스킬 스크립트가 실제 Prometheus·DB 대신 장애 당시 기록을 돌려주게 함
   3. claude -p 로 시나리오의 요청을 보내고, 실행한 명령과 최종 답변을 받음 (읽기·스크립트 실행만 허용)
-  4. grade.py 로 채점, 결과를 out/evals/ 에 저장. 하나라도 불통과면 종료 코드 1
+  4. grade.py 로 채점 (files·script 검사는 AI가 작업을 마친 그 폴더에서), 결과를 out/evals/ 에 저장. 하나라도 불통과면 종료 코드 1
 
 사용:
   python3 tools/eval/run.py --skill incident-analysis                 # 시나리오 전부
@@ -38,7 +38,11 @@ def build_workdir(case_dir: str, case: dict, skill: str) -> str:
         dst = os.path.join(work, rel)
         os.makedirs(os.path.dirname(dst), exist_ok=True)
         if content.startswith("@fixtures/"):
-            shutil.copy(os.path.join(fixtures, content[len("@fixtures/"):]), dst)
+            src = os.path.join(fixtures, content[len("@fixtures/"):])
+            if os.path.isdir(src):  # 폴더째 복사 (예: 생성형 스킬이 작업할 작은 Gradle 프로젝트)
+                shutil.copytree(src, dst, dirs_exist_ok=True)
+            else:
+                shutil.copy(src, dst)
         else:
             open(dst, "w", encoding="utf-8").write(content)
     if os.path.exists(os.path.join(work, "AGENTS.md")) and not os.path.exists(os.path.join(work, "CLAUDE.md")):
@@ -55,13 +59,22 @@ def build_workdir(case_dir: str, case: dict, skill: str) -> str:
     return work
 
 
+def tools_for(case: dict):
+    """시나리오의 "allow_tools"(예: ["Edit", "Write", "Bash(./gradlew *)"])를 기본 허용 목록에 더하고 금지 목록에서 뺀다."""
+    extra = case.get("allow_tools", [])
+    allowed = ALLOWED.split(",") + [t for t in extra if t not in ALLOWED.split(",")]
+    denied = [t for t in DENIED.split(",") if t not in extra]
+    return ",".join(allowed), ",".join(denied)
+
+
 def run_case(case_dir: str, skill: str, args) -> dict:
     case = json.load(open(os.path.join(case_dir, "case.json"), encoding="utf-8"))
     work = build_workdir(case_dir, case, skill)
     prompt = f"(현재 시각: {case['now']})\n\n{case['prompt']}"
+    allowed, denied = tools_for(case)
     cmd = [args.claude, "-p", prompt, "--output-format", "stream-json", "--verbose",
            "--max-turns", str(args.max_turns), "--permission-mode", "dontAsk",
-           "--allowedTools", ALLOWED, "--disallowedTools", DENIED]
+           "--allowedTools", allowed, "--disallowedTools", denied]
     if args.model:
         cmd += ["--model", args.model]
     env = dict(os.environ, KIT_EVAL_FIXTURES=os.path.join(case_dir, "fixtures"), **case.get("env", {}))
@@ -92,7 +105,7 @@ def run_case(case_dir: str, skill: str, args) -> dict:
         elif ev.get("type") == "result":
             answer = ev.get("result") or ""
             meta = {k: ev.get(k) for k in ("subtype", "is_error", "num_turns", "total_cost_usd", "duration_ms")}
-    result = grade(case, answer, commands)
+    result = grade(case, answer, commands, workdir=work)  # files·script 검사는 AI가 작업한 폴더에서
     if not answer:
         result["passed"] = False
         result["checks"].append({"name": "최종 답변을 받음", "ok": False,
