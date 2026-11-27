@@ -16,10 +16,15 @@ command -v git >/dev/null 2>&1 || die "git이 없습니다. git을 설치한 뒤
 command -v java >/dev/null 2>&1 || die "Java가 없습니다. Java 8 이상을 설치한 뒤 다시 실행하세요"
 
 say "1/3 kit 실행 파일 준비"
-say "  현재 버전으로 빌드합니다 (처음엔 1~2분, 이후엔 몇 초). JDK 17이 없으면 Gradle이 자동으로 받습니다"
-rm -f "$repo"/cli/build/libs/kit-*-all.jar
-(cd "$repo/cli" && ./gradlew --quiet fatJar) || die "빌드 실패. 위 메시지를 확인하세요"
-jar="$(ls "$repo"/cli/build/libs/kit-*-all.jar | sort -V | tail -1)"
+if [ -f "$repo/dist/kit.jar" ] && [ "${KIT_BUILD_FROM_SOURCE:-}" != "1" ]; then
+  jar="$repo/dist/kit.jar"
+  say "  빌드된 kit을 씁니다 (빌드 도구 불필요)"
+else
+  say "  소스에서 빌드합니다 (처음엔 1~2분, 이후엔 몇 초). JDK 17이 없으면 Gradle이 자동으로 받습니다"
+  rm -f "$repo"/cli/build/libs/kit-*-all.jar
+  (cd "$repo/cli" && sh gradlew --quiet fatJar) || die "빌드 실패. 위 메시지를 확인하세요"
+  jar="$(ls "$repo"/cli/build/libs/kit-*-all.jar | sort -V | tail -1)"
+fi
 mkdir -p "$bin"
 cp "$jar" "$bin/kit.jar"
 cp "$repo/cli/kit" "$bin/kit"

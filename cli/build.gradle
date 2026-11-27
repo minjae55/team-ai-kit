@@ -42,7 +42,10 @@ application {
 tasks.register('fatJar', Jar) {
     archiveClassifier = 'all'
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    manifest { attributes 'Main-Class': 'kit.Main' }
+    manifest { attributes 'Main-Class': 'kit.Main', 'Implementation-Version': project.version }
+    // 같은 소스면 같은 내용이 나오게 (배포 jar 검증용)
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
     from sourceSets.main.output
     dependsOn configurations.runtimeClasspath
     from { configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) } }

@@ -64,7 +64,7 @@ public final class ChangeSummary {
         if (contextChanged) {
             out.add("팀 공통 지식(kit/context)이 바뀌었습니다");
         }
-        Git.Result cli = Git.run(repo, "diff", "--name-only", range, "--", "cli/src", "cli/build.gradle", "cli/kit", "install.sh");
+        Git.Result cli = Git.run(repo, "diff", "--name-only", range, "--", "cli/src", "cli/build.gradle", "cli/kit", "install.sh", "dist/kit.jar");
         if (cli.ok() && !cli.out.isEmpty()) {
             out.add("kit 명령 자체가 업데이트되었습니다. 적용하려면: ~/.kit/repo/install.sh");
         }
@@ -89,7 +89,7 @@ public final class ChangeSummary {
             return false;
         }
         Git.Result r = Git.run(repo, "diff", "--name-only", fromCommit + ".." + toRef, "--",
-                "cli/src", "cli/build.gradle", "cli/kit", "install.sh");
+                "cli/src", "cli/build.gradle", "cli/kit", "install.sh", "dist/kit.jar");
         return r.ok() && !r.out.isEmpty();
     }
 

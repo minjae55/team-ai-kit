@@ -1,0 +1,23 @@
+name: 배포 jar 검사
+
+# 태그를 푸시하면 dist/kit.jar 가 그 태그의 소스로 빌드한 것과 같은지, 버전이 태그와 같은지 확인한다.
+# 팀원은 이 jar를 빌드 없이 그대로 쓰므로, 소스와 다르면 고친 내용이 팀원에게 안 간다.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: dist/kit.jar 와 소스 비교
+        run: python3 tools/check_dist.py --build ${{ startsWith(github.ref, 'refs/tags/') && format('--tag {0}', github.ref_name) || '' }}

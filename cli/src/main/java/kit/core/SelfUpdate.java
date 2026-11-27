@@ -11,7 +11,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * kit 명령 자체(~/.kit/bin/kit.jar)를 키트 레포의 현재 코드로 다시 빌드해 교체한다.
+ * kit 명령 자체(~/.kit/bin/kit.jar)를 키트 레포의 현재 버전으로 교체한다.
+ * 레포에 빌드된 jar(dist/kit.jar, 배포 때 tools/release.sh가 넣음)가 있으면 복사만 하고, 없으면 소스에서 빌드한다.
  * install.sh로 설치한 경우(~/.kit/bin/kit.jar가 있을 때)만 동작한다.
  */
 public final class SelfUpdate {
@@ -26,6 +27,11 @@ public final class SelfUpdate {
     public static String now(KitEnv env) {
         try {
             Path cli = env.repoDir().resolve("cli");
+            Path dist = distJar(env);
+            if (Files.isRegularFile(dist)) {
+                install(dist, cli, env.kitDir().resolve("bin"));
+                return null;
+            }
             ProcessBuilder pb = new ProcessBuilder("sh", "gradlew", "--quiet", "fatJar").directory(cli.toFile())
                     .redirectErrorStream(true).redirectOutput(env.kitDir().resolve("self-update.log").toFile());
             Process p = pb.start();
@@ -36,12 +42,7 @@ public final class SelfUpdate {
             if (jar == null) {
                 return "빌드 결과 jar를 찾지 못함";
             }
-            Path bin = env.kitDir().resolve("bin");
-            Path tmp = bin.resolve("kit.jar.tmp");
-            Files.copy(jar, tmp, StandardCopyOption.REPLACE_EXISTING);
-            Files.move(tmp, bin.resolve("kit.jar"), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-            Files.copy(cli.resolve("kit"), bin.resolve("kit"), StandardCopyOption.REPLACE_EXISTING);
-            bin.resolve("kit").toFile().setExecutable(true);
+            install(jar, cli, env.kitDir().resolve("bin"));
             return null;
         } catch (IOException e) {
             return e.getMessage();
@@ -56,6 +57,13 @@ public final class SelfUpdate {
      * 빌드에 1~2분 걸릴 수 있어서, 교체된 kit은 다음 실행부터 적용된다.
      */
     public static void background(KitEnv env) throws IOException {
+        if (Files.isRegularFile(distJar(env))) {  // 복사만 하면 되니 바로 끝난다
+            String err = now(env);
+            if (err != null) {
+                throw new IOException(err);
+            }
+            return;
+        }
         Path cli = env.repoDir().resolve("cli");
         Path bin = env.kitDir().resolve("bin");
         String script = "cd " + q(cli) + " && sh gradlew --quiet fatJar"
@@ -65,6 +73,19 @@ public final class SelfUpdate {
                 + " && cp kit " + q(bin.resolve("kit")) + " && chmod +x " + q(bin.resolve("kit"));
         new ProcessBuilder("sh", "-c", "nohup sh -c " + q(script) + " > " + q(env.kitDir().resolve("self-update.log")) + " 2>&1 &")
                 .redirectErrorStream(true).redirectOutput(new File("/dev/null")).start();
+    }
+
+    public static Path distJar(KitEnv env) {
+        return env.repoDir().resolve("dist").resolve("kit.jar");
+    }
+
+    private static void install(Path jar, Path cli, Path bin) throws IOException {
+        Files.createDirectories(bin);
+        Path tmp = bin.resolve("kit.jar.tmp");
+        Files.copy(jar, tmp, StandardCopyOption.REPLACE_EXISTING);
+        Files.move(tmp, bin.resolve("kit.jar"), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+        Files.copy(cli.resolve("kit"), bin.resolve("kit"), StandardCopyOption.REPLACE_EXISTING);
+        bin.resolve("kit").toFile().setExecutable(true);
     }
 
     private static String q(Object s) {

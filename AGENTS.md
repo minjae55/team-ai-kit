@@ -25,7 +25,7 @@
 ```bash
 python3 tools/validate_skills.py                       # 형식 검사
 python3 tools/eval/test_grader.py                      # 채점기 검증 (과거 실제 답변, AI 호출 없음)
-python3 tools/eval/run.py --skill <이름>               # AI eval (claude CLI 필요, 토큰 사용)
+python3 tools/eval/run.py --skill <이름> --isolated    # AI eval (claude CLI + CLAUDE_CODE_OAUTH_TOKEN 필요, 구독 사용량 사용)
 ```
 - PR마다 CI가 형식 검사(`skills-validate.yml`)와 eval(`evals.yml`)을 돌린다. AI eval은 저장소 비밀값 `ANTHROPIC_API_KEY`가 있을 때만 돈다
 - 스킬을 바꾸면 eval 시나리오(`evals/<스킬>/scenarios/`)가 모두 통과해야 병합한다
@@ -38,7 +38,8 @@ python3 tools/eval/run.py --skill <이름>               # AI eval (claude CLI �
 - 실제로 AI가 틀렸던 답변은 `grader-tests/`에 남겨 채점기가 계속 잡아내는지 확인한다
 
 ## 배포 (버전 태그)
-- 팀원에게 반영할 변경을 모았으면 `CHANGELOG.md` 맨 위에 새 버전 절을 쓰고, 같은 커밋에서 태그(`v0.x.y`)를 붙여 푸시한다
+- 팀원에게 반영할 변경을 모았으면 `CHANGELOG.md` 맨 위에 새 버전 절을 쓰고, `tools/release.sh 0.x.y`로 kit을 빌드해 `dist/kit.jar`를 갱신한 뒤, 같은 커밋에서 태그(`v0.x.y`)를 붙여 푸시한다
+- 팀원은 `dist/kit.jar`를 git으로 받아 빌드 없이 쓴다(Java 8 이상만 필요). 태그를 푸시하면 CI(`release-check.yml`)가 jar가 소스와 같은지 확인한다
 - `kit sync`가 그 절을 팀원에게 그대로 보여 주므로, 팀원이 알아야 할 것만 사람이 읽는 말로 쓴다
 
 ## 커밋

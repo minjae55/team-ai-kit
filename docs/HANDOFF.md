@@ -5,12 +5,17 @@
 
 ---
 
-## 0. 진행 상황 (2026-11-25 갱신)
+## 0. 진행 상황 (2026-11-27 갱신)
 - **0단계 완료**: `incident-analysis` 스킬을 stylehub 로컬 성능 환경에서 eval 3건(커넥션 풀 고갈, 행 락 경합, 인덱스 숨김)으로 검증. 케이스 3은 1차 불통과 → 스킬 보완(DB 스키마 변경 확인, 정상 구간 비교) → 재시험 통과. 기록: `evals/incident-analysis/cases.md`
 - **0.5단계 완료 (로드맵에 추가)**: 분석 → 수정안 → 사람 승인 → 수정 → 같은 시나리오로 전후 측정 → PR까지 한 바퀴. stylehub 협의 목록 캐시 동시 만료를 TTL jitter로 해결(커넥션 대기 88 → 0). stylehub PR #4, 증거 `docs/evidence/2026-11-25-negotiation-cache-ttl-jitter/`
 - **개인 대시보드 v1**: `tools/dashboard/build.py`. 서버·배포 없이 내 PC 기록으로 HTML 생성. API 목표 현황, 개선 사례, 알림 → 원인 파악 시간, AI 제안 검증, 로그. 실용성은 "누가, 언제, 보고 나서 무엇을 하나" 기준으로 재설계 필요
 - **1단계 완료**: 레포 규칙(AGENTS.md), 팀 공통 지식(`kit/context/AGENTS.md`), 스킬 형식 검사(`tools/validate_skills.py` + CI). GitHub `minjae55/team-ai-kit`(private, SSH)에 푸시, CI에서 `skills-ref validate` 통과. 빈 저장소 첫 푸시에서는 경로 필터 때문에 CI가 돌지 않아 `workflow_dispatch`를 추가함
+- **2단계 완료 (v0.1.x)**: Java CLI `kit install / sync / doctor / list / uninstall`. `install.sh` 한 줄로 설치, Claude(`~/.claude/skills`, CLAUDE.md import)와 Codex(`~/.agents/skills`, AGENTS.md 복사) 지원. 설계 `docs/cli-design.md`
+- **2.5단계 완료 (v0.2~0.4)**: `kit ui` 내 PC 전용 브라우저 화면. 업데이트, 점검, 스킬 켜기·끄기, 활동 기록, 스킬 후보 추천, 👍/👎 평가
+- **3단계 완료 (v0.5.0)**: 자동 sync(SessionStart 훅), kit 자기 갱신, pin/rollback, 스킬 사용 기록
+- **4단계 완료 (v0.6.0 + 6fc7cf8)**: 고정 데이터 시나리오, 채점기(과거 실제 답변 5개와 판정 일치), 실행기, CI. 확인 방식은 분석형(답변·명령 검사)과 생성형(`files`·`script` 검사)을 지원하고, 시나리오 없는 스킬은 CI에서 막는다. 혼자 쓰는 지금은 AI eval을 내 PC에서 구독 계정으로 돌린다(CI의 AI eval·병합 강제는 막을 대상이 없어 5단계로 미룸)
 - 배운 점
+  - 무엇을 확인할지는 사람이 시나리오에 정한다. AI가 채점 기준까지 정하면 검증이 아니다
   - 스킬의 가치는 "틀린 걸 한 번 고치면 다음부터 안 틀린다"에 있다 (케이스 3 재시험)
   - eval 정답도 틀릴 수 있다. 케이스 1 정답을 처음엔 "스탬피드"로 적었다가 "동시 만료"로 정정함
   - stylehub 쿼리 통계는 `useServerPrepStmts=true` 때문에 `performance_schema.prepared_statements_instances`에 있다
@@ -73,8 +78,10 @@
 | 1 ✅ | team-ai-kit 레포 구조와 공통 AGENTS.md 작성, 스킬 형식 검증 CI | `skills-ref validate` 통과 (2026-11-25 CI #1) |
 | 2 ✅ | **CLI MVP**: `kit install / sync / doctor`. Claude와 Codex 지원 | 새 PC에서 명령 하나로 스킬·지침이 설치됨 (2026-11-26, `install.sh`로 실제 PC 설치 → 다른 폴더의 새 세션에서 스킬 인식 확인. MCP 설정은 3단계 이후로 미룸) |
 | 3 ✅ | 자동 sync, 버전 고정과 롤백, 훅 기반 사용 추적 | 스킬을 수정하면 팀원 환경에 자동 반영되고 사용 기록이 남음 (2026-11-27 v0.5.0: Claude SessionStart 훅으로 6시간마다 sync, kit 명령 자기 갱신, pin/rollback, PostToolUse(Skill)·UserPromptExpansion 훅으로 ~/.kit/usage.jsonl 기록. 팀 단위 집계와 Codex 훅은 미구현: Codex만 쓰는 팀원은 수동 sync) |
-| 4 ✅ | eval 파이프라인 | 스킬 PR이 eval을 통과해야만 배포됨 (2026-11-27 v0.6.0: 장애 당시 기록을 고정 데이터로 만든 시나리오 3개, 스킬 스크립트의 KIT_EVAL_FIXTURES 모드, 채점기와 과거 실제 답변 5개로 채점기 검증, CI evals.yml. AI 실행은 ANTHROPIC_API_KEY 비밀값 등록 후 동작, 병합 강제는 브랜치 보호에서 evals 검사를 필수로 지정해야 함) |
-| 5 | Gemini 지원, 팀원 온보딩 | 2명 이상이 실제로 사용 |
+| 4 ✅ | eval 파이프라인 | 스킬 PR이 eval을 통과해야만 배포됨 (2026-11-27 v0.6.0: 장애 당시 기록을 고정 데이터로 만든 시나리오 3개, 스킬 스크립트의 KIT_EVAL_FIXTURES 모드, 채점기와 과거 실제 답변 5개로 채점기 검증, CI evals.yml. 6fc7cf8: 생성형 스킬용 `files`·`script` 검사, 시나리오별 허용 도구, 시나리오 없는 스킬은 CI 실패. 지금은 키 없이 도는 검사(형식, 채점기, 시나리오 필수)만 CI에서 돌고, AI eval은 내 PC에서 실행) |
+| 5 | 팀원 온보딩과 팀 단위 운영 | 2명 이상이 실제로 사용. ① 회사 GitHub 조직(비공개)으로 이전, CODEOWNERS로 스킬 승인자 지정, CI에 회사 계정 키 등록(AI eval) + 브랜치 보호(PR 필수, eval 통과 필수). 팀원이 고친 스킬도 시험을 거쳐야만 배포되게 하는 것이 목적 ② 설치 간소화(빌드된 jar 배포, 팀원 PC에 JDK 불필요: tools/release.sh + dist/kit.jar 준비됨, 첫 적용은 다음 배포 v0.7.0) ③ 성능 개선 스킬 묶음(query-analysis, k6-scenario-generator, perf-report. 시나리오와 함께) ④ 팀 단위 사용·평가 집계 ⑤ Gemini 어댑터, Codex 훅 |
+| 6 | 자동 실행 | 알림 webhook → 사람 없이 `claude -p`로 분석 → 회사 채널로 결과 전송 (3절 자동 실행). 회사 계정 인증·라이선스 확인(8절 2번)이 먼저 |
+| 7 | 전 직군 확대 | 프론트엔드를 포함한 모든 개발자와 비개발자가 사용. 비개발자는 터미널 없이 Claude 앱 조직 배포(회사 플랜 지원 여부 확인 필요)로 같은 스킬 원본을 받음 |
 
 ## 8. 미확인 항목 (POC가 필요하며, 지원된다고 단정하지 않음)
 1. Codex와 Gemini의 **훅 형식**과 텔레메트리(OpenTelemetry) 지원 여부
@@ -103,11 +110,11 @@ team-ai-kit/
 └── evals/incident-analysis/          # 입력 예시와 확인 항목
 ```
 
-## 10. 다음 작업 (2026-11-25 갱신)
-1. ~~GitHub 저장소 만들고 CI 통과 확인~~ → 완료
-2. 2단계 CLI 설계: `kit install`이 할 일을 정한다. 스킬 → `~/.claude/skills/`, `~/.agents/skills/`(Codex), 공통 지식 → 사용자 지침 파일 연결, 버전 lock 파일
-3. 병행 후보: stylehub 주문 생성 성능 개선 (Mac 환경 기준 측정부터, `docs/perf/runs.json`에 기록)
-4. 대시보드 재설계: 누가, 언제, 보고 나서 무엇을 하는지부터 정한다
+## 10. 다음 작업 (2026-11-27 갱신)
+1. 4단계 확인: 내 PC에 Claude Code CLI를 설치하고 AI eval을 한 번 실제로 돌려 파이프라인 동작 확인 (구독 계정, 추가 비용 없음)
+2. 5단계 시작: 회사 조직 이전 여부와 두 번째 팀원 결정, 생성형 스킬 하나를 `script` 시나리오와 함께 배포 대상에 올리기
+3. 블로그 글 이어 쓰기 (남은 절 6개)
+4. 보류: stylehub PR #4 병합, 주문 생성 성능 개선 (B 트랙)
 
 (0단계 작업 목록은 완료되어 지웠다. stylehub 모니터링 구성은 stylehub `AGENTS.md`에 있다.)
 

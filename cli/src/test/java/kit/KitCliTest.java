@@ -188,6 +188,19 @@ class KitCliTest {
     }
 
     @Test
+    void self_update_copies_prebuilt_dist_jar_without_building() throws IOException {
+        kit.core.KitEnv env = new kit.core.KitEnv(home, "x");
+        write(env.repoDir().resolve("dist/kit.jar"), "new-jar");
+        write(env.repoDir().resolve("cli/kit"), "#!/bin/sh");
+        write(env.kitDir().resolve("bin/kit.jar"), "old-jar");
+
+        assertEquals(null, kit.core.SelfUpdate.now(env));
+        assertEquals("new-jar", new String(Files.readAllBytes(env.kitDir().resolve("bin/kit.jar")), StandardCharsets.UTF_8));
+        assertTrue(Files.isExecutable(env.kitDir().resolve("bin/kit")));
+        assertFalse(Files.exists(env.kitDir().resolve("self-update.log")), "빌드하지 않음");
+    }
+
+    @Test
     void only_selected_tool_is_installed() {
         assertEquals(0, kit("install", "--tools", "claude"));
         assertTrue(Files.exists(home.resolve(".claude/skills/incident-analysis")));

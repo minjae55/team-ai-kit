@@ -12,8 +12,10 @@
 | 2 | 배포 CLI `kit install / sync / doctor` | 완료 (v0.1.x) |
 | 2.5 | `kit ui` 화면 (설치·업데이트·스킬 후보 추천·평가·시스템 현황) | 완료 (v0.2~0.4) |
 | 3 | 자동 sync, 버전 고정·롤백, 사용 기록 | 완료 (v0.5.0, 내 PC 기준) |
-| 4 | eval 자동화 (고정 데이터 시나리오 + 채점기 + CI) | 완료 (v0.6.0, AI 실행은 API 키 등록 후) |
-| 5 | 팀 온보딩, 팀 단위 집계, Gemini | 다음 |
+| 4 | eval 자동화 (시나리오 + 채점기 + CI, 분석형·생성형 검사, 시나리오 필수) | 완료 (v0.6.0. AI eval은 지금 내 PC에서, CI 실행·병합 강제는 5단계) |
+| 5 | 팀 온보딩: 회사 조직 이전(CI AI eval·브랜치 보호), jar 배포, 성능 스킬 묶음, 팀 단위 집계, Gemini | 진행 중 |
+| 6 | 자동 실행: 알림 → 사람 없이 분석 → 회사 채널로 결과 | 예정 |
+| 7 | 전 직군 확대: 프론트엔드 포함 모든 개발자, 비개발자(Claude 앱 조직 배포) | 예정 |
 
 ## 스킬
 | 스킬 | 하는 일 |
@@ -21,7 +23,7 @@
 | [`incident-analysis`](kit/skills/incident-analysis/SKILL.md) | 장애·지표 이상의 원인을 지표 → DB → 로그 → 최근 변경 순서로 근거를 모아 분석 (읽기 전용) |
 
 ## 설치
-Java 8 이상과 git, 키트 레포 접근 권한(SSH)이 필요하다. 처음 한 번만:
+Java 8 이상(실행만, JDK·빌드 도구 불필요)과 git, 키트 레포 접근 권한(SSH)이 필요하다. 처음 한 번만:
 ```bash
 git clone git@github.com:minjae55/team-ai-kit.git ~/.kit/repo && ~/.kit/repo/install.sh
 ```
