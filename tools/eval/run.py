@@ -10,12 +10,15 @@
 사용:
   python3 tools/eval/run.py --skill incident-analysis                 # 시나리오 전부
   python3 tools/eval/run.py --skill incident-analysis --case case3-index-invisible
-  python3 tools/eval/run.py --skill incident-analysis --isolated      # 내 ~/.claude 설정·스킬을 섞지 않음 (ANTHROPIC_API_KEY 필요, CI 기본)
+  python3 tools/eval/run.py --skill incident-analysis --isolated      # 내 ~/.claude 설정·설치 스킬을 섞지 않음 (권장)
+      로그인: 구독이면 `claude setup-token`으로 받은 토큰을 CLAUDE_CODE_OAUTH_TOKEN 에, API면 ANTHROPIC_API_KEY 에 넣어 둔다
+      격리하지 않으면 ~/.claude/skills 의 설치본(main 버전)이 불려서 PR 버전을 시험하지 못할 수 있다
   python3 tools/eval/run.py --skill incident-analysis --dry-run       # 명령만 보여 주기
 """
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -59,6 +62,19 @@ def build_workdir(case_dir: str, case: dict, skill: str) -> str:
     return work
 
 
+def outside_skill_paths(commands, skill: str, work: str):
+    """명령에 나온 절대 경로 중 작업 폴더 밖의 스킬 경로 (예: ~/.claude/skills/<스킬> 설치본). 상대 경로는 작업 폴더 안이다."""
+    roots = {os.path.realpath(work), work}
+    pat = re.compile(r"(?:^|(?<=[\s'\"=(]))(~?/[^\s'\"]*?)/skills/" + re.escape(skill) + r"\b")
+    found = set()
+    for c in commands:
+        for m in pat.finditer(c):
+            path = os.path.expanduser(m.group(1))
+            if not any(path == r or path.startswith(r + "/") for r in roots):
+                found.add(c)
+    return sorted(found)
+
+
 def tools_for(case: dict):
     """시나리오의 "allow_tools"(예: ["Edit", "Write", "Bash(./gradlew *)"])를 기본 허용 목록에 더하고 금지 목록에서 뺀다."""
     extra = case.get("allow_tools", [])
@@ -90,6 +106,7 @@ def run_case(case_dir: str, skill: str, args) -> dict:
     started = time.time()
     proc = subprocess.run(cmd, cwd=work, env=env, capture_output=True, text=True, timeout=args.timeout)
     answer, commands, skills_used, meta = "", [], [], {}
+    denials = []
     for line in proc.stdout.splitlines():
         try:
             ev = json.loads(line)
@@ -105,7 +122,23 @@ def run_case(case_dir: str, skill: str, args) -> dict:
         elif ev.get("type") == "result":
             answer = ev.get("result") or ""
             meta = {k: ev.get(k) for k in ("subtype", "is_error", "num_turns", "total_cost_usd", "duration_ms")}
+            denials = ev.get("permission_denials") or []
     result = grade(case, answer, commands, workdir=work)  # files·script 검사는 AI가 작업한 폴더에서
+    # 환경 검사: 실패하면 스킬이 틀린 게 아니라 시험 환경 문제다 (결과를 믿을 수 없으므로 불통과 처리)
+    outside = outside_skill_paths(commands, skill, work)
+    env_checks = [
+        {"name": "환경: 시험용 스킬 복사본을 사용함", "scope": "env", "ok": not outside,
+         "detail": "작업 폴더 밖의 설치본을 불렀음 (--isolated 로 실행하세요): " + outside[0][:150] if outside else ""},
+    ]
+    if denials:
+        # 거부돼도 AI가 다른 방법으로 다시 해서 답을 맞히는 경우가 많다. 그래서 판정에는 넣지 않고 기록만 한다.
+        # 거부 때문에 근거를 못 모았다면 내용 검사가 불통과하고, 이 기록이 그 이유를 설명한다.
+        env_checks.append({"name": "참고: 권한 거부", "scope": "env", "ok": True,
+                           "detail": f"{len(denials)}건 (판정에는 영향 없음): " + "; ".join(
+                               str((d.get('tool_input') or {}).get('command') or d.get('tool_name'))[:100] for d in denials[:3])})
+    result["checks"] += env_checks
+    result["env_problem"] = not all(c["ok"] for c in env_checks)
+    result["passed"] = result["passed"] and not result["env_problem"]
     if not answer:
         result["passed"] = False
         result["checks"].append({"name": "최종 답변을 받음", "ok": False,
@@ -113,6 +146,7 @@ def run_case(case_dir: str, skill: str, args) -> dict:
     if skill not in [s.split(":")[-1] for s in skills_used] and not any(skill in c for c in commands):
         result["checks"].append({"name": "스킬을 사용함 (참고)", "ok": True, "detail": "스킬 사용 흔적이 없음: 스킬 없이 답했을 수 있음"})
     result.update({"title": case["title"], "skills_used": skills_used, "commands": commands, "answer": answer,
+                   "permission_denials": denials,
                    "meta": meta, "seconds": round(time.time() - started)})
     shutil.rmtree(work, ignore_errors=True)
     if config_dir:
@@ -127,7 +161,8 @@ def main():
     p.add_argument("--model", help="예: sonnet, opus 또는 전체 모델 ID")
     p.add_argument("--max-turns", type=int, default=40)
     p.add_argument("--timeout", type=int, default=900, help="시나리오당 최대 초")
-    p.add_argument("--isolated", action="store_true", help="빈 CLAUDE_CONFIG_DIR로 실행 (ANTHROPIC_API_KEY 필요)")
+    p.add_argument("--isolated", action="store_true",
+                   help="빈 CLAUDE_CONFIG_DIR로 실행 (CLAUDE_CODE_OAUTH_TOKEN 또는 ANTHROPIC_API_KEY 필요)")
     p.add_argument("--claude", default=os.environ.get("CLAUDE_BIN", "claude"))
     p.add_argument("--dry-run", action="store_true")
     args = p.parse_args()
@@ -140,8 +175,10 @@ def main():
         sys.exit("시나리오가 없습니다: " + base)
     if not args.dry_run and shutil.which(args.claude) is None:
         sys.exit(f"'{args.claude}' 명령이 없습니다. Claude Code CLI를 설치하세요 (npm install -g @anthropic-ai/claude-code)")
-    if args.isolated and not os.environ.get("ANTHROPIC_API_KEY") and not args.dry_run:
-        sys.exit("--isolated 는 ANTHROPIC_API_KEY 가 필요합니다")
+    if args.isolated and not (os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("CLAUDE_CODE_OAUTH_TOKEN")) \
+            and not args.dry_run:
+        sys.exit("--isolated 는 로그인 정보가 필요합니다: 구독은 `claude setup-token` 으로 받은 토큰을 "
+                 "CLAUDE_CODE_OAUTH_TOKEN 에, API는 ANTHROPIC_API_KEY 에 넣으세요 (채팅·파일에 붙여 넣지 말 것)")
 
     out_dir = os.path.join(ROOT, "out", "evals")
     os.makedirs(out_dir, exist_ok=True)
@@ -156,6 +193,8 @@ def main():
         for chk in r["checks"]:
             print(("  PASS " if chk["ok"] else "  FAIL ") + chk["name"] + (f"  ({chk['detail']})" if chk.get("detail") else ""))
         cost = (r.get("meta") or {}).get("total_cost_usd")
+        if r.get("env_problem"):
+            print("  ⚠ 시험 환경 문제: 스킬이 틀렸다고 단정할 수 없음")
         print(f"  → {'통과' if r['passed'] else '불통과'}  ({r.get('seconds')}초" + (f", ${cost:.3f}" if cost else "") + ")")
     if args.dry_run:
         return
