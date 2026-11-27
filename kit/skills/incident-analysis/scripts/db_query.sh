@@ -34,6 +34,25 @@ if printf '%s' "$upper" | grep -Eq 'EXPLAIN[[:space:]]+ANALYZE|INTO[[:space:]]+(
   echo "거부: 쿼리를 실제 실행하거나 락을 잡거나 파일을 쓰는 구문은 허용되지 않습니다" >&2; exit 3
 fi
 
+# --- eval 모드: 장애 당시 기록해 둔 결과를 돌려준다 (안전 검사는 위에서 똑같이 거친다) ---
+# KIT_EVAL_FIXTURES/db.tsv 각 줄: "키워드1,키워드2<TAB>결과파일" — 키워드가 모두 SQL에 있으면 그 파일을 출력
+if [ -n "${KIT_EVAL_FIXTURES:-}" ]; then
+  rules="$KIT_EVAL_FIXTURES/db.tsv"
+  if [ -f "$rules" ]; then
+    while IFS=$'\t' read -r keys file; do
+      [ -z "$keys" ] && continue
+      hit=1
+      IFS=',' read -ra ks <<< "$keys"
+      for k in "${ks[@]}"; do
+        printf '%s' "$upper" | grep -qiF -- "$k" || { hit=0; break; }
+      done
+      if [ "$hit" = 1 ]; then cat "$KIT_EVAL_FIXTURES/$file"; exit 0; fi
+    done < "$rules"
+  fi
+  echo "Empty set (이 시점에 해당하는 결과 없음)"
+  exit 0
+fi
+
 # --- 접속 정보 ---
 cnf="${INCIDENT_DB_CNF:-}"
 [ -n "$cnf" ] && [ -f "$cnf" ] || { echo "INCIDENT_DB_CNF에 접속 정보 파일 경로를 지정하세요 (프로젝트 AGENTS.md 참고)" >&2; exit 4; }

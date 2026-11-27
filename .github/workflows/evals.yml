@@ -1,0 +1,64 @@
+name: 스킬 eval
+
+# 스킬이나 eval이 바뀐 PR, main 푸시, 수동 실행에서 돈다.
+# 1) 채점기 검증: 과거 실제 답변으로 채점기가 사람 판정과 같은지 (API 키 불필요, 항상)
+# 2) AI eval: 고정 데이터 시나리오에서 claude -p 로 스킬을 실제로 돌려 채점 (저장소 비밀값 ANTHROPIC_API_KEY 가 있을 때만)
+on:
+  pull_request:
+    paths: ["kit/skills/**", "evals/**", "tools/eval/**", ".github/workflows/evals.yml"]
+  push:
+    branches: [main]
+    paths: ["kit/skills/**", "evals/**", "tools/eval/**"]
+  workflow_dispatch:
+
+jobs:
+  grader:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 채점기 검증 (과거 실제 답변)
+        run: python3 tools/eval/test_grader.py
+
+  ai-eval:
+    needs: grader
+    runs-on: ubuntu-latest
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: API 키 확인
+        id: key
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::warning::ANTHROPIC_API_KEY 비밀값이 없어 AI eval을 건너뜁니다 (Settings → Secrets and variables → Actions)"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/setup-node@v4
+        if: steps.key.outputs.skip != 'true'
+        with:
+          node-version: "22"
+      - name: Claude Code CLI 설치
+        if: steps.key.outputs.skip != 'true'
+        run: npm install -g @anthropic-ai/claude-code@latest
+      - uses: actions/setup-python@v5
+        if: steps.key.outputs.skip != 'true'
+        with:
+          python-version: "3.12"
+      - name: AI eval (모든 스킬의 시나리오)
+        if: steps.key.outputs.skip != 'true'
+        run: |
+          status=0
+          for d in evals/*/scenarios; do
+            skill=$(basename "$(dirname "$d")")
+            python3 tools/eval/run.py --skill "$skill" --isolated --model sonnet || status=1
+          done
+          exit $status
+      - name: 결과 파일 올리기
+        if: always() && steps.key.outputs.skip != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-results
+          path: out/evals/

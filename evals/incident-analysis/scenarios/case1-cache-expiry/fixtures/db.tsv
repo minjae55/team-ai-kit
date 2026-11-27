@@ -1,0 +1,6 @@
+PREPARED_STATEMENTS_INSTANCES	prepared.txt
+PROCESSLIST	processlist.txt
+INNODB_TRX	empty.txt
+DATA_LOCK_WAITS	empty.txt
+DIGEST_TEXT,ALTER	empty.txt
+DIGEST_TEXT,REGEXP	empty.txt

@@ -69,6 +69,23 @@ def labels_of(series):
     return "{" + ", ".join(f'{k}="{v}"' for k, v in sorted(metric.items())) + "}" if metric else "{}"
 
 
+def fixture(query):
+    """eval 모드: 장애 당시 기록해 둔 결과를 돌려준다 (KIT_EVAL_FIXTURES/prom.json).
+    각 항목의 match 문자열이 모두 쿼리에 들어 있으면 그 output을 출력한다."""
+    path = os.path.join(os.environ["KIT_EVAL_FIXTURES"], "prom.json")
+    try:
+        with open(path, encoding="utf-8") as f:
+            items = json.load(f)
+    except OSError:
+        items = []
+    q = query.lower()
+    for item in items:
+        if all(m.lower() in q for m in item.get("match", [])):
+            print(item["output"])
+            return
+    print("결과 없음 (지표 이름·라벨을 확인하거나, 이 시점에 수집된 데이터가 없음)")
+
+
 def main():
     p = argparse.ArgumentParser(description="Prometheus 지표 조회 요약")
     p.add_argument("query", help="PromQL")
@@ -78,6 +95,10 @@ def main():
     p.add_argument("--raw", action="store_true", help="요약과 함께 모든 점을 출력")
     p.add_argument("--url", default=os.environ.get("PROM_URL", "http://localhost:9090"))
     args = p.parse_args()
+
+    if os.environ.get("KIT_EVAL_FIXTURES"):
+        fixture(args.query)
+        return
 
     if not args.start:
         data = call(args.url, "/api/v1/query", {"query": args.query})

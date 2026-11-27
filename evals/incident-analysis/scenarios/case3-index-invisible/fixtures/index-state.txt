@@ -1,0 +1,9 @@
++------------------------------------------+-------------------------------------+---------+
+| INDEX_NAME                               | cols                                | visible |
++------------------------------------------+-------------------------------------+---------+
+| FK3m3riqvldjhc7l6wcouhy680x              | quote_id                            | YES     |
+| idx_orders_buyer_created                 | buyer_id,created_at                 | NO      |
+| idx_orders_seller_company_status_created | seller_company_id,status,created_at | YES     |
+| PRIMARY                                  | order_id                            | YES     |
+| UKg8pohnngqi5x1nask7nff2u7w              | order_no                            | YES     |
++------------------------------------------+-------------------------------------+---------+

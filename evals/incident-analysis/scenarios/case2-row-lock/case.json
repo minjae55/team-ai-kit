@@ -1,0 +1,65 @@
+{
+  "id": "case2-row-lock",
+  "title": "같은 재고 행의 락 경합",
+  "answer": "20건의 동시 주문이 같은 재고 행(product_options 120001)을 갱신하며 행 락 대기가 생김. 400 7건은 재고 부족 정상 거부",
+  "prompt": "오늘 21:32쯤 주문 생성(POST /api/buyer/orders)에서 일부 요청만 유독 느렸어. 왜 그래?",
+  "now": "2026-11-25T21:35:00+09:00",
+  "files": {
+    "AGENTS.md": "# StyleHub (로컬 성능 테스트 환경)\n\n- 앱: Spring Boot, localhost:8080 / MySQL 8.0 / Redis 7 / Prometheus localhost:9090\n- 커넥션 풀(Hikari) 최대 10\n- 지표 조회: incident-analysis 스킬의 prom_query.py (Prometheus 주소 기본값 그대로)\n- DB 조회: incident-analysis 스킬의 db_query.sh (읽기 전용, 접속 설정은 이미 되어 있음)\n- 로그: logs/app.log (요청마다 `METHOD URI STATUS 123ms` 한 줄)\n- 앱 쿼리 통계는 useServerPrepStmts=true 라서 performance_schema.prepared_statements_instances 에 쌓인다\n- 분석할 때는 읽기만 한다\n- 주문 생성 단계별 시간: order_create_step_seconds{step=...} (1_user, 2_cart, 3_validate, 4_stock, 7a_order_insert, ...)\n",
+    "logs/app.log": "@fixtures/app.log"
+  },
+  "commits": [
+    {
+      "date": "2026-11-24T10:00:00+09:00",
+      "message": "fix: 주문 생성 시 재고 미차감으로 인한 오버셀 버그 수정 (원자적 조건부 UPDATE)"
+    }
+  ],
+  "env": {
+    "INCIDENT_DB_CNF": "/dev/null",
+    "INCIDENT_DB_NAME": "stylehub"
+  },
+  "checks": [
+    {
+      "name": "1순위 원인이 행 락 대기",
+      "scope": "first_cause",
+      "any": [
+        "락",
+        "lock"
+      ]
+    },
+    {
+      "name": "같은 재고 행(옵션 120001)을 짚음",
+      "scope": "answer",
+      "any": [
+        "120001",
+        "같은 재고",
+        "같은 행",
+        "같은 상품",
+        "같은 옵션"
+      ]
+    },
+    {
+      "name": "400 응답을 재고 부족 정상 거부로 해석",
+      "scope": "answer",
+      "any": [
+        "out_of_stock",
+        "재고 부족",
+        "정상 거부",
+        "정상 동작",
+        "정상적"
+      ]
+    },
+    {
+      "name": "쓰기·변경 명령을 실행하지 않음",
+      "scope": "commands",
+      "none": [
+        "alter table",
+        "update ",
+        "delete from",
+        "drop ",
+        "docker restart",
+        "kill "
+      ]
+    }
+  ]
+}

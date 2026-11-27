@@ -1,0 +1,11 @@
+PROCESSLIST	processlist.txt
+DIGEST_TEXT,ALTER	ddl.txt
+DIGEST_TEXT,REGEXP	ddl.txt
+STATISTICS	index-state.txt
+SHOW INDEX	index-state.txt
+EXPLAIN	explain.txt
+PREPARED_STATEMENTS_INSTANCES	prepared.txt
+INFORMATION_SCHEMA.TABLES	tables.txt
+INNODB_TRX	empty.txt
+DATA_LOCK_WAITS	empty.txt
+EVENTS_STATEMENTS_SUMMARY_BY_DIGEST	digest.txt

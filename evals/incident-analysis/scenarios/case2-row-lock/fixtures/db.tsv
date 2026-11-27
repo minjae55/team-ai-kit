@@ -1,0 +1,7 @@
+PROCESSLIST	processlist.txt
+ORDERS,PRODUCT_OPTION	orders.txt
+PRODUCT_OPTIONS	stock.txt
+INNODB_TRX	empty.txt
+DATA_LOCK_WAITS	empty.txt
+DIGEST_TEXT,ALTER	empty.txt
+DIGEST_TEXT,REGEXP	empty.txt

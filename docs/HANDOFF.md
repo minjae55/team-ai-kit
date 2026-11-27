@@ -73,7 +73,7 @@
 | 1 ✅ | team-ai-kit 레포 구조와 공통 AGENTS.md 작성, 스킬 형식 검증 CI | `skills-ref validate` 통과 (2026-11-25 CI #1) |
 | 2 ✅ | **CLI MVP**: `kit install / sync / doctor`. Claude와 Codex 지원 | 새 PC에서 명령 하나로 스킬·지침이 설치됨 (2026-11-26, `install.sh`로 실제 PC 설치 → 다른 폴더의 새 세션에서 스킬 인식 확인. MCP 설정은 3단계 이후로 미룸) |
 | 3 ✅ | 자동 sync, 버전 고정과 롤백, 훅 기반 사용 추적 | 스킬을 수정하면 팀원 환경에 자동 반영되고 사용 기록이 남음 (2026-11-27 v0.5.0: Claude SessionStart 훅으로 6시간마다 sync, kit 명령 자기 갱신, pin/rollback, PostToolUse(Skill)·UserPromptExpansion 훅으로 ~/.kit/usage.jsonl 기록. 팀 단위 집계와 Codex 훅은 미구현: Codex만 쓰는 팀원은 수동 sync) |
-| 4 | eval 파이프라인 | 스킬 PR이 eval을 통과해야만 배포됨 |
+| 4 ✅ | eval 파이프라인 | 스킬 PR이 eval을 통과해야만 배포됨 (2026-11-27 v0.6.0: 장애 당시 기록을 고정 데이터로 만든 시나리오 3개, 스킬 스크립트의 KIT_EVAL_FIXTURES 모드, 채점기와 과거 실제 답변 5개로 채점기 검증, CI evals.yml. AI 실행은 ANTHROPIC_API_KEY 비밀값 등록 후 동작, 병합 강제는 브랜치 보호에서 evals 검사를 필수로 지정해야 함) |
 | 5 | Gemini 지원, 팀원 온보딩 | 2명 이상이 실제로 사용 |
 
 ## 8. 미확인 항목 (POC가 필요하며, 지원된다고 단정하지 않음)

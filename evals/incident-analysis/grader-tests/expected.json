@@ -1,0 +1,10 @@
+{
+  "note": "실제 블라인드 분석 답변(2026-11-25)과 사람의 판정. 채점기는 이 판정과 같아야 한다. 답변은 원문에서 핵심 부분만 남겼다.",
+  "tests": [
+    {"answer": "case1-pass-detailed.md", "case": "case1-cache-expiry", "expect": true},
+    {"answer": "case1-pass-vague.md", "case": "case1-cache-expiry", "expect": true},
+    {"answer": "case2-pass.md", "case": "case2-row-lock", "expect": true},
+    {"answer": "case3-fail-1st.md", "case": "case3-index-invisible", "expect": false},
+    {"answer": "case3-pass-retest.md", "case": "case3-index-invisible", "expect": true}
+  ]
+}

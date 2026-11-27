@@ -12,7 +12,8 @@
 | 2 | 배포 CLI `kit install / sync / doctor` | 완료 (v0.1.x) |
 | 2.5 | `kit ui` 화면 (설치·업데이트·스킬 후보 추천·평가·시스템 현황) | 완료 (v0.2~0.4) |
 | 3 | 자동 sync, 버전 고정·롤백, 사용 기록 | 완료 (v0.5.0, 내 PC 기준) |
-| 4 | eval 자동화 | 다음 |
+| 4 | eval 자동화 (고정 데이터 시나리오 + 채점기 + CI) | 완료 (v0.6.0, AI 실행은 API 키 등록 후) |
+| 5 | 팀 온보딩, 팀 단위 집계, Gemini | 다음 |
 
 ## 스킬
 | 스킬 | 하는 일 |
@@ -40,6 +41,7 @@ kit rollback    # 업데이트 후 문제가 생기면 직전 버전으로 되�
 
 ## 도구
 - `tools/validate_skills.py`: 스킬 형식 검사
+- `tools/eval/`: 스킬 eval 실행기(`run.py`), 채점기(`grade.py`), 채점기 검증(`test_grader.py`)
 - `tools/perf-evidence/`: 부하 테스트 중 JFR·스레드 덤프·Grafana 캡처 수집 (현재 stylehub 경로 고정)
 - `tools/dashboard/`: 개인 AI 작업 대시보드 (`python3 tools/dashboard/build.py --open`, 내 PC 전용)
 

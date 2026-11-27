@@ -1,0 +1,8 @@
+2026-11-25T21:41:31.104+09:00  INFO 13225 --- [nio-8080-exec-3] k.r.s.global.logging.RequestIdFilter : GET /api/buyer/orders 200 402ms
+2026-11-25T21:41:32.551+09:00  INFO 13225 --- [nio-8080-exec-5] k.r.s.global.logging.RequestIdFilter : GET /api/buyer/orders 200 438ms
+2026-11-25T21:42:05.010+09:00  INFO 13225 --- [nio-8080-exec-2] k.r.s.global.logging.RequestIdFilter : GET /api/buyer/orders 200 411ms
+2026-11-25T21:56:15.871+09:00  INFO 13225 --- [nio-8080-exec-1] k.r.s.global.logging.RequestIdFilter : GET /api/buyer/orders 200 3218ms
+2026-11-25T21:56:19.240+09:00  INFO 13225 --- [nio-8080-exec-4] k.r.s.global.logging.RequestIdFilter : GET /api/buyer/orders 200 3355ms
+2026-11-25T21:56:44.902+09:00  INFO 13225 --- [nio-8080-exec-7] k.r.s.global.logging.RequestIdFilter : GET /api/buyer/orders 200 3690ms
+2026-11-25T21:57:08.335+09:00  INFO 13225 --- [nio-8080-exec-2] k.r.s.global.logging.RequestIdFilter : GET /api/buyer/orders 200 3280ms
+2026-11-25T21:57:30.002+09:00  INFO 13225 --- [nio-8080-exec-9] k.r.s.global.logging.RequestIdFilter : GET /api/negotiations 200 9ms
