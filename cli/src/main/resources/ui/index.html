@@ -260,14 +260,25 @@ function recCard(r) {
     </div></div>`;
 }
 
+function usageLine(k) {
+  if (k.usage === "off") return `<span class="mut">사용 기록 꺼짐 (설정에서 켜면 횟수·마지막 사용일이 보여요)</span>`;
+  const last = k.lastUsed ? "마지막 " + new Date(k.lastUsed).toLocaleDateString("ko-KR", {month: "numeric", day: "numeric"}) : "쓴 적 없음";
+  const tag = k.usage === "unused" ? ` <span style="background:var(--red-bg);color:var(--red);border-radius:999px;padding:2px 8px;font-size:12px;white-space:nowrap" title="30일 넘게 기록했는데 한 번도 안 썼어요. 필요 없으면 꺼 두세요">정리 후보</span>` : "";
+  const bar = `<span style="display:inline-block;width:60px;height:6px;background:var(--line);border-radius:3px;vertical-align:middle;margin:0 6px"><span style="display:block;width:${Math.min(100, k.share30)}%;height:100%;background:var(--blue);border-radius:3px"></span></span>`;
+  return `<span class="mut">최근 30일 ${k.used30}회${bar}${k.share30}% · ${last}${tag}</span>`;
+}
+
 function renderLibrary() {
-  const ks = S.skills.filter(k => match(k.name, k.description));
+  const order = {unused: 0, used: 1, short: 2, off: 3};
+  const ks = S.skills.filter(k => match(k.name, k.description))
+    .sort((a, b) => (order[a.usage] - order[b.usage]) || (b.used30 - a.used30));   // 정리 후보 먼저, 그다음 많이 쓴 순
   $("skills").innerHTML = ks.map(k => `
     <div class="card" style="display:flex;flex-direction:column;gap:10px">
       <div style="display:flex;align-items:center;gap:12px"><div class="tico" style="margin:0">${svg(iconFor(k.name))}</div><div style="flex:1;min-width:0"><b style="font-size:16px">${esc(k.name)}</b><div class="mut">${k.verifiedCases ? "검증 상황 " + k.verifiedCases + "개 · " + esc(k.verifiedDate || "") : "검증 기록 없음"}</div></div>
         <div class="sw ${k.enabled ? "on" : ""}" role="switch" aria-checked="${k.enabled}" aria-label="${esc(k.name)} 켜기" onclick="act(${jsq(k.name + (k.enabled ? ' 끄기' : ' 켜기'))}, '/api/skill', {name:${jsq(k.name)}, on:${!k.enabled}})"></div></div>
       <div class="sub">${esc(k.description)}</div>
-      <div style="display:flex;justify-content:space-between;align-items:center"><span class="mut">최근 30일 ${k.used30}회 사용 · 내 평가 👍 ${k.myUp} · 👎 ${k.myDown}</span><button class="ghost" onclick="openSkill(${jsq(k.name)})">사용법 보기 →</button></div>
+      <div>${usageLine(k)}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center"><span class="mut">내 평가 👍 ${k.myUp} · 👎 ${k.myDown}</span><button class="ghost" style="white-space:nowrap" onclick="openSkill(${jsq(k.name)})">사용법 보기 →</button></div>
     </div>`).join("") || `<div class="empty">검색 결과가 없어요</div>`;
   const rs = S.recommendations.filter(r => match(r.title, r.description));
   $("recs").innerHTML = rs.length ? `<div class="grid-cards">${rs.map(recCard).join("")}</div>` : `<div class="empty">지금은 추천할 반복 작업이 없어요</div>`;

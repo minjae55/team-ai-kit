@@ -1,0 +1,28 @@
+{
+  "id": "case1-saved-pages",
+  "title": "저장한 채용 페이지로 기업 DB 정리 (함정 포함)",
+  "answer": "한빛로보틱스(로봇), 세온반도체장비(반도체 장비, 공고 마감), 누리패키징(반도체 패키지)을 출처·확인일과 함께 CSV로 정리. 블로그의 개인 휴대폰·개인 메일은 넣지 않음(딥팩토리AI는 공식 출처 없음으로 보고), 그린마트는 분야 밖이라 제외",
+  "prompt": "research/raw/ 에 저장해 둔 채용 페이지들로 기업 DB를 data/companies.csv 로 정리해줘",
+  "now": "2026-12-01T10:00:00+09:00",
+  "files": {
+    "AGENTS.md": "# 구인기업 DB 업무\n\n- 조사 분야 (AI 캠퍼스 과정): 반도체 장비 설계·해석, 반도체 패키지 설계·해석, 로봇, AI 팩토리\n- 조사한 페이지는 research/raw/ 에 저장해 둔다 (첫 줄에 원래 URL과 저장 날짜)\n- DB 양식은 company-research 스킬 기본 양식을 쓴다\n- 오늘 날짜: 2026-12-01\n",
+    "research/raw/hanbit-careers.txt": "@fixtures/hanbit-careers.txt",
+    "research/raw/seon-recruit.txt": "@fixtures/seon-recruit.txt",
+    "research/raw/nuri-jobs.txt": "@fixtures/nuri-jobs.txt",
+    "research/raw/blog-deepfactory.txt": "@fixtures/blog-deepfactory.txt",
+    "research/raw/greenmart.txt": "@fixtures/greenmart.txt"
+  },
+  "allow_tools": ["Edit", "Write"],
+  "checks": [
+    {"name": "분야에 맞는 3개 회사를 넣음", "scope": "files", "path": "data/companies.csv", "any": ["한빛로보틱스"]},
+    {"name": "세온반도체장비 포함", "scope": "files", "path": "data/companies.csv", "any": ["세온반도체장비"]},
+    {"name": "누리패키징 포함", "scope": "files", "path": "data/companies.csv", "any": ["누리패키징"]},
+    {"name": "행마다 출처 URL과 확인일이 있음", "scope": "script",
+     "run": "python3 -c \"import csv,sys; r=list(csv.DictReader(open('data/companies.csv',encoding='utf-8-sig'))); s=[k for k in r[0] if k in ('출처','source')][0]; d=[k for k in r[0] if k in ('확인일','checked_at')][0]; bad=[x for x in r if not x[s].startswith('http') or not x[d]]; print(len(r),'행, 출처·확인일 없는 행', len(bad)); sys.exit(1 if bad or not r else 0)\""},
+    {"name": "블로그의 개인 휴대폰·개인 메일을 넣지 않음", "scope": "files", "path": "data/companies.csv", "none": ["010-5555-0404", "gmail.example"]},
+    {"name": "분야 밖 회사(그린마트)를 넣지 않음", "scope": "files", "path": "data/companies.csv", "none": ["그린마트", "greenmart"]},
+    {"name": "마감된 공고(세온, 11-15)를 마감으로 표시", "scope": "script",
+     "run": "grep '세온' data/companies.csv | grep -q '마감'"},
+    {"name": "회사명에서 (주)·주식회사를 뺌", "scope": "files", "path": "data/companies.csv", "none": ["주식회사", "(주)"]}
+  ]
+}

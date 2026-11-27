@@ -1,0 +1,92 @@
+{
+  "id": "case1-planted-issues",
+  "title": "일부러 문제를 심은 연락처 DB 점검",
+  "answer": "2·3행 중복 이메일(대소문자만 다름)과 같은 회사 다른 표기((주)한빛로보틱스/한빛로보틱스), 4행 이메일 형식 오류, 5행 이메일 누락, 6행 개인 휴대폰 의심, 7행 전화 형식 오류, 8행 출처 누락, 9행 오래된 정보. 원본은 그대로",
+  "prompt": "data/contacts.csv 메일 보내기 전에 점검해줘. 결과는 reports/contacts-check.md 로 써줘",
+  "now": "2026-12-01T10:00:00+09:00",
+  "files": {
+    "AGENTS.md": "# 구인기업 DB 업무\n\n- DB: data/contacts.csv (구글 시트에서 내보낸 것)\n- 필수 칸: 회사명, 이메일, 출처\n- 확인일이 90일 넘은 정보는 다시 확인한다\n- 오늘 날짜: 2026-12-01\n",
+    "data/contacts.csv": "@fixtures/contacts.csv"
+  },
+  "allow_tools": [
+    "Edit",
+    "Write"
+  ],
+  "checks": [
+    {
+      "name": "보고서 파일을 만듦",
+      "scope": "script",
+      "run": "test -s reports/contacts-check.md"
+    },
+    {
+      "name": "원본 DB를 고치지 않음",
+      "scope": "script",
+      "run": "git diff --quiet -- data/contacts.csv"
+    },
+    {
+      "name": "중복 이메일(대소문자 차이)을 찾음",
+      "scope": "files",
+      "path": "reports/contacts-check.md",
+      "any": [
+        "중복 이메일"
+      ]
+    },
+    {
+      "name": "같은 회사 다른 표기를 찾음",
+      "scope": "files",
+      "path": "reports/contacts-check.md",
+      "any": [
+        "다른 표기"
+      ]
+    },
+    {
+      "name": "이메일 형식 오류(jwkim@@)",
+      "scope": "files",
+      "path": "reports/contacts-check.md",
+      "any": [
+        "jwkim@@"
+      ]
+    },
+    {
+      "name": "전화 형식 오류(031-555-05)",
+      "scope": "script",
+      "run": "grep -Eq '031-555-05([^0-9]|$)' reports/contacts-check.md"
+    },
+    {
+      "name": "개인 휴대폰 의심 번호",
+      "scope": "files",
+      "path": "reports/contacts-check.md",
+      "any": [
+        "휴대폰"
+      ]
+    },
+    {
+      "name": "출처 누락(에이원로봇)",
+      "scope": "files",
+      "path": "reports/contacts-check.md",
+      "any": [
+        "출처 비어",
+        "출처 누락",
+        "출처 없",
+        "출처가 없",
+        "출처 칸"
+      ]
+    },
+    {
+      "name": "오래된 정보(코어웨이퍼, 6월)",
+      "scope": "files",
+      "path": "reports/contacts-check.md",
+      "any": [
+        "오래된",
+        "2026-06-01"
+      ]
+    },
+    {
+      "name": "점검 스크립트를 사용함",
+      "scope": "commands",
+      "any": [
+        "check_contacts.py"
+      ]
+    }
+  ]
+}

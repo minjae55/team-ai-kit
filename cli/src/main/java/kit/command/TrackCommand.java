@@ -30,6 +30,10 @@ public class TrackCommand extends Common implements Callable<Integer> {
             if (in == null) {
                 return 0;
             }
+            // 스킬 eval(tools/eval/run.py)이 돌린 세션은 내 사용이 아니므로 세지 않는다
+            if (System.getenv("KIT_EVAL_FIXTURES") != null || in.path("cwd").asText("").contains("kit-eval-")) {
+                return 0;
+            }
             KitEnv env = env();
             String skill = null;
             String via = null;

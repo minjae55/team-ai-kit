@@ -26,9 +26,9 @@
 | [`perf-report`](kit/skills/perf-report/SKILL.md) | 전후 측정 기록으로 "문제 → 원인 → 변경 → 결과 → 한계" 보고서 작성 |
 
 ## 설치
-Java 8 이상(실행만, JDK·빌드 도구 불필요)과 git, 키트 레포 접근 권한(SSH)이 필요하다. 처음 한 번만:
+Java 8 이상(실행만, JDK·빌드 도구 불필요)과 git이 필요하다. 공개 저장소라 SSH 키나 로그인 없이 받는다. 처음 한 번만:
 ```bash
-git clone git@github.com:minjae55/team-ai-kit.git ~/.kit/repo && ~/.kit/repo/install.sh
+git clone https://github.com/minjae55/team-ai-kit.git ~/.kit/repo && ~/.kit/repo/install.sh
 ```
 `install.sh`가 kit 실행 파일을 `~/.kit/bin`에 넣고, PATH 등록 여부를 물은 뒤, `kit install`까지 실행한다. 그다음부터는 아무 폴더에서:
 ```bash

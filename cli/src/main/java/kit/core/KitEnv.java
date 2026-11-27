@@ -6,7 +6,7 @@ import java.nio.file.Paths;
 /** 키트가 쓰는 경로 모음. 테스트에서는 home을 임시 폴더로 바꿔 실제 홈을 건드리지 않는다. */
 public final class KitEnv {
 
-    public static final String DEFAULT_REPO = "git@github.com:minjae55/team-ai-kit.git";
+    public static final String DEFAULT_REPO = "https://github.com/minjae55/team-ai-kit.git";
 
     private final Path home;
     private final String repoUrl;

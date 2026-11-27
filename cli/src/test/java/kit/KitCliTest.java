@@ -188,6 +188,31 @@ class KitCliTest {
     }
 
     @Test
+    void usage_summary_counts_recent_uses_and_flags_unused_only_after_30_days() throws IOException {
+        java.time.Instant now = java.time.Instant.now();
+        String old = now.minus(java.time.Duration.ofDays(45)).toString();
+        String recent = now.minus(java.time.Duration.ofDays(2)).toString();
+        write(home.resolve(".kit/usage.jsonl"),
+                "{\"time\":\"" + old + "\",\"skill\":\"perf-report\"}\n"
+                + "{\"time\":\"" + recent + "\",\"skill\":\"incident-analysis\"}\n"
+                + "{\"time\":\"" + recent + "\",\"skill\":\"incident-analysis\"}\n"
+                + "{\"time\":\"" + recent + "\",\"skill\":\"query-analysis\"}\n"
+                + "깨진 줄\n");
+        kit.core.Usage.Summary sum = new kit.core.Usage(new kit.core.KitEnv(home, "x")).summary(30);
+        assertEquals(3, sum.total, "30일 안의 사용만 셈");
+        assertEquals(2, sum.bySkill.get("incident-analysis").count);
+        assertEquals(0, sum.bySkill.get("perf-report").count, "45일 전 사용은 횟수에서 빠짐");
+        assertEquals(old, sum.bySkill.get("perf-report").lastUsed.toString(), "마지막 사용일은 기간과 무관");
+        assertTrue(sum.coversDays(30), "기록이 30일 넘음");
+
+        assertEquals(0, kit("install"));
+        assertEquals(0, kit("list"));
+        String out = output();
+        assertTrue(out.contains("스킬 사용 (최근 30일 3회)"), out);
+        assertTrue(out.matches("(?s).*incident-analysis\\s+2회\\s+67%.*"), out);
+    }
+
+    @Test
     void self_update_copies_prebuilt_dist_jar_without_building() throws IOException {
         kit.core.KitEnv env = new kit.core.KitEnv(home, "x");
         write(env.repoDir().resolve("dist/kit.jar"), "new-jar");
@@ -240,11 +265,12 @@ class KitCliTest {
             track("{\"session_id\":\"s2\",\"command_name\":\"incident-analysis\"}");
             track("{\"session_id\":\"s3\",\"command_name\":\"help\"}");
             track("this is not json");
+            track("{\"session_id\":\"s4\",\"cwd\":\"/tmp/kit-eval-abc\",\"tool_name\":\"Skill\",\"tool_input\":{\"skill\":\"incident-analysis\"}}");
         } finally {
             System.setIn(realIn);
         }
         java.util.List<String> lines = Files.readAllLines(home.resolve(".kit/usage.jsonl"), StandardCharsets.UTF_8);
-        assertEquals(2, lines.size(), "팀 스킬 사용만 기록, /help 와 깨진 입력은 무시");
+        assertEquals(2, lines.size(), "팀 스킬 사용만 기록, /help·깨진 입력·eval 세션은 무시");
         assertTrue(lines.get(0).contains("\"via\":\"ai\"") && lines.get(1).contains("\"via\":\"slash\""));
         assertEquals(Integer.valueOf(2), new kit.core.Usage(new kit.core.KitEnv(home, "x")).counts(30).get("incident-analysis"));
     }

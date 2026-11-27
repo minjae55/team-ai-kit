@@ -182,7 +182,8 @@ public final class UiData {
         List<Map<String, Object>> out = new ArrayList<Map<String, Object>>();
         Installer inst = new Installer(env, null, true);
         Map<String, int[]> rated = new Ratings(env).bySkill();
-        Map<String, Integer> used = new kit.core.Usage(env).counts(30);
+        kit.core.Usage.Summary usage = new kit.core.Usage(env).summary(30);
+        boolean tracking = new kit.core.ClaudeHooks(env).enabled() || usage.firstRecord != null;
         for (String name : inst.repoSkills()) {
             Map<String, Object> s = new LinkedHashMap<String, Object>();
             s.put("name", name);
@@ -192,8 +193,13 @@ public final class UiData {
             int[] mine = rated.get(name);
             s.put("myUp", mine == null ? 0 : mine[0]);
             s.put("myDown", mine == null ? 0 : mine[1]);
-            Integer u = used.get(name);
-            s.put("used30", u == null ? 0 : u);
+            kit.core.Usage.Stat st = usage.bySkill.get(name);
+            int count = st == null ? 0 : st.count;
+            s.put("used30", count);
+            s.put("share30", usage.total == 0 ? 0 : Math.round(count * 1000.0 / usage.total) / 10.0);
+            s.put("lastUsed", st == null || st.lastUsed == null ? null : st.lastUsed.toString());
+            // 정리 후보: 기록을 30일 넘게 했는데 그동안 한 번도 안 쓴 스킬. 기록이 짧으면 판단하지 않는다
+            s.put("usage", !tracking ? "off" : count > 0 ? "used" : usage.coversDays(30) ? "unused" : "short");
             s.put("enabled", lock == null || !lock.disabled.contains(name));
             Path results = env.repoDir().resolve("evals").resolve(name).resolve("results.json");
             if (Files.exists(results)) {

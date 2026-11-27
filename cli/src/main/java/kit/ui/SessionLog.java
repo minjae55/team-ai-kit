@@ -54,8 +54,8 @@ public final class SessionLog {
         long since = System.currentTimeMillis() - days * 86400000L;
         try (DirectoryStream<Path> projects = Files.newDirectoryStream(projectsDir)) {
             for (Path project : projects) {
-                if (!Files.isDirectory(project)) {
-                    continue;
+                if (!Files.isDirectory(project) || project.getFileName().toString().contains("kit-eval-")) {
+                    continue;  // 스킬 eval이 돌린 세션은 내 활동이 아니다
                 }
                 try (DirectoryStream<Path> files = Files.newDirectoryStream(project, "*.jsonl")) {
                     for (Path f : files) {

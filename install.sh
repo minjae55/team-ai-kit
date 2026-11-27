@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # team-ai-kit 처음 설치:
-#   git clone git@github.com:minjae55/team-ai-kit.git ~/.kit/repo && ~/.kit/repo/install.sh
+#   git clone https://github.com/minjae55/team-ai-kit.git ~/.kit/repo && ~/.kit/repo/install.sh
 # 하는 일: kit 실행 파일을 ~/.kit/bin 에 넣고 → PATH 등록(물어봄) → kit install 실행
 # 그다음부터는 아무 폴더에서 kit sync / kit doctor
 set -euo pipefail
