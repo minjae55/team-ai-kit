@@ -29,7 +29,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from grade import grade  # noqa: E402
 
-ALLOWED = ("Read,Grep,Glob,Skill,Bash(python3 *),Bash(bash *),Bash(git log *),Bash(git diff *),Bash(git show *),"
+ALLOWED = ("Read,Grep,Glob,Skill,Bash(cd *),Bash(python3 *),Bash(bash *),Bash(git log *),Bash(git diff *),Bash(git show *),"
            "Bash(cat *),Bash(grep *),Bash(head *),Bash(tail *),Bash(ls *),Bash(date *)")
 DENIED = "Edit,Write,NotebookEdit,WebFetch,WebSearch"
 

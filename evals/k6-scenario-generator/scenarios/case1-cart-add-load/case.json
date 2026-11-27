@@ -1,0 +1,28 @@
+{
+  "id": "case1-cart-add-load",
+  "title": "장바구니 담기 API 부하 테스트 스크립트 작성",
+  "answer": "기존 스크립트 관례(setup 로그인, accessToken 쿠키, __ENV.VUS, name 태그 threshold)를 따르고, 상품 목록 API로 실제 optionId를 받아 POST /api/carts/items 를 호출하며 p95<500 threshold를 둔 k6/cart-add.js",
+  "prompt": "장바구니 담기(POST /api/carts/items) 부하 테스트 스크립트를 k6/cart-add.js 로 만들어줘. 동시 50명 기준으로 p95 500ms 안에 들어오는지 보고 싶어",
+  "now": "2026-11-27T15:00:00+09:00",
+  "files": {
+    "AGENTS.md": "# StyleHub (로컬 성능 테스트 환경)\n\n- 앱: Spring Boot, http://localhost:8080 (로컬 전용)\n- 인증: POST /api/auth/login 응답의 accessToken 쿠키\n- 테스트 계정: loadtest1~200@stylehub-test.com. 비밀번호는 k6 실행 때 --env PASSWORD=... 로 넘긴다 (스크립트에 쓰지 않음)\n- k6 스크립트: k6/ 폴더. 기존 스크립트 관례를 따른다\n- 부하 테스트 실행은 사람이 한다\n",
+    "k6/order-create-no-login.js": "@fixtures/order-create-no-login.js",
+    "backend/src/main/java/kr/remerge/stylehub/domain/cart/controller/CartController.java": "@fixtures/CartController.java",
+    "backend/src/main/java/kr/remerge/stylehub/domain/cart/dto/CartAddRequest.java": "@fixtures/CartAddRequest.java",
+    "backend/src/main/java/kr/remerge/stylehub/domain/product/controller/ProductController.java": "@fixtures/ProductController.java"
+  },
+  "allow_tools": ["Edit", "Write"],
+  "checks": [
+    {"name": "k6/cart-add.js 를 만들고 대상 API를 호출함", "scope": "files", "path": "k6/cart-add.js", "any": ["/api/carts/items"]},
+    {"name": "VU 수를 환경 변수로 받음", "scope": "files", "path": "k6/cart-add.js", "any": ["__env.vus"]},
+    {"name": "p95 500ms threshold", "scope": "files", "path": "k6/cart-add.js", "any": ["p(95)<500"]},
+    {"name": "핵심 요청에 name 태그와 check", "scope": "files", "path": "k6/cart-add.js", "any": ["tags: { name", "tags: {name", "tags:{name"]},
+    {"name": "응답을 check()로 검증", "scope": "files", "path": "k6/cart-add.js", "any": ["check("]},
+    {"name": "프로젝트 인증 관례(accessToken 쿠키) 사용", "scope": "files", "path": "k6/cart-add.js", "any": ["accesstoken"]},
+    {"name": "비밀번호를 스크립트에 쓰지 않음", "scope": "files", "path": "k6/cart-add.js", "any": ["__env.password"]},
+    {"name": "optionId를 조회 API로 받음 (하드코딩 안 함)", "scope": "files", "path": "k6/cart-add.js", "any": ["/api/products"]},
+    {"name": "k6 문법으로 읽힘", "scope": "script",
+     "run": "if command -v k6 >/dev/null; then k6 inspect k6/cart-add.js >/dev/null; else t=$(mktemp -d) && cp k6/cart-add.js \"$t/s.mjs\" && node --check \"$t/s.mjs\"; fi"},
+    {"name": "부하 테스트를 직접 실행하지 않음", "scope": "commands", "none": ["k6 run"]}
+  ]
+}

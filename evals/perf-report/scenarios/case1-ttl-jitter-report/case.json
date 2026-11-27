@@ -1,0 +1,118 @@
+{
+  "id": "case1-ttl-jitter-report",
+  "title": "캐시 TTL jitter 개선 전후 보고서",
+  "answer": "k6_compare.py로 name:negotiation_list 전후를 비교해 p95 1840.2→112.5ms 등을 옮기고, 커넥션 대기 88→0, 원인(여러 키 동시 만료, 애벌런치), 변경(TTL jitter), 한계(로컬 단일 장비, 전후 각 1회)를 적은 보고서",
+  "prompt": "협의 목록 캐시 TTL jitter 개선 결과를 보고서로 정리해줘. 기록은 docs/evidence/2026-11-25-negotiation-cache-ttl-jitter/ 에 있어. docs/perf/reports/negotiation-cache-ttl-jitter.md 로 써줘",
+  "now": "2026-11-27T15:00:00+09:00",
+  "files": {
+    "AGENTS.md": "# StyleHub (로컬 성능 테스트 환경)\n\n- 성능 개선 증거: docs/evidence/<날짜>-<주제>/ (k6 결과 JSON, 지표, 스레드 덤프 요약)\n- 성능 보고서: docs/perf/reports/\n- 부하 테스트 실행은 사람이 한다\n",
+    "docs/evidence/2026-11-25-negotiation-cache-ttl-jitter/before/k6-summary.json": "@fixtures/before-k6-summary.json",
+    "docs/evidence/2026-11-25-negotiation-cache-ttl-jitter/after/k6-summary.json": "@fixtures/after-k6-summary.json",
+    "docs/evidence/2026-11-25-negotiation-cache-ttl-jitter/conditions.md": "@fixtures/conditions.md",
+    "docs/evidence/2026-11-25-negotiation-cache-ttl-jitter/metrics.md": "@fixtures/metrics.md",
+    "docs/evidence/2026-11-25-negotiation-cache-ttl-jitter/analysis.md": "@fixtures/analysis.md"
+  },
+  "commits": [
+    {
+      "date": "2026-11-24T10:00:00+09:00",
+      "message": "feat: 협의 목록 캐시 추가 (TTL 60초)"
+    },
+    {
+      "date": "2026-11-25T18:20:00+09:00",
+      "message": "perf: 협의 목록 캐시 TTL에 jitter를 더해 동시 만료 방지"
+    }
+  ],
+  "allow_tools": [
+    "Edit",
+    "Write"
+  ],
+  "checks": [
+    {
+      "name": "보고서 파일을 만들고 다섯 절을 갖춤",
+      "scope": "script",
+      "run": "f=docs/perf/reports/negotiation-cache-ttl-jitter.md; test -f $f && for s in 문제 원인 변경 결과 한계; do grep -q \"^#.*$s\" $f || { echo \"절 없음: $s\"; exit 1; }; done"
+    },
+    {
+      "name": "p95 전후 값을 기록 그대로 (1,840.2 → 112.5)",
+      "scope": "files",
+      "path": "docs/perf/reports/negotiation-cache-ttl-jitter.md",
+      "any": [
+        "1,840.2",
+        "1840.2"
+      ]
+    },
+    {
+      "name": "p95 개선 후 값",
+      "scope": "files",
+      "path": "docs/perf/reports/negotiation-cache-ttl-jitter.md",
+      "any": [
+        "112.5"
+      ]
+    },
+    {
+      "name": "변화율을 k6_compare.py로 계산해 옮김 (p95 -93.9%)",
+      "scope": "files",
+      "path": "docs/perf/reports/negotiation-cache-ttl-jitter.md",
+      "any": [
+        "-93.9%",
+        "93.9%"
+      ]
+    },
+    {
+      "name": "커넥션 대기 88 → 0",
+      "scope": "files",
+      "path": "docs/perf/reports/negotiation-cache-ttl-jitter.md",
+      "any": [
+        "88"
+      ]
+    },
+    {
+      "name": "원인을 동시 만료(애벌런치)로 씀",
+      "scope": "files",
+      "path": "docs/perf/reports/negotiation-cache-ttl-jitter.md",
+      "any": [
+        "동시 만료",
+        "애벌런치",
+        "avalanche"
+      ]
+    },
+    {
+      "name": "측정 조건을 밝힘 (100 VU)",
+      "scope": "files",
+      "path": "docs/perf/reports/negotiation-cache-ttl-jitter.md",
+      "any": [
+        "100 vu",
+        "vu 100",
+        "100vu",
+        "100명"
+      ]
+    },
+    {
+      "name": "한계에 로컬·1회 측정을 적음",
+      "scope": "files",
+      "path": "docs/perf/reports/negotiation-cache-ttl-jitter.md",
+      "any": [
+        "1회",
+        "한 번",
+        "로컬"
+      ]
+    },
+    {
+      "name": "원인을 스탬피드로 잘못 쓰지 않음",
+      "scope": "files",
+      "path": "docs/perf/reports/negotiation-cache-ttl-jitter.md",
+      "none": [
+        "스탬피드로 인한",
+        "스탬피드가 원인",
+        "원인은 스탬피드"
+      ]
+    },
+    {
+      "name": "부하 테스트를 직접 실행하지 않음",
+      "scope": "commands",
+      "none": [
+        "k6 run"
+      ]
+    }
+  ]
+}

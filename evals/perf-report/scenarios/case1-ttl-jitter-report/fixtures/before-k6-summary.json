@@ -1,0 +1,44 @@
+{
+  "root_group": {},
+  "metrics": {
+    "http_req_duration": {
+      "avg": 399.931,
+      "min": 2.9,
+      "med": 38.1,
+      "max": 3011.7,
+      "p(90)": 1294.09,
+      "p(95)": 1821.798
+    },
+    "http_req_duration{name:negotiation_list}": {
+      "avg": 412.3,
+      "min": 3.1,
+      "med": 38.1,
+      "max": 3011.7,
+      "p(90)": 1320.5,
+      "p(95)": 1840.2
+    },
+    "http_reqs": {
+      "count": 6060,
+      "rate": 50.3
+    },
+    "http_reqs{name:negotiation_list}": {
+      "count": 6000,
+      "rate": 49.8
+    },
+    "http_req_failed": {
+      "passes": 0,
+      "fails": 6060,
+      "value": 0
+    },
+    "checks": {
+      "passes": 6000,
+      "fails": 0,
+      "value": 1
+    },
+    "vus_max": {
+      "value": 100,
+      "min": 100,
+      "max": 100
+    }
+  }
+}

@@ -21,6 +21,9 @@
 | 스킬 | 하는 일 |
 |---|---|
 | [`incident-analysis`](kit/skills/incident-analysis/SKILL.md) | 장애·지표 이상의 원인을 지표 → DB → 로그 → 최근 변경 순서로 근거를 모아 분석 (읽기 전용) |
+| [`query-analysis`](kit/skills/query-analysis/SKILL.md) | 느린 쿼리의 원인을 실행 계획·인덱스·테이블 통계로 분석하고 인덱스·쿼리 개선안 제안 (읽기 전용) |
+| [`k6-scenario-generator`](kit/skills/k6-scenario-generator/SKILL.md) | 프로젝트의 기존 k6 관례대로 부하 테스트 스크립트 작성 (실행은 사람이) |
+| [`perf-report`](kit/skills/perf-report/SKILL.md) | 전후 측정 기록으로 "문제 → 원인 → 변경 → 결과 → 한계" 보고서 작성 |
 
 ## 설치
 Java 8 이상(실행만, JDK·빌드 도구 불필요)과 git, 키트 레포 접근 권한(SSH)이 필요하다. 처음 한 번만:
