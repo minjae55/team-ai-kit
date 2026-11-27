@@ -22,6 +22,12 @@ public final class LockFile {
     public String commit;
     public String installedAt;
     public String mode = "link";
+    /** 고정한 버전 (kit pin / rollback). 있으면 자동 업데이트가 이 버전에 머문다 */
+    public String pinned;
+    /** 직전에 설치돼 있던 버전 (kit rollback 대상) */
+    public String previous;
+    /** 마지막으로 업데이트를 확인한 시각 (자동 업데이트가 너무 자주 돌지 않게) */
+    public String lastCheck;
     /** 내 PC에서 꺼 둔 팀 스킬. 설치·sync 때 건너뛴다 (팀 레포와 다른 팀원에게는 영향 없음) */
     public List<String> disabled = new ArrayList<String>();
     public Map<String, ToolState> tools = new LinkedHashMap<String, ToolState>();

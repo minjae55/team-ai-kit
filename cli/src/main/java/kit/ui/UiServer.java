@@ -146,6 +146,13 @@ public final class UiServer {
                     args.add("--tools");
                     args.add(tool);
                 }
+            } else if ("/api/auto".equals(path)) {
+                args.add("auto");
+                args.add("true".equals(form.get("on")) ? "on" : "off");
+            } else if ("/api/rollback".equals(path)) {
+                args.add("rollback");
+            } else if ("/api/unpin".equals(path)) {
+                args.add("unpin");
             } else if ("/api/skill".equals(path)) {
                 String name = form.get("name");
                 if (name == null || !name.matches("[a-z0-9-]+")) {

@@ -36,6 +36,7 @@ public class UninstallCommand extends Common implements Callable<Integer> {
             stdout.println("미리보기 끝. 아무것도 바꾸지 않았습니다");
             return 0;
         }
+        new kit.core.ClaudeHooks(env).disable();
         Files.deleteIfExists(env.lockFile());
         if (purge) {
             stdout.println("  키트 폴더 삭제 " + env.kitDir());

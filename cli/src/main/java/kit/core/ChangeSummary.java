@@ -83,6 +83,16 @@ public final class ChangeSummary {
         return out;
     }
 
+    /** 두 버전 사이에 kit 명령 자체(cli 코드, 실행 스크립트, install.sh)가 바뀌었는지 */
+    public static boolean cliChanged(Path repo, String fromCommit, String toRef) throws IOException {
+        if (fromCommit == null || !Git.run(repo, "cat-file", "-e", fromCommit + "^{commit}").ok()) {
+            return false;
+        }
+        Git.Result r = Git.run(repo, "diff", "--name-only", fromCommit + ".." + toRef, "--",
+                "cli/src", "cli/build.gradle", "cli/kit", "install.sh");
+        return r.ok() && !r.out.isEmpty();
+    }
+
     /** 특정 버전(ref)에 들어 있는 스킬 이름. 체크아웃하지 않고 git에서 바로 읽는다. */
     public static Set<String> skillsAt(Path repo, String ref) throws IOException {
         Set<String> names = new TreeSet<String>();

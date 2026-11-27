@@ -41,6 +41,10 @@ public final class UiData {
         m.put("user", userName());
         m.put("installed", lock != null);
         m.put("version", lock == null ? null : lock.version);
+        m.put("pinned", lock == null ? null : lock.pinned);
+        m.put("previous", lock == null ? null : lock.previous);
+        m.put("lastCheck", lock == null ? null : lock.lastCheck);
+        m.put("auto", new kit.core.ClaudeHooks(env).enabled());
         String latest = repo ? Git.latestTag(env.repoDir()) : null;
         m.put("latest", latest);
         boolean update = lock != null && latest != null && !latest.equals(lock.version);
@@ -178,6 +182,7 @@ public final class UiData {
         List<Map<String, Object>> out = new ArrayList<Map<String, Object>>();
         Installer inst = new Installer(env, null, true);
         Map<String, int[]> rated = new Ratings(env).bySkill();
+        Map<String, Integer> used = new kit.core.Usage(env).counts(30);
         for (String name : inst.repoSkills()) {
             Map<String, Object> s = new LinkedHashMap<String, Object>();
             s.put("name", name);
@@ -187,6 +192,8 @@ public final class UiData {
             int[] mine = rated.get(name);
             s.put("myUp", mine == null ? 0 : mine[0]);
             s.put("myDown", mine == null ? 0 : mine[1]);
+            Integer u = used.get(name);
+            s.put("used30", u == null ? 0 : u);
             s.put("enabled", lock == null || !lock.disabled.contains(name));
             Path results = env.repoDir().resolve("evals").resolve(name).resolve("results.json");
             if (Files.exists(results)) {

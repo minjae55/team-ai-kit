@@ -30,6 +30,9 @@ abstract class Common {
         if (parentCommand instanceof SkillCommand) {
             return ((SkillCommand) parentCommand).parent;
         }
+        if (parentCommand instanceof AutoCommand) {
+            return ((AutoCommand) parentCommand).parent;
+        }
         return new KitCommand();
     }
 
@@ -43,6 +46,17 @@ abstract class Common {
             @Override public void info(String msg) { stdout.println("  " + msg); }
             @Override public void warn(String msg) { warnings++; stdout.println("  [경고] " + msg); }
         };
+    }
+
+    /** 지정 버전(null이면 고정 버전/최신)으로 동기화하고, 성공하면 done 문구를 출력 */
+    int runSync(KitEnv env, String version, String done) throws Exception {
+        kit.core.SyncService.Options o = new kit.core.SyncService.Options();
+        o.version = version;
+        int code = new kit.core.SyncService(env, out(), stdout).run(o);
+        if (code == 0) {
+            stdout.println(done);
+        }
+        return code;
     }
 
     void ok(String msg) { stdout.println("  [OK] " + msg); }

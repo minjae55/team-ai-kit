@@ -128,6 +128,10 @@ button:disabled{opacity:.5;cursor:default}
         <div class="card"><b style="font-size:16px">점검</b><div id="health" style="margin-top:10px"></div></div>
         <div class="card"><b style="font-size:16px">팀 새 소식</b><div id="news" style="margin-top:10px"></div></div>
       </div>
+      <div class="g2">
+        <div class="card"><b style="font-size:16px">자동 업데이트 · 사용 기록</b><div id="auto" style="margin-top:10px"></div></div>
+        <div class="card"><b style="font-size:16px">버전 고정 · 되돌리기</b><div id="pin" style="margin-top:10px"></div></div>
+      </div>
       <div class="card" style="margin-top:16px"><b style="font-size:16px">파일 위치</b>
         <div class="sub" style="margin-top:8px;line-height:1.9">설치 기록 <code>~/.kit/kit.lock.json</code> · 내 평가 <code>~/.kit/ratings.json</code> · 화면 설정(시스템 현황 지표, 개선 기록 폴더) <code>~/.kit/ui.json</code></div>
       </div>
@@ -263,7 +267,7 @@ function renderLibrary() {
       <div style="display:flex;align-items:center;gap:12px"><div class="tico" style="margin:0">${svg(iconFor(k.name))}</div><div style="flex:1;min-width:0"><b style="font-size:16px">${esc(k.name)}</b><div class="mut">${k.verifiedCases ? "검증 상황 " + k.verifiedCases + "개 · " + esc(k.verifiedDate || "") : "검증 기록 없음"}</div></div>
         <div class="sw ${k.enabled ? "on" : ""}" role="switch" aria-checked="${k.enabled}" aria-label="${esc(k.name)} 켜기" onclick="act(${jsq(k.name + (k.enabled ? ' 끄기' : ' 켜기'))}, '/api/skill', {name:${jsq(k.name)}, on:${!k.enabled}})"></div></div>
       <div class="sub">${esc(k.description)}</div>
-      <div style="display:flex;justify-content:space-between;align-items:center"><span class="mut">내 평가 👍 ${k.myUp} · 👎 ${k.myDown}</span><button class="ghost" onclick="openSkill(${jsq(k.name)})">사용법 보기 →</button></div>
+      <div style="display:flex;justify-content:space-between;align-items:center"><span class="mut">최근 30일 ${k.used30}회 사용 · 내 평가 👍 ${k.myUp} · 👎 ${k.myDown}</span><button class="ghost" onclick="openSkill(${jsq(k.name)})">사용법 보기 →</button></div>
     </div>`).join("") || `<div class="empty">검색 결과가 없어요</div>`;
   const rs = S.recommendations.filter(r => match(r.title, r.description));
   $("recs").innerHTML = rs.length ? `<div class="grid-cards">${rs.map(recCard).join("")}</div>` : `<div class="empty">지금은 추천할 반복 작업이 없어요</div>`;
@@ -298,6 +302,14 @@ function renderSettings() {
     const btn = h.installTool ? ` <button style="padding:3px 10px" onclick="act(${jsq(h.installTool + ' 설치')}, '/api/install', {tool:${jsq(h.installTool)}}, this)">설치</button>` : "";
     return `<div style="padding:5px 0">${icon} ${esc(h.text)}${btn}</div>`;
   }).join("") + `<div class="mut" style="margin-top:10px">설치 ${esc(S.version || "-")} · 받아 둔 최신 ${esc(S.latest || "-")} ${S.updateAvailable ? `<button style="padding:3px 10px;margin-left:6px" class="primary" onclick="act('업데이트', '/api/sync', {}, this)">업데이트</button>` : ""}</div>`;
+  $("auto").innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px"><div style="flex:1" class="sub">Claude 세션을 열 때 6시간에 한 번 자동으로 업데이트하고, 스킬을 쓰면 사용 횟수를 기록해요. 요청 내용은 남기지 않아요.</div>
+      <div class="sw ${S.auto ? "on" : ""}" role="switch" aria-checked="${S.auto}" aria-label="자동 업데이트" onclick="act('자동 업데이트 ${S.auto ? "끄기" : "켜기"}', '/api/auto', {on:${!S.auto}})"></div></div>
+    <div class="mut" style="margin-top:8px">${S.auto ? "켜짐" : "꺼짐"}${S.lastCheck ? " · 마지막 확인 " + esc(ago(S.lastCheck)) : ""} · 바꾸면 ~/.claude/settings.json에 키트 훅만 넣고 빼요</div>`;
+  $("pin").innerHTML = S.pinned
+    ? `<div class="sub"><b>${esc(S.pinned)}</b>에 고정돼 있어요. 자동 업데이트도 이 버전에 머물러요.</div><div style="margin-top:10px"><button class="primary" onclick="act('고정 해제', '/api/unpin', {}, this)">고정 풀고 최신으로</button></div>`
+    : `<div class="sub">최신 버전을 따라가요.${S.previous ? ` 업데이트 후 문제가 생기면 직전 버전 <b>${esc(S.previous)}</b>로 되돌릴 수 있어요.` : ""}</div>
+       <div style="margin-top:10px">${S.previous ? `<button onclick="if(confirm('${esc(S.previous)}로 되돌리고 고정할까요?')) act('되돌리기', '/api/rollback', {}, this)">${esc(S.previous)}로 되돌리기</button>` : `<span class="mut">되돌릴 직전 버전 기록이 아직 없어요</span>`}</div>`;
   $("news").innerHTML = S.news.map((n, i) => `
     <div style="display:flex;gap:10px;padding:7px 0"><span class="chip ${i === 0 ? "blue" : ""}" style="height:24px">${esc(n.version)}</span><div style="font-size:13px">${n.items.map(md).join("<br>")}<div class="mut">${esc(n.date)}</div></div></div>`).join("") || `<div class="mut">소식이 없어요</div>`;
 }

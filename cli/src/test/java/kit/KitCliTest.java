@@ -148,7 +148,7 @@ class KitCliTest {
         assertTrue(out.contains("- v0.2.0"), "변경 내역에 커밋 제목");
         assertTrue(out.contains("- 새 스킬: query-analysis"), "CHANGELOG 절");
         assertFalse(out.contains("첫 버전"), "다른 버전의 CHANGELOG는 안 보여 줌");
-        assertFalse(out.contains("kit 명령 자체가 업데이트"), "cli를 안 바꿨으면 안내하지 않음");
+        assertFalse(out.contains("kit 명령"), "cli를 안 바꿨으면 kit 명령 안내 없음");
     }
 
     @Test
@@ -158,7 +158,8 @@ class KitCliTest {
         commitAndTag("v0.1.1");
 
         assertEquals(0, kit("sync"));
-        assertTrue(output().contains("kit 명령 자체가 업데이트되었습니다"));
+        // install.sh로 설치하지 않은 환경(~/.kit/bin/kit.jar 없음)에서는 자동 교체 대신 안내만 한다
+        assertTrue(output().contains("kit 명령 자체가 바뀌었습니다. 적용하려면: ~/.kit/repo/install.sh"));
     }
 
     @Test
@@ -191,6 +192,99 @@ class KitCliTest {
         assertEquals(0, kit("install", "--tools", "claude"));
         assertTrue(Files.exists(home.resolve(".claude/skills/incident-analysis")));
         assertFalse(Files.exists(home.resolve(".agents/skills")));
+    }
+
+    @Test
+    void auto_on_adds_only_kit_hooks_and_off_removes_only_them() throws IOException {
+        Path settings = home.resolve(".claude/settings.json");
+        write(settings, "{\"theme\":\"dark\",\"hooks\":{\"PostToolUse\":[{\"matcher\":\"Write\",\"hooks\":[{\"type\":\"command\",\"command\":\"echo mine\"}]}]}}");
+
+        assertEquals(0, kit("auto", "on"));
+        String on = ManagedBlock.read(settings);
+        assertTrue(on.contains("\"theme\" : \"dark\""), "다른 설정 유지");
+        assertTrue(on.contains("echo mine"), "직접 만든 훅 유지");
+        assertTrue(on.contains("\"SessionStart\"") && on.contains("\"matcher\" : \"startup\"") && on.contains("sync --quiet --if-older-than 6h"));
+        assertTrue(on.contains("\"matcher\" : \"Skill\"") && on.contains("\"UserPromptExpansion\"") && on.contains("track --tool claude"));
+        assertTrue(Files.exists(home.resolve(".claude/settings.json.kit-backup")));
+        assertEquals(0, kit("auto", "on"));
+        String twice = ManagedBlock.read(settings);
+        assertEquals(twice.indexOf("sync --quiet"), twice.lastIndexOf("sync --quiet"), "두 번 켜도 훅은 하나");
+        assertTrue(new kit.core.ClaudeHooks(new kit.core.KitEnv(home, "x")).enabled());
+
+        assertEquals(0, kit("auto", "off"));
+        String off = ManagedBlock.read(settings);
+        assertFalse(off.contains(".kit/bin/kit"));
+        assertTrue(off.contains("echo mine") && off.contains("\"theme\" : \"dark\""));
+        assertFalse(off.contains("SessionStart"), "비게 된 이벤트는 정리");
+    }
+
+    @Test
+    void track_records_skill_use_silently_and_ignores_non_team_commands() throws IOException {
+        assertEquals(0, kit("install"));
+        java.io.InputStream realIn = System.in;
+        try {
+            track("{\"session_id\":\"s1\",\"tool_name\":\"Skill\",\"tool_input\":{\"skill\":\"incident-analysis\"}}");
+            track("{\"session_id\":\"s2\",\"command_name\":\"incident-analysis\"}");
+            track("{\"session_id\":\"s3\",\"command_name\":\"help\"}");
+            track("this is not json");
+        } finally {
+            System.setIn(realIn);
+        }
+        java.util.List<String> lines = Files.readAllLines(home.resolve(".kit/usage.jsonl"), StandardCharsets.UTF_8);
+        assertEquals(2, lines.size(), "팀 스킬 사용만 기록, /help 와 깨진 입력은 무시");
+        assertTrue(lines.get(0).contains("\"via\":\"ai\"") && lines.get(1).contains("\"via\":\"slash\""));
+        assertEquals(Integer.valueOf(2), new kit.core.Usage(new kit.core.KitEnv(home, "x")).counts(30).get("incident-analysis"));
+    }
+
+    private void track(String json) {
+        System.setIn(new java.io.ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8)));
+        assertEquals(0, kit("track", "--tool", "claude"));
+    }
+
+    @Test
+    void rollback_pins_previous_version_and_unpin_returns_to_latest() throws IOException {
+        assertEquals(0, kit("install"));
+        write(origin.resolve("kit/skills/query-analysis/SKILL.md"), "---\nname: query-analysis\ndescription: test\n---\n");
+        commitAndTag("v0.2.0");
+        assertEquals(0, kit("sync"));
+        LockFile lock = LockFile.readOrNull(home.resolve(".kit/kit.lock.json"));
+        assertEquals("v0.2.0", lock.version);
+        assertEquals("v0.1.0", lock.previous);
+
+        assertEquals(0, kit("rollback"));
+        lock = LockFile.readOrNull(home.resolve(".kit/kit.lock.json"));
+        assertEquals("v0.1.0", lock.version);
+        assertEquals("v0.1.0", lock.pinned);
+        assertFalse(Files.exists(home.resolve(".claude/skills/query-analysis"), java.nio.file.LinkOption.NOFOLLOW_LINKS));
+
+        assertEquals(0, kit("sync"));
+        assertEquals("v0.1.0", LockFile.readOrNull(home.resolve(".kit/kit.lock.json")).version, "고정 중에는 sync해도 그대로");
+
+        assertEquals(0, kit("unpin"));
+        lock = LockFile.readOrNull(home.resolve(".kit/kit.lock.json"));
+        assertEquals("v0.2.0", lock.version);
+        assertEquals(null, lock.pinned);
+        assertEquals(1, kit("pin", "v9.9.9"), "없는 버전은 고정 불가");
+    }
+
+    @Test
+    void quiet_sync_prints_one_line_only_when_updated_and_respects_interval() throws IOException {
+        assertEquals(0, kit("install"));
+        captured.reset();
+        assertEquals(0, kit("sync", "--quiet"));
+        assertEquals("", output().trim(), "바뀐 게 없으면 아무것도 출력하지 않음 (AI 맥락 오염 방지)");
+
+        write(origin.resolve("kit/skills/query-analysis/SKILL.md"), "---\nname: query-analysis\ndescription: test\n---\n");
+        commitAndTag("v0.2.0");
+        captured.reset();
+        assertEquals(0, kit("sync", "--quiet", "--if-older-than", "1h"));
+        assertEquals("", output().trim(), "방금 확인했으면 1시간 안에는 확인하지 않음");
+
+        captured.reset();
+        assertEquals(0, kit("sync", "--quiet"));
+        String out = output().trim();
+        assertTrue(out.startsWith("[팀 AI 키트] v0.1.0 → v0.2.0 업데이트됨") && out.contains("새 스킬: query-analysis"), out);
+        assertEquals(1, out.split("\\R").length, "한 줄만");
     }
 
     @Test
