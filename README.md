@@ -24,6 +24,9 @@
 | [`query-analysis`](kit/skills/query-analysis/SKILL.md) | 느린 쿼리의 원인을 실행 계획·인덱스·테이블 통계로 분석하고 인덱스·쿼리 개선안 제안 (읽기 전용) |
 | [`k6-scenario-generator`](kit/skills/k6-scenario-generator/SKILL.md) | 프로젝트의 기존 k6 관례대로 부하 테스트 스크립트 작성 (실행은 사람이) |
 | [`perf-report`](kit/skills/perf-report/SKILL.md) | 전후 측정 기록으로 "문제 → 원인 → 변경 → 결과 → 한계" 보고서 작성 |
+| [`contact-db-check`](kit/skills/contact-db-check/SKILL.md) | 연락처 DB(CSV)의 중복·누락·형식 오류·출처 없음·오래된 정보 점검 (원본 수정 안 함) |
+| [`mail-campaign`](kit/skills/mail-campaign/SKILL.md) | 명단과 템플릿으로 발송 목록·제외 목록·초안 작성, 발송 기록으로 중복 발송 방지 (직접 발송 안 함) |
+| [`company-research`](kit/skills/company-research/SKILL.md) | 분야별 채용 기업을 공개 정보만으로 출처·확인일과 함께 양식에 정리 |
 
 ## 설치
 Java 8 이상(실행만, JDK·빌드 도구 불필요)과 git이 필요하다. 공개 저장소라 SSH 키나 로그인 없이 받는다. 처음 한 번만:
