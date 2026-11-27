@@ -10,7 +10,8 @@
   },
   "allow_tools": [
     "Edit",
-    "Write"
+    "Write",
+    "Bash(mkdir *)"
   ],
   "checks": [
     {

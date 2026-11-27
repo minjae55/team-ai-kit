@@ -18,6 +18,7 @@ description: 연락처 명단(CSV)과 메일 템플릿으로 안내 메일 발�
 
 ## 2. 발송 목록과 초안 만들기
 스크립트는 이 SKILL.md가 있는 폴더의 `scripts/` 안에 있다. 전체 경로로 실행한다.
+- 명령은 `&&`·`;`로 묶지 말고 **하나씩** 실행한다. 묶으면 권한 확인에서 한꺼번에 거부될 수 있다.
 ```bash
 python3 /…/scripts/build_sendlist.py --contacts <명단.csv> --template <템플릿.md> --campaign <캠페인> \
   --sent-log <발송기록.csv> [--optout <수신거부.txt>] --out outbox

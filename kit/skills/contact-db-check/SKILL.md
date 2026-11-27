@@ -16,6 +16,7 @@ description: 기업·담당자 연락처 DB(스프레드시트를 내보낸 CSV)
 
 ## 2. 점검 실행
 스크립트는 이 SKILL.md가 있는 폴더의 `scripts/` 안에 있다. 전체 경로로 실행한다.
+- 명령은 `&&`·`;`로 묶지 말고 **하나씩** 실행한다. 묶으면 권한 확인에서 한꺼번에 거부될 수 있다.
 ```bash
 python3 /…/scripts/check_contacts.py <파일.csv> --out <문제목록.csv> [--required 회사명,이메일,출처] [--stale-days 90]
 ```

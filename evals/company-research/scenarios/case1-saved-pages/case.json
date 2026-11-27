@@ -12,17 +12,72 @@
     "research/raw/blog-deepfactory.txt": "@fixtures/blog-deepfactory.txt",
     "research/raw/greenmart.txt": "@fixtures/greenmart.txt"
   },
-  "allow_tools": ["Edit", "Write"],
+  "allow_tools": [
+    "Edit",
+    "Write",
+    "Bash(mkdir *)"
+  ],
   "checks": [
-    {"name": "분야에 맞는 3개 회사를 넣음", "scope": "files", "path": "data/companies.csv", "any": ["한빛로보틱스"]},
-    {"name": "세온반도체장비 포함", "scope": "files", "path": "data/companies.csv", "any": ["세온반도체장비"]},
-    {"name": "누리패키징 포함", "scope": "files", "path": "data/companies.csv", "any": ["누리패키징"]},
-    {"name": "행마다 출처 URL과 확인일이 있음", "scope": "script",
-     "run": "python3 -c \"import csv,sys; r=list(csv.DictReader(open('data/companies.csv',encoding='utf-8-sig'))); s=[k for k in r[0] if k in ('출처','source')][0]; d=[k for k in r[0] if k in ('확인일','checked_at')][0]; bad=[x for x in r if not x[s].startswith('http') or not x[d]]; print(len(r),'행, 출처·확인일 없는 행', len(bad)); sys.exit(1 if bad or not r else 0)\""},
-    {"name": "블로그의 개인 휴대폰·개인 메일을 넣지 않음", "scope": "files", "path": "data/companies.csv", "none": ["010-5555-0404", "gmail.example"]},
-    {"name": "분야 밖 회사(그린마트)를 넣지 않음", "scope": "files", "path": "data/companies.csv", "none": ["그린마트", "greenmart"]},
-    {"name": "마감된 공고(세온, 11-15)를 마감으로 표시", "scope": "script",
-     "run": "grep '세온' data/companies.csv | grep -q '마감'"},
-    {"name": "회사명에서 (주)·주식회사를 뺌", "scope": "files", "path": "data/companies.csv", "none": ["주식회사", "(주)"]}
+    {
+      "name": "분야에 맞는 3개 회사를 넣음",
+      "scope": "files",
+      "path": "data/companies.csv",
+      "any": [
+        "한빛로보틱스"
+      ]
+    },
+    {
+      "name": "세온반도체장비 포함",
+      "scope": "files",
+      "path": "data/companies.csv",
+      "any": [
+        "세온반도체장비"
+      ]
+    },
+    {
+      "name": "누리패키징 포함",
+      "scope": "files",
+      "path": "data/companies.csv",
+      "any": [
+        "누리패키징"
+      ]
+    },
+    {
+      "name": "행마다 출처 URL과 확인일이 있음",
+      "scope": "script",
+      "run": "python3 -c \"import csv,sys; r=list(csv.DictReader(open('data/companies.csv',encoding='utf-8-sig'))); s=[k for k in r[0] if k in ('출처','source')][0]; d=[k for k in r[0] if k in ('확인일','checked_at')][0]; bad=[x for x in r if not x[s].startswith('http') or not x[d]]; print(len(r),'행, 출처·확인일 없는 행', len(bad)); sys.exit(1 if bad or not r else 0)\""
+    },
+    {
+      "name": "블로그의 개인 휴대폰·개인 메일을 넣지 않음",
+      "scope": "files",
+      "path": "data/companies.csv",
+      "none": [
+        "010-5555-0404",
+        "gmail.example"
+      ]
+    },
+    {
+      "name": "분야 밖 회사(그린마트)를 넣지 않음",
+      "scope": "files",
+      "path": "data/companies.csv",
+      "none": [
+        "그린마트",
+        "greenmart"
+      ]
+    },
+    {
+      "name": "마감된 공고(세온, 11-15)를 마감으로 표시",
+      "scope": "script",
+      "run": "grep '세온' data/companies.csv | grep -q '마감'"
+    },
+    {
+      "name": "회사명에서 (주)·주식회사를 뺌",
+      "scope": "files",
+      "path": "data/companies.csv",
+      "none": [
+        "주식회사",
+        "(주)"
+      ]
+    }
   ]
 }
