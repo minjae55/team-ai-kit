@@ -131,7 +131,10 @@ public final class SyncService {
                 selfNote = "kit 명령은 뒤에서 업데이트 중";
             } else {
                 String err = SelfUpdate.now(env);
-                selfNote = err == null ? "kit 명령도 새 버전으로 업데이트했습니다" : "kit 명령 업데이트 실패: " + err + " → ~/.kit/repo/install.sh";
+                selfNote = err != null ? "kit 명령 업데이트 실패: " + err + " → ~/.kit/repo/install.sh"
+                        : java.nio.file.Files.exists(env.kitDir().resolve("bin").resolve("kit.jar.new"))
+                        ? "kit 명령은 이 명령이 끝나고 몇 초 뒤 새 버전으로 바뀝니다 (Windows). 바뀐 뒤 한 번 더 업데이트하면 새 기능까지 적용됩니다"
+                        : "kit 명령도 새 버전으로 업데이트했습니다";
             }
         } else if (cliChanged) {
             selfNote = "kit 명령 자체가 바뀌었습니다. 적용하려면: ~/.kit/repo/install.sh";

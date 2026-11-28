@@ -81,11 +81,44 @@ public final class SelfUpdate {
 
     private static void install(Path jar, Path cli, Path bin) throws IOException {
         Files.createDirectories(bin);
+        if (WindowsShortcut.isWindows()) {
+            installWindows(jar, cli, bin);
+            return;
+        }
         Path tmp = bin.resolve("kit.jar.tmp");
         Files.copy(jar, tmp, StandardCopyOption.REPLACE_EXISTING);
         Files.move(tmp, bin.resolve("kit.jar"), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
         Files.copy(cli.resolve("kit"), bin.resolve("kit"), StandardCopyOption.REPLACE_EXISTING);
         bin.resolve("kit").toFile().setExecutable(true);
+    }
+
+    /**
+     * Windows는 실행 중인 kit.jar 를 잠가서 덮어쓸 수 없다. 새 jar를 kit.jar.new 로 두고,
+     * 바꿀 수 없으면 이 프로세스가 끝난 뒤 몇 초 있다가 바꾸는 작업을 따로 띄운다 (다음 kit 실행 때도 남아 있으면 다시 시도).
+     */
+    private static void installWindows(Path jar, Path cli, Path bin) throws IOException {
+        Path next = bin.resolve("kit.jar.new");
+        Files.copy(jar, next, StandardCopyOption.REPLACE_EXISTING);
+        try {
+            Files.move(next, bin.resolve("kit.jar"), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException locked) {
+            deferredSwap(bin);
+        }
+        Files.copy(cli.resolve("kit"), bin.resolve("kit"), StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    /** kit.jar.new 가 있으면, 잠시 뒤(지금 kit 이 끝난 뒤) kit.jar 로 바꾸는 cmd 작업을 띄운다 */
+    public static void deferredSwap(Path bin) {
+        Path next = bin.resolve("kit.jar.new");
+        if (!WindowsShortcut.isWindows() || !Files.exists(next)) {
+            return;
+        }
+        String cmd = "ping -n 4 127.0.0.1 >nul & move /y \"" + next + "\" \"" + bin.resolve("kit.jar") + "\" >nul";
+        try {
+            new ProcessBuilder("cmd", "/c", cmd).redirectErrorStream(true).redirectOutput(new File("NUL")).start();
+        } catch (IOException ignored) {
+            // 다음 실행 때 다시 시도
+        }
     }
 
     private static String q(Object s) {

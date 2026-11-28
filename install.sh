@@ -36,7 +36,7 @@ cp "$repo/cli/kit" "$bin/kit"
 chmod +x "$bin/kit"
 case "$(uname -s 2>/dev/null)" in
   MINGW*|MSYS*|CYGWIN*)   # Windows: PowerShell·CMD 에서도 kit 을 쓰도록 (Java 만으로 실행, bash 불필요)
-    printf '@echo off\r\njava -jar "%%~dp0kit.jar" %%*\r\n' > "$bin/kit.cmd" ;;
+    printf '@echo off\r\nif exist "%%~dp0kit.jar.new" move /y "%%~dp0kit.jar.new" "%%~dp0kit.jar" >nul\r\njava -jar "%%~dp0kit.jar" %%*\r\n' > "$bin/kit.cmd" ;;
 esac
 say "  $bin/kit"
 
