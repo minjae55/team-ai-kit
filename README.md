@@ -44,6 +44,10 @@ Claude Code(데스크톱 앱의 Code 탭 포함)에 이렇게 말한다:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/minjae55/team-ai-kit/main/get.sh | bash
 ```
+Windows(PowerShell, Git for Windows 필요):
+```powershell
+irm https://raw.githubusercontent.com/minjae55/team-ai-kit/main/get.ps1 | iex
+```
 
 **3. 직접 받아서 설치**
 ```bash

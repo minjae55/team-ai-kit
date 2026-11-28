@@ -34,7 +34,8 @@ public final class ClaudeHooks {
     }
 
     private String kit() {
-        return env.kitDir().resolve("bin").resolve("kit").toString();
+        // Windows 경로(C:\Users\..)도 / 로 바꾼다: 훅은 bash(Git Bash)로 실행되고, 키트 훅 구별 표시(".kit/bin/kit")와도 맞아야 함
+        return env.kitDir().resolve("bin").resolve("kit").toString().replace('\\', '/');
     }
 
     public boolean enabled() throws IOException {

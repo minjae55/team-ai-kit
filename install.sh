@@ -6,6 +6,11 @@
 set -euo pipefail
 
 home="${KIT_HOME_DIR:-$HOME}"
+# Windows(Git Bash)에서는 Java에 넘기는 홈 경로를 C:/Users/... 형식으로 바꾼다 (/c/Users/... 는 Java가 못 알아봄)
+kit_home="$home"
+case "$(uname -s 2>/dev/null)" in
+  MINGW*|MSYS*|CYGWIN*) command -v cygpath >/dev/null 2>&1 && kit_home="$(cygpath -m "$home")" ;;
+esac
 repo="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 bin="$home/.kit/bin"
 
@@ -29,6 +34,10 @@ mkdir -p "$bin"
 cp "$jar" "$bin/kit.jar"
 cp "$repo/cli/kit" "$bin/kit"
 chmod +x "$bin/kit"
+case "$(uname -s 2>/dev/null)" in
+  MINGW*|MSYS*|CYGWIN*)   # Windows: PowerShell·CMD 에서도 kit 을 쓰도록 (Java 만으로 실행, bash 불필요)
+    printf '@echo off\r\njava -jar "%%~dp0kit.jar" %%*\r\n' > "$bin/kit.cmd" ;;
+esac
 say "  $bin/kit"
 
 say "2/5 PATH 등록"
@@ -57,13 +66,13 @@ esac
 export PATH="$bin:$PATH"
 
 say "3/5 kit install"
-KIT_HOME_DIR="$home" "$bin/kit" install "$@"
+KIT_HOME_DIR="$kit_home" "$bin/kit" install "$@"
 
 interactive=0
 if [ -r /dev/tty ] && [ -t 1 ]; then interactive=1; fi
 
 say "4/5 자동 업데이트·사용 기록"
-if KIT_HOME_DIR="$home" "$bin/kit" auto status 2>/dev/null | grep -q "켜짐"; then
+if KIT_HOME_DIR="$kit_home" "$bin/kit" auto status 2>/dev/null | grep -q "켜짐"; then
   say "  이미 켜져 있습니다"
 else
   answer="n"
@@ -73,20 +82,20 @@ else
     [ -z "$answer" ] && answer="y"
   fi
   if [ "$answer" = "y" ] || [ "$answer" = "Y" ]; then
-    KIT_HOME_DIR="$home" "$bin/kit" auto on | sed 's/^/  /'
+    KIT_HOME_DIR="$kit_home" "$bin/kit" auto on | sed 's/^/  /'
   else
     say "  건너뜀. 나중에 켜려면: kit auto on"
   fi
 fi
 
 say "5/5 점검"
-KIT_HOME_DIR="$home" "$bin/kit" doctor | sed 's/^/  /' || true
+KIT_HOME_DIR="$kit_home" "$bin/kit" doctor | sed 's/^/  /' || true
 
 say ""
 say "설치 끝. 새 Claude 세션부터 팀 스킬이 적용됩니다."
 if [ "$interactive" = 1 ] && [ "${KIT_NO_UI:-}" != "1" ]; then
   say "kit 화면을 엽니다 (닫으려면 Ctrl+C, 다시 열려면 kit ui)"
-  exec env KIT_HOME_DIR="$home" "$bin/kit" ui
+  exec env KIT_HOME_DIR="$kit_home" "$bin/kit" ui
 else
   say "화면 보기: kit ui"
 fi
