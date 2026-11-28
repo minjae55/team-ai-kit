@@ -3,6 +3,11 @@
 버전 태그를 붙일 때마다 맨 위에 한 절을 추가한다. `kit sync`가 새 버전의 절을 팀원에게 보여 준다.
 쓰는 법: 팀원이 알아야 할 것만, 사람이 읽는 말로. 분류는 `새 스킬`, `바뀐 스킬`, `공통 지식`, `kit 명령`.
 
+## v0.10.5 (2026-11-28)
+- Windows 설치 지원: Antigravity 같은 AI 도구에 저장소 링크를 주고 "설치해줘"라고 하면 PowerShell에서 알아서 설치한다 (Git for Windows·Java 필요). 직접 하려면 `irm https://raw.githubusercontent.com/minjae55/team-ai-kit/main/get.ps1 | iex`
+- Windows에서는 스킬을 링크 대신 복사로 설치하고, PowerShell·CMD에서도 `kit` 명령을 쓸 수 있다
+- AI 설치 안내: 설명만 하지 않고 직접 실행, 다른 저장소·도구를 추측해 설치하지 않음
+
 ## v0.10.4 (2026-11-28)
 - Antigravity(구글 에이전트 IDE·앱) 지원: 스킬은 `~/.gemini/config/skills/`, 공통 원칙은 Gemini CLI와 같은 `~/.gemini/GEMINI.md`에 겹치지 않게 들어간다. 설치 뒤에 Antigravity를 깔아도 다음 업데이트 때 자동으로 들어간다
 - 저장소 링크만 주고 "설치해줘"라고 해도 AI가 같은 순서로 설치한다 (README 맨 위 안내)
