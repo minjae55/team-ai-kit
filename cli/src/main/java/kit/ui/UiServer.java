@@ -151,6 +151,18 @@ public final class UiServer {
                 args.add("true".equals(form.get("on")) ? "on" : "off");
             } else if ("/api/export".equals(path)) {
                 args.add("export");
+            } else if ("/api/uninstall".equals(path)) {
+                // 초기화: preview(미리보기, 아무것도 안 바꿈) → remove(키트 설치 제거) 또는 purge(~/.kit 까지 삭제)
+                String mode = form.get("mode");
+                args.add("uninstall");
+                if ("preview".equals(mode)) {
+                    args.add("--dry-run");
+                } else if ("purge".equals(mode)) {
+                    args.add("--purge");
+                } else if (!"remove".equals(mode)) {
+                    send(ex, 400, "application/json", "{\"error\":\"mode\"}");
+                    return;
+                }
             } else if ("/api/rollback".equals(path)) {
                 args.add("rollback");
             } else if ("/api/unpin".equals(path)) {

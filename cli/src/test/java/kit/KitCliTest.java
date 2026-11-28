@@ -418,6 +418,16 @@ class KitCliTest {
             assertEquals(200, off.code);
             assertTrue(off.body.contains("껐습니다"));
             assertFalse(Files.exists(home.resolve(".claude/skills/incident-analysis"), java.nio.file.LinkOption.NOFOLLOW_LINKS));
+
+            assertEquals(0, kit("skill", "enable", "incident-analysis"));
+            Http preview = http("POST", base + "/api/uninstall", server.token(), "mode=preview");
+            assertTrue(preview.body.contains("미리보기"), preview.body);
+            assertTrue(Files.exists(home.resolve(".claude/skills/incident-analysis"), java.nio.file.LinkOption.NOFOLLOW_LINKS), "미리보기는 아무것도 안 지움");
+            assertEquals(400, http("POST", base + "/api/uninstall", server.token(), "mode=bogus").code);
+            Http removed = http("POST", base + "/api/uninstall", server.token(), "mode=remove");
+            assertTrue(removed.body.contains("완료"), removed.body);
+            assertFalse(Files.exists(home.resolve(".claude/skills/incident-analysis"), java.nio.file.LinkOption.NOFOLLOW_LINKS));
+            assertTrue(Files.exists(home.resolve(".kit/repo")), "remove는 ~/.kit 을 남김");
         } finally {
             server.stop();
         }
