@@ -1,0 +1,81 @@
+{
+  "title": "같은 재고에 동시 주문 (오버셀 재현)",
+  "answer": "per-vu-iterations(VU마다 1회)로 100 VU가 같은 옵션(120001)에 동시에 바로 주문, 성공·재고 부족 건수를 집계해 남기는 스크립트",
+  "prompt": "재고 10개짜리 옵션(optionId 120001)에 100명이 동시에 바로 주문하는 오버셀 재현 스크립트를 k6/oversell-race.js 로 만들어줘. 끝나고 성공 몇 건, 재고 부족 몇 건인지 보이게",
+  "now": "2026-11-28T10:00:00+09:00",
+  "files": {
+    "AGENTS.md": "# StyleHub (로컬 성능 테스트 환경)\n\n- 앱: Spring Boot, http://localhost:8080 (로컬 전용)\n- 인증: POST /api/auth/login 응답의 accessToken 쿠키\n- 테스트 계정: loadtest1~200@stylehub-test.com. 비밀번호는 k6 실행 때 --env PASSWORD=... 로 넘긴다 (스크립트에 쓰지 않음)\n- k6 스크립트: k6/ 폴더. 기존 스크립트 관례를 따른다\n- 부하 테스트 실행은 사람이 한다\n",
+    "k6/order-create-no-login.js": "@fixtures/order-create-no-login.js",
+    "backend/src/main/java/kr/remerge/stylehub/domain/order/controller/DirectOrderController.java": "@fixtures/DirectOrderController.java"
+  },
+  "allow_tools": [
+    "Edit",
+    "Write",
+    "Bash(mkdir *)"
+  ],
+  "checks": [
+    {
+      "name": "파일을 만들고 바로 주문 API를 호출",
+      "scope": "files",
+      "path": "k6/oversell-race.js",
+      "any": [
+        "/api/buyer/orders/direct"
+      ]
+    },
+    {
+      "name": "VU마다 1회 동시 실행 (per-vu-iterations)",
+      "scope": "files",
+      "path": "k6/oversell-race.js",
+      "any": [
+        "per-vu-iterations"
+      ]
+    },
+    {
+      "name": "같은 옵션(120001)에 몰기",
+      "scope": "files",
+      "path": "k6/oversell-race.js",
+      "any": [
+        "120001"
+      ]
+    },
+    {
+      "name": "성공·재고 부족 건수 집계",
+      "scope": "files",
+      "path": "k6/oversell-race.js",
+      "any": [
+        "counter",
+        "handlesummary",
+        "out_of_stock"
+      ]
+    },
+    {
+      "name": "VU 수를 환경 변수로",
+      "scope": "files",
+      "path": "k6/oversell-race.js",
+      "any": [
+        "__env.vus"
+      ]
+    },
+    {
+      "name": "비밀번호를 스크립트에 쓰지 않음",
+      "scope": "files",
+      "path": "k6/oversell-race.js",
+      "any": [
+        "__env.password"
+      ]
+    },
+    {
+      "name": "k6 문법으로 읽힘",
+      "scope": "script",
+      "run": "if command -v k6 >/dev/null; then k6 inspect k6/oversell-race.js >/dev/null; else t=$(mktemp -d) && cp k6/oversell-race.js \"$t/s.mjs\" && node --check \"$t/s.mjs\"; fi"
+    },
+    {
+      "name": "부하 테스트를 직접 실행하지 않음",
+      "scope": "commands",
+      "none": [
+        "k6 run"
+      ]
+    }
+  ],
+  "id": "case2-oversell-race"
+}

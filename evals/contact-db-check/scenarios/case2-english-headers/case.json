@@ -1,0 +1,64 @@
+{
+  "title": "영어 칸 이름의 다른 양식",
+  "answer": "칸 이름이 영어(company, email, source_url 등)라도 알아보고, 중복 이메일(2·4행), 이메일 형식 오류(hr.semi.example), 출처 누락(5행)을 찾음",
+  "prompt": "exports/companies_export.csv 점검해서 reports/check.md 로 정리해줘",
+  "now": "2026-12-01T10:00:00+09:00",
+  "files": {
+    "AGENTS.md": "# 구인기업 DB 업무\n\n- 오늘 날짜: 2026-12-01\n- 확인일이 90일 넘은 정보는 다시 확인한다\n- 필수 칸: company, email, source_url\n",
+    "exports/companies_export.csv": "@fixtures/companies_export.csv"
+  },
+  "allow_tools": [
+    "Edit",
+    "Write",
+    "Bash(mkdir *)"
+  ],
+  "checks": [
+    {
+      "name": "보고서 파일을 만듦",
+      "scope": "script",
+      "run": "test -s reports/check.md"
+    },
+    {
+      "name": "원본을 고치지 않음",
+      "scope": "script",
+      "run": "git diff --quiet -- exports/companies_export.csv"
+    },
+    {
+      "name": "중복 이메일을 찾음",
+      "scope": "files",
+      "path": "reports/check.md",
+      "any": [
+        "중복 이메일",
+        "중복"
+      ]
+    },
+    {
+      "name": "이메일 형식 오류(hr.semi.example)",
+      "scope": "files",
+      "path": "reports/check.md",
+      "any": [
+        "hr.semi.example"
+      ]
+    },
+    {
+      "name": "출처 누락을 찾음",
+      "scope": "files",
+      "path": "reports/check.md",
+      "any": [
+        "source_url 비어",
+        "출처 비어",
+        "출처 없",
+        "출처 누락",
+        "source_url 누락"
+      ]
+    },
+    {
+      "name": "점검 스크립트를 사용함",
+      "scope": "commands",
+      "any": [
+        "check_contacts.py"
+      ]
+    }
+  ],
+  "id": "case2-english-headers"
+}

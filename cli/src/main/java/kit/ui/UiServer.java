@@ -149,6 +149,8 @@ public final class UiServer {
             } else if ("/api/auto".equals(path)) {
                 args.add("auto");
                 args.add("true".equals(form.get("on")) ? "on" : "off");
+            } else if ("/api/export".equals(path)) {
+                args.add("export");
             } else if ("/api/rollback".equals(path)) {
                 args.add("rollback");
             } else if ("/api/unpin".equals(path)) {

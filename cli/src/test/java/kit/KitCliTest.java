@@ -213,6 +213,33 @@ class KitCliTest {
     }
 
     @Test
+    void export_builds_web_bundles_and_reports_changed_skills() throws Exception {
+        assertEquals(0, kit("install"));
+        Path out = tmp.resolve("export");
+        assertEquals(0, kit("export", "--out", out.toString()));
+        assertTrue(output().contains("새로 올리기"), output());
+        try (java.util.zip.ZipFile z = new java.util.zip.ZipFile(out.resolve("claude-web/incident-analysis.zip").toFile())) {
+            assertTrue(z.getEntry("incident-analysis/SKILL.md") != null, "claude.ai 업로드 형식: 스킬 폴더째 zip");
+        }
+        String ins = new String(Files.readAllBytes(out.resolve("chatgpt/incident-analysis/instructions.md")), StandardCharsets.UTF_8);
+        assertTrue(ins.contains("웹에서 쓸 때의 규칙") && ins.contains("코드 실행"), ins);
+        assertFalse(ins.startsWith("---"), "frontmatter는 뺌");
+        assertTrue(Files.exists(out.resolve("gemini/incident-analysis/files/SKILL.md")));
+        assertTrue(Files.exists(out.resolve("gemini/incident-analysis/올리는법.txt")));
+
+        captured.reset();
+        assertEquals(0, kit("export", "--out", out.toString()));
+        assertTrue(output().contains("바뀐 스킬이 없습니다"), output());
+
+        Path skillMd = home.resolve(".kit/repo/kit/skills/incident-analysis/SKILL.md");
+        Files.write(skillMd, (new String(Files.readAllBytes(skillMd), StandardCharsets.UTF_8) + "\n추가 규칙\n").getBytes(StandardCharsets.UTF_8));
+        captured.reset();
+        assertEquals(0, kit("export", "--out", out.toString(), "--tools", "chatgpt"));
+        assertTrue(output().contains("바뀜 → 다시 올리기"), output());
+        assertFalse(output().contains("claude.ai"), "고른 도구만");
+    }
+
+    @Test
     void self_update_copies_prebuilt_dist_jar_without_building() throws IOException {
         kit.core.KitEnv env = new kit.core.KitEnv(home, "x");
         write(env.repoDir().resolve("dist/kit.jar"), "new-jar");
@@ -223,6 +250,18 @@ class KitCliTest {
         assertEquals("new-jar", new String(Files.readAllBytes(env.kitDir().resolve("bin/kit.jar")), StandardCharsets.UTF_8));
         assertTrue(Files.isExecutable(env.kitDir().resolve("bin/kit")));
         assertFalse(Files.exists(env.kitDir().resolve("self-update.log")), "빌드하지 않음");
+    }
+
+    @Test
+    void gemini_gets_skills_and_copied_context_in_its_own_folder() throws IOException {
+        Files.createDirectories(home.resolve(".gemini"));
+        assertEquals(0, kit("install", "--tools", "gemini"));
+        assertTrue(Files.exists(home.resolve(".gemini/skills/incident-analysis/SKILL.md")));
+        String ctx = new String(Files.readAllBytes(home.resolve(".gemini/GEMINI.md")), StandardCharsets.UTF_8);
+        assertTrue(ctx.contains("team-ai-kit") || ctx.contains("팀"), ctx);
+        assertFalse(Files.exists(home.resolve(".agents/skills")), "Codex 폴더는 건드리지 않음");
+        assertEquals(0, kit("uninstall"));
+        assertFalse(Files.exists(home.resolve(".gemini/skills/incident-analysis")));
     }
 
     @Test

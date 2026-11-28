@@ -1,0 +1,68 @@
+{
+  "title": "상품 검색 변경: 문자열로 조립한 SQL(주입)과 반복문 안 조회(N+1)",
+  "answer": "keyword·sort를 문자열로 이어 붙인 네이티브 쿼리라 SQL 주입 가능(sort는 바인딩도 안 되므로 허용 목록 필요), 상품마다 옵션을 따로 조회해 N+1. 둘 다 꼭 고칠 것",
+  "prompt": "스테이징한 상품 검색 변경 코드 리뷰해줘",
+  "now": "2026-11-28T10:00:00+09:00",
+  "files": {
+    "AGENTS.md": "# StyleHub\n\n- Spring Boot + JPA, MySQL. 상품 약 41만 건\n",
+    "src/main/java/kr/remerge/stylehub/domain/product/repository/ProductRepository.java": "package kr.remerge.stylehub.domain.product.repository;\n\nimport org.springframework.data.jpa.repository.JpaRepository;\n\npublic interface ProductRepository extends JpaRepository<Product, Long> {\n}\n"
+  },
+  "commits": [
+    {
+      "date": "2026-11-20T10:00:00+09:00",
+      "message": "feat: 상품 엔티티와 리포지토리"
+    }
+  ],
+  "staged": {
+    "src/main/java/kr/remerge/stylehub/domain/product/repository/ProductSearchRepository.java": "package kr.remerge.stylehub.domain.product.repository;\n\nimport jakarta.persistence.EntityManager;\nimport lombok.RequiredArgsConstructor;\nimport org.springframework.stereotype.Repository;\nimport java.util.List;\n\n@Repository\n@RequiredArgsConstructor\npublic class ProductSearchRepository {\n    private final EntityManager em;\n\n    public List<Product> searchByName(String keyword, String sort) {\n        String sql = \"select * from products where name like '%\" + keyword + \"%' order by \" + sort;\n        return em.createNativeQuery(sql, Product.class).getResultList();\n    }\n}\n",
+    "src/main/java/kr/remerge/stylehub/domain/product/service/ProductSearchService.java": "package kr.remerge.stylehub.domain.product.service;\n\nimport lombok.RequiredArgsConstructor;\nimport org.springframework.stereotype.Service;\nimport org.springframework.transaction.annotation.Transactional;\nimport java.util.ArrayList;\nimport java.util.List;\n\n@Service\n@RequiredArgsConstructor\npublic class ProductSearchService {\n    private final ProductSearchRepository searchRepository;\n    private final ProductOptionRepository optionRepository;\n\n    // GET /api/products/search?keyword=...&sort=...\n    @Transactional(readOnly = true)\n    public List<ProductSearchResponse> search(String keyword, String sort) {\n        List<Product> products = searchRepository.searchByName(keyword, sort);\n        List<ProductSearchResponse> out = new ArrayList<>();\n        for (Product p : products) {\n            List<ProductOption> options = optionRepository.findByProductId(p.getId());\n            out.add(ProductSearchResponse.of(p, options));\n        }\n        return out;\n    }\n}\n"
+  },
+  "checks": [
+    {
+      "name": "SQL 주입을 찾음",
+      "scope": "answer",
+      "any": [
+        "injection",
+        "인젝션",
+        "sql 주입",
+        "주입"
+      ]
+    },
+    {
+      "name": "반복문 안 조회(N+1)를 찾음",
+      "scope": "answer",
+      "any": [
+        "n+1",
+        "n + 1",
+        "반복문 안",
+        "루프 안"
+      ]
+    },
+    {
+      "name": "정렬 값(sort)도 위험하다고 짚음",
+      "scope": "answer",
+      "any": [
+        "sort",
+        "order by",
+        "정렬"
+      ]
+    },
+    {
+      "name": "문제를 근거(파일)와 함께",
+      "scope": "answer",
+      "any": [
+        "productsearchrepository",
+        "productsearchservice"
+      ]
+    },
+    {
+      "name": "코드를 고치거나 커밋하지 않음",
+      "scope": "commands",
+      "none": [
+        "git commit",
+        "git add"
+      ]
+    }
+  ],
+  "id": "case1-sql-injection-n-plus-1"
+}

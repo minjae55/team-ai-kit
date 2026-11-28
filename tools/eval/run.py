@@ -59,6 +59,17 @@ def build_workdir(case_dir: str, case: dict, skill: str) -> str:
     for i, c in enumerate(commits):
         e = dict(env, GIT_AUTHOR_DATE=c["date"], GIT_COMMITTER_DATE=c["date"])
         subprocess.run(["git", "commit", "-q", "--allow-empty", "-m", c["message"]], cwd=work, env=e, check=True)
+    # 커밋하지 않은 변경 (커밋 메시지·코드 리뷰 시나리오): "staged"는 git add까지, "unstaged"는 파일만 바꿈
+    for key, add in (("staged", True), ("unstaged", False)):
+        for rel, content in case.get(key, {}).items():
+            dst = os.path.join(work, rel)
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            if content.startswith("@fixtures/"):
+                shutil.copy(os.path.join(fixtures, content[len("@fixtures/"):]), dst)
+            else:
+                open(dst, "w", encoding="utf-8").write(content)
+            if add:
+                subprocess.run(["git", "add", rel], cwd=work, check=True)
     return work
 
 
@@ -83,6 +94,30 @@ def tools_for(case: dict):
     return ",".join(allowed), ",".join(denied)
 
 
+class InstalledSkillOff:
+    """격리하지 않고 돌릴 때, 같은 이름의 설치본(~/.claude/skills/<스킬>)이 있으면 시험 동안만 kit으로 끄고 끝나면 다시 켠다.
+    설치본이 먼저 불리면 시험용 복사본(PR 버전)을 시험하지 못하기 때문이다. 끄는 동안에는 내 다른 Claude 세션에서도 그 스킬이 빠진다."""
+
+    def __init__(self, skill: str, enabled: bool):
+        self.skill = skill
+        self.kit = os.path.expanduser("~/.kit/bin/kit")
+        link = os.path.expanduser(f"~/.claude/skills/{skill}")
+        self.active = enabled and os.path.lexists(link) and os.path.exists(self.kit)
+
+    def __enter__(self):
+        if self.active:
+            print(f"  (설치된 {self.skill} 스킬을 시험 동안 잠시 끕니다. 끝나면 다시 켭니다)", flush=True)
+            subprocess.run([self.kit, "skill", "disable", self.skill], capture_output=True, text=True)
+        return self
+
+    def __exit__(self, *exc):
+        if self.active:
+            r = subprocess.run([self.kit, "skill", "enable", self.skill], capture_output=True, text=True)
+            if r.returncode != 0:
+                print(f"  [경고] {self.skill} 스킬을 다시 켜지 못했습니다. 직접 실행하세요: kit skill enable {self.skill}")
+        return False
+
+
 def run_case(case_dir: str, skill: str, args) -> dict:
     case = json.load(open(os.path.join(case_dir, "case.json"), encoding="utf-8"))
     work = build_workdir(case_dir, case, skill)
@@ -104,7 +139,8 @@ def run_case(case_dir: str, skill: str, args) -> dict:
         return {"case": case["id"], "passed": True, "dry_run": True}
 
     started = time.time()
-    proc = subprocess.run(cmd, cwd=work, env=env, capture_output=True, text=True, timeout=args.timeout)
+    with InstalledSkillOff(skill, enabled=not args.isolated and not args.keep_installed):
+        proc = subprocess.run(cmd, cwd=work, env=env, capture_output=True, text=True, timeout=args.timeout)
     answer, commands, skills_used, meta = "", [], [], {}
     denials = []
     for line in proc.stdout.splitlines():
@@ -163,6 +199,7 @@ def main():
     p.add_argument("--timeout", type=int, default=900, help="시나리오당 최대 초")
     p.add_argument("--isolated", action="store_true",
                    help="빈 CLAUDE_CONFIG_DIR로 실행 (CLAUDE_CODE_OAUTH_TOKEN 또는 ANTHROPIC_API_KEY 필요)")
+    p.add_argument("--keep-installed", action="store_true", help="설치된 같은 이름 스킬을 끄지 않음 (환경 검사에서 불통과할 수 있음)")
     p.add_argument("--claude", default=os.environ.get("CLAUDE_BIN", "claude"))
     p.add_argument("--dry-run", action="store_true")
     args = p.parse_args()

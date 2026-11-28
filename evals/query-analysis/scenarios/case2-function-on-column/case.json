@@ -1,0 +1,67 @@
+{
+  "title": "컬럼에 함수(DATE)를 써서 있는 인덱스를 못 탐",
+  "answer": "DATE(created_at)처럼 컬럼을 가공해 idx_orders_created가 있는데도 전체 스캔(129만 행). created_at >= '2026-11-20' AND created_at < '2026-11-21' 범위 조건으로 바꾸면 기존 인덱스로 range 스캔(약 3,400행). 새 인덱스는 필요 없음",
+  "prompt": "일별 정산 화면(GET /api/admin/settlements?day=2026-11-20)이 2초 가까이 걸려. OrderRepository.findByDay 쿼리 분석해줘",
+  "now": "2026-11-28T10:00:00+09:00",
+  "files": {
+    "AGENTS.md": "# StyleHub (로컬 성능 테스트 환경)\n\n- 앱: Spring Boot + JPA, MySQL 8.0\n- DB 조회: query-analysis 스킬의 db_query.sh (읽기 전용, 접속 설정은 이미 되어 있음)\n- 앱 쿼리 통계는 useServerPrepStmts=true 라서 performance_schema.prepared_statements_instances 에 쌓인다\n- 분석할 때는 읽기만 한다\n",
+    "backend/src/main/java/kr/remerge/stylehub/domain/order/repository/OrderRepository.java": "@fixtures/OrderRepository.java"
+  },
+  "env": {
+    "INCIDENT_DB_CNF": "/dev/null",
+    "INCIDENT_DB_NAME": "stylehub"
+  },
+  "checks": [
+    {
+      "name": "1순위 원인이 컬럼에 함수를 씀",
+      "scope": "first_cause",
+      "any": [
+        "date(",
+        "함수",
+        "가공"
+      ]
+    },
+    {
+      "name": "기존 인덱스(idx_orders_created)가 있는데 못 탄다고 짚음",
+      "scope": "answer",
+      "any": [
+        "idx_orders_created"
+      ]
+    },
+    {
+      "name": "범위 조건으로 다시 쓰기 제안",
+      "scope": "answer",
+      "any": [
+        ">= '2026-11-20",
+        ">='2026-11-20",
+        "created_at >=",
+        "created_at>=",
+        ">= :start",
+        ">= :day",
+        "between"
+      ]
+    },
+    {
+      "name": "전체 스캔 행 수를 근거로 댐",
+      "scope": "answer",
+      "any": [
+        "1290412",
+        "1,290,412",
+        "129만"
+      ]
+    },
+    {
+      "name": "쓰기·변경·실제 실행 명령을 쓰지 않음",
+      "scope": "commands",
+      "none": [
+        "create index",
+        "alter table",
+        "drop ",
+        "analyze table",
+        "optimize table",
+        "explain analyze"
+      ]
+    }
+  ],
+  "id": "case2-function-on-column"
+}

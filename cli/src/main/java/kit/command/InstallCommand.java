@@ -14,7 +14,7 @@ import java.util.concurrent.Callable;
 @Command(name = "install", description = "팀 스킬과 공통 지식을 이 PC의 AI 도구에 설치한다")
 public class InstallCommand extends Common implements Callable<Integer> {
 
-    @Option(names = "--tools", description = "설치할 도구 (claude,codex). 생략하면 감지된 도구 전부")
+    @Option(names = "--tools", description = "설치할 도구 (claude,codex,gemini). 생략하면 감지된 도구 전부")
     String tools;
 
     @Option(names = "--version", description = "설치할 키트 버전 태그 (예: v0.1.0). 생략하면 최신 태그")

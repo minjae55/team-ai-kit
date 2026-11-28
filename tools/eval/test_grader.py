@@ -37,7 +37,7 @@ def check_scenarios(skill_dir):
                 problems.append(f"{case_file}: files 검사 '{chk['name']}'에 path 없음")
             elif scope not in ("script", "files") and "any" not in chk and "none" not in chk:
                 problems.append(f"{case_file}: '{chk['name']}'에 any나 none이 없음")
-        for rel, content in case.get("files", {}).items():
+        for rel, content in {**case.get("files", {}), **case.get("staged", {}), **case.get("unstaged", {})}.items():
             if content.startswith("@fixtures/") and not os.path.exists(os.path.join(d, "fixtures", content[10:])):
                 problems.append(f"{case_file}: {content} 파일 없음")
         rules = os.path.join(d, "fixtures", "db.tsv")

@@ -1,0 +1,84 @@
+{
+  "title": "캐시 개선 전후 비교용 시나리오 (워밍업 분리, 조건 고정)",
+  "answer": "워밍업 시나리오와 측정 시나리오(startTime으로 뒤에 시작)를 나누고, 100 VU 2분 고정 조건, name 태그 threshold, 결과를 파일로 남기는 방법(--summary-export 또는 handleSummary)을 안내",
+  "prompt": "협의 목록(GET /api/negotiations) 캐시 개선 전후를 같은 조건으로 비교할 스크립트를 k6/negotiation-compare.js 로 만들어줘. 캐시 워밍업은 측정에서 빼고, 100명 2분, 결과는 파일로 남기고 싶어",
+  "now": "2026-11-28T10:00:00+09:00",
+  "files": {
+    "AGENTS.md": "# StyleHub (로컬 성능 테스트 환경)\n\n- 앱: Spring Boot, http://localhost:8080 (로컬 전용)\n- 인증: POST /api/auth/login 응답의 accessToken 쿠키\n- 테스트 계정: loadtest1~200@stylehub-test.com. 비밀번호는 k6 실행 때 --env PASSWORD=... 로 넘긴다 (스크립트에 쓰지 않음)\n- k6 스크립트: k6/ 폴더. 기존 스크립트 관례를 따른다\n- 부하 테스트 실행은 사람이 한다\n",
+    "k6/order-create-no-login.js": "@fixtures/order-create-no-login.js",
+    "backend/src/main/java/kr/remerge/stylehub/domain/negotiation/controller/NegotiationController.java": "@fixtures/NegotiationController.java"
+  },
+  "allow_tools": [
+    "Edit",
+    "Write",
+    "Bash(mkdir *)"
+  ],
+  "checks": [
+    {
+      "name": "파일을 만들고 협의 목록 API를 호출",
+      "scope": "files",
+      "path": "k6/negotiation-compare.js",
+      "any": [
+        "/api/negotiations"
+      ]
+    },
+    {
+      "name": "워밍업과 측정을 나눔 (startTime)",
+      "scope": "files",
+      "path": "k6/negotiation-compare.js",
+      "any": [
+        "starttime"
+      ]
+    },
+    {
+      "name": "2분 측정",
+      "scope": "files",
+      "path": "k6/negotiation-compare.js",
+      "any": [
+        "'2m'",
+        "\"2m\"",
+        "|| '2m'",
+        "120s"
+      ]
+    },
+    {
+      "name": "측정 요청에 name 태그",
+      "scope": "files",
+      "path": "k6/negotiation-compare.js",
+      "any": [
+        "tags: { name",
+        "tags: {name",
+        "tags:{name"
+      ]
+    },
+    {
+      "name": "결과를 파일로 남기는 방법",
+      "scope": "answer",
+      "any": [
+        "--summary-export",
+        "handlesummary"
+      ]
+    },
+    {
+      "name": "VU 수를 환경 변수로",
+      "scope": "files",
+      "path": "k6/negotiation-compare.js",
+      "any": [
+        "__env.vus"
+      ]
+    },
+    {
+      "name": "k6 문법으로 읽힘",
+      "scope": "script",
+      "run": "if command -v k6 >/dev/null; then k6 inspect k6/negotiation-compare.js >/dev/null; else t=$(mktemp -d) && cp k6/negotiation-compare.js \"$t/s.mjs\" && node --check \"$t/s.mjs\"; fi"
+    },
+    {
+      "name": "부하 테스트를 직접 실행하지 않음",
+      "scope": "commands",
+      "none": [
+        "k6 run"
+      ]
+    }
+  ],
+  "id": "case3-before-after-compare"
+}

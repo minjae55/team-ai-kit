@@ -1,0 +1,59 @@
+{
+  "title": "깊은 페이지의 큰 OFFSET (인덱스 추가가 답이 아님)",
+  "answer": "PRIMARY 인덱스로 정렬은 되지만 OFFSET 200000 때문에 200,020행을 읽고 버림. 앞 페이지는 빠르고 뒤 페이지만 느림. 인덱스 추가가 아니라 마지막 product_id 기준 커서(keyset) 페이지로 바꿔야 함",
+  "prompt": "관리자 상품 목록에서 뒤쪽 페이지(page=10000)로 갈수록 느려져. 앞 페이지는 빠른데. ProductRepository.findAll 페이지 조회 분석해줘",
+  "now": "2026-11-28T10:00:00+09:00",
+  "files": {
+    "AGENTS.md": "# StyleHub (로컬 성능 테스트 환경)\n\n- 앱: Spring Boot + JPA, MySQL 8.0\n- DB 조회: query-analysis 스킬의 db_query.sh (읽기 전용, 접속 설정은 이미 되어 있음)\n- 앱 쿼리 통계는 useServerPrepStmts=true 라서 performance_schema.prepared_statements_instances 에 쌓인다\n- 분석할 때는 읽기만 한다\n",
+    "backend/src/main/java/kr/remerge/stylehub/domain/product/service/AdminProductService.java": "@fixtures/AdminProductService.java"
+  },
+  "env": {
+    "INCIDENT_DB_CNF": "/dev/null",
+    "INCIDENT_DB_NAME": "stylehub"
+  },
+  "checks": [
+    {
+      "name": "1순위 원인이 큰 OFFSET",
+      "scope": "first_cause",
+      "any": [
+        "offset"
+      ]
+    },
+    {
+      "name": "읽고 버리는 행 수를 근거로 댐",
+      "scope": "answer",
+      "any": [
+        "200020",
+        "200,020",
+        "20만"
+      ]
+    },
+    {
+      "name": "커서(keyset) 페이지 제안",
+      "scope": "answer",
+      "any": [
+        "커서",
+        "keyset",
+        "product_id <",
+        "seek",
+        "no offset",
+        "no-offset",
+        "마지막 id",
+        "마지막 product_id"
+      ]
+    },
+    {
+      "name": "쓰기·변경·실제 실행 명령을 쓰지 않음",
+      "scope": "commands",
+      "none": [
+        "create index",
+        "alter table",
+        "drop ",
+        "analyze table",
+        "optimize table",
+        "explain analyze"
+      ]
+    }
+  ],
+  "id": "case3-large-offset"
+}

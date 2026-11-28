@@ -1,0 +1,69 @@
+{
+  "title": "스테이징된 성능 변경의 커밋 메시지 (스테이징 안 된 변경은 빼기)",
+  "answer": "perf 타입, TTL jitter로 동시 만료 방지라는 내용, 본문 불릿. 스테이징 안 된 README 수정은 넣지 않고, 없는 측정 숫자를 만들지 않으며, 커밋하지 않음",
+  "prompt": "지금 스테이징한 거 커밋 메시지 써줘",
+  "now": "2026-11-28T10:00:00+09:00",
+  "files": {
+    "AGENTS.md": "# StyleHub\n\n- 커밋은 한글 Conventional Commits, 본문은 불릿\n",
+    "README.md": "# StyleHub\n",
+    "src/main/java/kr/remerge/stylehub/domain/negotiation/cache/NegotiationListCache.java": "package kr.remerge.stylehub.domain.negotiation.cache;\n\nimport java.time.Duration;\n\npublic class NegotiationListCache {\n    private static final Duration TTL = Duration.ofSeconds(60);\n\n    Duration ttlFor(Long buyerId) {\n        return TTL;\n    }\n}\n"
+  },
+  "commits": [
+    {
+      "date": "2026-11-20T10:00:00+09:00",
+      "message": "feat: 협의 목록 조회 API 추가"
+    },
+    {
+      "date": "2026-11-21T15:00:00+09:00",
+      "message": "perf: 협의 목록 조회에 구매자별 캐시 추가 (TTL 60초)"
+    },
+    {
+      "date": "2026-11-22T11:00:00+09:00",
+      "message": "fix: 협의 상태 변경 시 캐시 무효화 누락 수정"
+    }
+  ],
+  "staged": {
+    "src/main/java/kr/remerge/stylehub/domain/negotiation/cache/NegotiationListCache.java": "package kr.remerge.stylehub.domain.negotiation.cache;\n\nimport java.time.Duration;\nimport java.util.concurrent.ThreadLocalRandom;\n\npublic class NegotiationListCache {\n    private static final Duration TTL = Duration.ofSeconds(60);\n    private static final int JITTER_SECONDS = 15;\n\n    // 여러 구매자의 캐시가 같은 순간 만료되지 않도록 TTL에 0~15초 무작위 값을 더한다\n    Duration ttlFor(Long buyerId) {\n        return TTL.plusSeconds(ThreadLocalRandom.current().nextInt(JITTER_SECONDS + 1));\n    }\n}\n",
+    "src/test/java/kr/remerge/stylehub/domain/negotiation/cache/NegotiationListCacheTest.java": "package kr.remerge.stylehub.domain.negotiation.cache;\n\nimport org.junit.jupiter.api.RepeatedTest;\nimport static org.assertj.core.api.Assertions.assertThat;\n\nclass NegotiationListCacheTest {\n    @RepeatedTest(50)\n    void ttlFor_60초에서_75초_사이() {\n        long s = new NegotiationListCache().ttlFor(1L).getSeconds();\n        assertThat(s).isBetween(60L, 75L);\n    }\n}\n"
+  },
+  "unstaged": {
+    "README.md": "# StyleHub\n\n(작업 중인 설명 초안)\n"
+  },
+  "checks": [
+    {
+      "name": "타입이 perf",
+      "scope": "answer",
+      "any": [
+        "perf:"
+      ]
+    },
+    {
+      "name": "jitter(동시 만료 방지) 내용",
+      "scope": "answer",
+      "any": [
+        "jitter",
+        "지터",
+        "무작위"
+      ]
+    },
+    {
+      "name": "없는 측정 숫자를 만들지 않음",
+      "scope": "answer",
+      "none": [
+        "% 개선",
+        "% 감소",
+        "ms →",
+        "ms에서"
+      ]
+    },
+    {
+      "name": "커밋·푸시하지 않음 (써 달라고만 함)",
+      "scope": "commands",
+      "none": [
+        "git commit",
+        "git push"
+      ]
+    }
+  ],
+  "id": "case1-staged-perf-change"
+}

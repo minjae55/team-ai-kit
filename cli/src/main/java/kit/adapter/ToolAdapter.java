@@ -28,7 +28,7 @@ public interface ToolAdapter {
     String contextBody(KitEnv env) throws IOException;
 
     static List<ToolAdapter> all() {
-        return Arrays.<ToolAdapter>asList(new ClaudeAdapter(), new CodexAdapter());
+        return Arrays.<ToolAdapter>asList(new ClaudeAdapter(), new CodexAdapter(), new GeminiAdapter());
     }
 
     static ToolAdapter byId(String id) {

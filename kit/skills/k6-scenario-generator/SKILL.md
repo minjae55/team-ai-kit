@@ -21,7 +21,7 @@ description: 특정 API의 k6 부하 테스트 스크립트를 프로젝트의 �
 | 동시 요청에서 정합성·경쟁 상태 재현 | `per-vu-iterations` (VU마다 1회) | 같은 재고에 동시 주문 |
 | 목표 동시 사용자에서 응답 시간 | `constant-vus` 또는 `ramping-vus` | 동시 50명 1분 |
 | 목표 처리량(RPS)에서 응답 시간 | `constant-arrival-rate` | 초당 100건 |
-| 개선 전후 비교 | 위 중 하나를 **고정 조건**으로 | 같은 VU·시간·데이터 |
+| 개선 전후 비교 | 위 중 하나를 **고정 조건**으로, 워밍업은 별도 시나리오(`startTime`) | 같은 VU·시간·데이터. **결과를 파일로 남긴다**: 스크립트에 `handleSummary`(예: `summary.json`)를 넣거나 실행 명령에 `--summary-export` |
 
 ## 3. 작성 규칙
 1. VU 수, 시간, 주소는 `__ENV`로 받는다 (`__ENV.VUS || '10'`, `__ENV.BASE_URL || '<로컬 주소>'`).

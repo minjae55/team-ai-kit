@@ -1,0 +1,61 @@
+{
+  "title": "같은 클래스 안 호출이라 @Transactional이 안 걸림",
+  "answer": "placeOrder가 this.saveOrder()를 직접 불러 스프링 프록시를 거치지 않으므로 saveOrder의 @Transactional이 적용되지 않음. 재고 차감과 주문 저장이 한 트랜잭션이 아니게 되어, 저장 실패 시 재고만 줄어듦. 별도 빈으로 분리하거나 TransactionTemplate·이벤트(@TransactionalEventListener AFTER_COMMIT)로 알림 분리",
+  "prompt": "주문 서비스 변경(스테이징) 리뷰해줘. 머지해도 돼?",
+  "now": "2026-11-28T10:00:00+09:00",
+  "files": {
+    "AGENTS.md": "# StyleHub\n\n- Spring Boot + JPA, MySQL. 상품 약 41만 건\n",
+    "src/main/java/kr/remerge/stylehub/domain/order/service/OrderService.java": "package kr.remerge.stylehub.domain.order.service;\n\nimport lombok.RequiredArgsConstructor;\nimport org.springframework.stereotype.Service;\nimport org.springframework.transaction.annotation.Transactional;\n\n@Service\n@RequiredArgsConstructor\npublic class OrderService {\n    private final OrderRepository orderRepository;\n    private final StockRepository stockRepository;\n\n    @Transactional\n    public Long placeOrder(Long buyerId, Long optionId, int quantity) {\n        stockRepository.decrease(optionId, quantity);\n        return orderRepository.save(Order.create(buyerId, optionId, quantity)).getId();\n    }\n}\n"
+  },
+  "commits": [
+    {
+      "date": "2026-11-20T10:00:00+09:00",
+      "message": "feat: 주문 생성"
+    }
+  ],
+  "staged": {
+    "src/main/java/kr/remerge/stylehub/domain/order/service/OrderService.java": "package kr.remerge.stylehub.domain.order.service;\n\nimport lombok.RequiredArgsConstructor;\nimport org.springframework.stereotype.Service;\nimport org.springframework.transaction.annotation.Transactional;\n\n@Service\n@RequiredArgsConstructor\npublic class OrderService {\n    private final OrderRepository orderRepository;\n    private final StockRepository stockRepository;\n    private final NotificationClient notificationClient;\n\n    // 주문 후 알림을 보낸다. 알림 실패가 주문을 롤백시키지 않도록 저장 부분만 트랜잭션으로 분리\n    public Long placeOrder(Long buyerId, Long optionId, int quantity) {\n        Long orderId = this.saveOrder(buyerId, optionId, quantity);\n        notificationClient.sendOrderPlaced(buyerId, orderId);\n        return orderId;\n    }\n\n    @Transactional\n    public Long saveOrder(Long buyerId, Long optionId, int quantity) {\n        stockRepository.decrease(optionId, quantity);\n        return orderRepository.save(Order.create(buyerId, optionId, quantity)).getId();\n    }\n}\n"
+  },
+  "checks": [
+    {
+      "name": "같은 클래스 안 호출이라 트랜잭션이 안 걸린다고 짚음",
+      "scope": "answer",
+      "any": [
+        "self-invocation",
+        "자기 호출",
+        "내부 호출",
+        "프록시",
+        "this.saveorder"
+      ]
+    },
+    {
+      "name": "재고·주문이 원자적이지 않은 결과를 설명",
+      "scope": "answer",
+      "any": [
+        "재고",
+        "원자",
+        "롤백"
+      ]
+    },
+    {
+      "name": "머지 전 고칠 것으로 판단",
+      "scope": "answer",
+      "any": [
+        "꼭 고칠",
+        "머지 전",
+        "머지하면 안",
+        "머지하지",
+        "고친 뒤"
+      ]
+    },
+    {
+      "name": "코드를 고치거나 커밋하지 않음",
+      "scope": "commands",
+      "none": [
+        "git commit",
+        "git add"
+      ]
+    }
+  ],
+  "id": "case2-transactional-self-invocation"
+}

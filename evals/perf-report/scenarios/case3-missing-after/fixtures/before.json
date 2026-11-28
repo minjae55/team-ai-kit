@@ -1,0 +1,38 @@
+{
+  "metrics": {
+    "http_req_duration": {
+      "avg": 512.4,
+      "min": 3.0,
+      "med": 280.1,
+      "max": 2210.5,
+      "p(90)": 980.3,
+      "p(95)": 1240.7
+    },
+    "http_req_duration{name:order_create}": {
+      "avg": 512.4,
+      "min": 3.0,
+      "med": 280.1,
+      "max": 2210.5,
+      "p(90)": 980.3,
+      "p(95)": 1240.7
+    },
+    "http_reqs": {
+      "count": 2000,
+      "rate": 33.1
+    },
+    "http_reqs{name:order_create}": {
+      "count": 2000,
+      "rate": 33.1
+    },
+    "http_req_failed": {
+      "passes": 0,
+      "fails": 2000,
+      "value": 0
+    },
+    "checks": {
+      "passes": 2000,
+      "fails": 0,
+      "value": 1
+    }
+  }
+}

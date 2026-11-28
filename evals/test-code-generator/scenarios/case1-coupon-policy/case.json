@@ -1,0 +1,72 @@
+{
+  "title": "쿠폰 할인 정책 테스트 (경계값·예외 포함, 실행해서 통과)",
+  "answer": "기존 관례(AssertJ, @DisplayName)로 CouponPolicyTest를 만들고, 최소 주문 금액과 같을 때 할인, 미만이면 0, 최대 할인 상한, 만료일 당일 사용 가능·다음 날 예외, 음수 예외를 덮고 실행해 모두 통과",
+  "prompt": "CouponPolicy 테스트 코드 짜줘",
+  "now": "2026-11-28T10:00:00+09:00",
+  "files": {
+    "AGENTS.md": "# 쇼핑 도메인 예제\n\n- Java 17, Gradle. 테스트 실행: `sh gradlew test` (특정 클래스: `sh gradlew test --tests 'shop.CouponPolicyTest'`)\n- 테스트는 JUnit 5 + AssertJ, 기존 테스트 관례를 따른다\n",
+    "build.gradle": "@fixtures/build.gradle",
+    "settings.gradle": "@fixtures/settings.gradle",
+    "gradlew": "@fixtures/gradlew",
+    "gradle/wrapper/gradle-wrapper.jar": "@fixtures/gradle-wrapper.jar",
+    "gradle/wrapper/gradle-wrapper.properties": "@fixtures/gradle-wrapper.properties",
+    "src/main/java/shop/CouponPolicy.java": "@fixtures/CouponPolicy.java",
+    "src/main/java/shop/PointPolicy.java": "@fixtures/PointPolicy.java",
+    "src/test/java/shop/PointPolicyTest.java": "@fixtures/PointPolicyTest.java"
+  },
+  "allow_tools": [
+    "Edit",
+    "Write",
+    "Bash(mkdir *)",
+    "Bash(sh gradlew *)",
+    "Bash(./gradlew *)"
+  ],
+  "checks": [
+    {
+      "name": "테스트를 만들고 실행하면 통과",
+      "scope": "script",
+      "run": "test -f src/test/java/shop/CouponPolicyTest.java && sh gradlew test --offline -q",
+      "timeout": 600
+    },
+    {
+      "name": "테스트가 5개 이상",
+      "scope": "script",
+      "run": "test $(grep -c '@Test' src/test/java/shop/CouponPolicyTest.java) -ge 5"
+    },
+    {
+      "name": "예외 케이스 검증",
+      "scope": "files",
+      "path": "src/test/java/shop/CouponPolicyTest.java",
+      "any": [
+        "assertthatthrownby",
+        "assertthrows",
+        "isinstanceof(illegal"
+      ]
+    },
+    {
+      "name": "만료일 당일 경계",
+      "scope": "files",
+      "path": "src/test/java/shop/CouponPolicyTest.java",
+      "any": [
+        "당일",
+        "만료일과 같",
+        "expireson",
+        "같은 날"
+      ]
+    },
+    {
+      "name": "기존 관례(@DisplayName·AssertJ)",
+      "scope": "files",
+      "path": "src/test/java/shop/CouponPolicyTest.java",
+      "any": [
+        "@displayname"
+      ]
+    },
+    {
+      "name": "대상 코드를 고치지 않음",
+      "scope": "script",
+      "run": "git diff --quiet -- src/main"
+    }
+  ],
+  "id": "case1-coupon-policy"
+}

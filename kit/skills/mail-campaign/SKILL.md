@@ -30,7 +30,13 @@ python3 /…/scripts/build_sendlist.py --contacts <명단.csv> --template <템�
 - 초안 1~2개 미리 보기 (이름·회사가 맞게 들어갔는지)
 - "템플릿 값 없음"으로 빠진 사람: 값을 채울지, 기본값(`{{칸|기본값}}`)을 둘지
 
-## 4. 보낸 뒤 기록
+## 4. 구글 시트 + Gmail로 보낼 때 (Apps Script)
+- `references/send_and_log.gs`를 사람에게 안내한다: `for_sheet.csv`를 시트로 가져오고, 스크립트를 붙여 넣고, "키트 발송" 메뉴에서 **미리보기 1통 → 발송(확인 창)** 순서로 한다.
+- 스크립트는 한 번에 50명까지, 발송기록·발송상태로 중복을 막고, 보낸 사람을 "발송기록" 시트에 남긴다.
+- 끝나면 "발송기록" 시트를 CSV로 내려받아 발송 기록 파일(예: `data/sent_log.csv`)을 바꾸게 안내한다. 이때는 5번의 `log_sent.py`가 필요 없다.
+- 이 스크립트를 사람 대신 실행하거나 계정 권한을 허용하지 않는다.
+
+## 5. 보낸 뒤 기록 (시트를 쓰지 않을 때)
 사람이 실제로 보냈다고 알려 주면:
 ```bash
 python3 /…/scripts/log_sent.py outbox/<캠페인>/list.csv --campaign <캠페인> --sent-log <발송기록.csv> --confirm [--only 1,2,5]

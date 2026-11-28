@@ -1,0 +1,8 @@
+STATISTICS	indexes.txt
+SHOW INDEX	indexes.txt
+INFORMATION_SCHEMA.TABLES	tables.txt
+EXPLAIN,>=	explain-range.txt
+EXPLAIN,BETWEEN	explain-range.txt
+EXPLAIN	explain.txt
+EVENTS_STATEMENTS_SUMMARY_BY_DIGEST	stats.txt
+PREPARED_STATEMENTS_INSTANCES	stats.txt

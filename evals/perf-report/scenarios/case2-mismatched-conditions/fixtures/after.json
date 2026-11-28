@@ -1,0 +1,38 @@
+{
+  "metrics": {
+    "http_req_duration": {
+      "avg": 88.1,
+      "min": 3.0,
+      "med": 31.2,
+      "max": 1203.7,
+      "p(90)": 260.5,
+      "p(95)": 451.9
+    },
+    "http_req_duration{name:product_detail}": {
+      "avg": 88.1,
+      "min": 3.0,
+      "med": 31.2,
+      "max": 1203.7,
+      "p(90)": 260.5,
+      "p(95)": 451.9
+    },
+    "http_reqs": {
+      "count": 12000,
+      "rate": 99.4
+    },
+    "http_reqs{name:product_detail}": {
+      "count": 12000,
+      "rate": 99.4
+    },
+    "http_req_failed": {
+      "passes": 0,
+      "fails": 12000,
+      "value": 0
+    },
+    "checks": {
+      "passes": 12000,
+      "fails": 0,
+      "value": 1
+    }
+  }
+}

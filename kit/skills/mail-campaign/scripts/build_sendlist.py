@@ -6,7 +6,7 @@
   python3 build_sendlist.py --contacts data/contacts.csv --template templates/x.md --campaign 2026-12-ai-campus \
       [--sent-log data/sent_log.csv] [--optout data/optout.txt] [--out outbox]
 템플릿: 첫 줄 "제목: ..." 다음 빈 줄, 그 아래 본문. {{칸이름}}은 명단의 칸 값으로, {{칸이름|기본값}}은 값이 없으면 기본값으로 바꾼다.
-결과: <out>/<campaign>/list.csv, skipped.csv, drafts/NN-<회사>.md
+결과: <out>/<campaign>/list.csv, skipped.csv, drafts/NN-<회사>.md, for_sheet.csv(구글 시트 발송용: 번호·이메일·회사명·제목·본문)
 """
 import argparse
 import csv
@@ -117,16 +117,18 @@ def main():
         draft = os.path.join(out_dir, "drafts", f"{n:02d}-{safe(company or email)}.md")
         with open(draft, "w", encoding="utf-8") as f:
             f.write(f"받는 사람: {email}\n제목: {subject}\n\n{body_out}")
-        send.append({"번호": n, "이메일": email, "회사명": company, "제목": subject, "초안": os.path.relpath(draft, out_dir)})
+        send.append({"번호": n, "이메일": email, "회사명": company, "제목": subject, "초안": os.path.relpath(draft, out_dir),
+                     "본문": body_out})
 
     for name, data, cols in (("list.csv", send, ["번호", "이메일", "회사명", "제목", "초안"]),
+                             ("for_sheet.csv", send, ["번호", "이메일", "회사명", "제목", "본문"]),
                              ("skipped.csv", skip, ["행", "이메일", "회사명", "이유"])):
         with open(os.path.join(out_dir, name), "w", encoding="utf-8-sig", newline="") as f:
-            w = csv.DictWriter(f, fieldnames=cols)
+            w = csv.DictWriter(f, fieldnames=cols, extrasaction="ignore")
             w.writeheader()
             w.writerows(data)
     print(f"캠페인 {a.campaign}: 명단 {len(rows)}명 → 보낼 대상 {len(send)}명, 제외 {len(skip)}명")
-    print(f"결과: {out_dir}/list.csv, skipped.csv, drafts/ (메일은 보내지 않았습니다)")
+    print(f"결과: {out_dir}/list.csv, skipped.csv, drafts/, for_sheet.csv (메일은 보내지 않았습니다)")
     if skip:
         print("\n| 행 | 이메일 | 회사명 | 제외 이유 |\n|---|---|---|---|")
         for s in skip:

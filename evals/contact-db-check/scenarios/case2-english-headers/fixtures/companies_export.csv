@@ -1,0 +1,5 @@
+company,department,contact_name,email,phone,source_url,checked_at
+Orbit Robotics,HR,Jane Park,jobs@orbit-robotics.example,02-555-1001,https://orbit-robotics.example/careers,2026-11-25
+SemiTech,People,Min Lee,hr.semi.example,031-555-1002,https://semitech.example/jobs,2026-11-24
+Orbit Robotics Korea,HR,Jane Park,JOBS@orbit-robotics.example,02-555-1001,https://orbit-robotics.example/kr,2026-11-26
+PackLab,HR,,hr@packlab.example,031-555-1004,,2026-11-27

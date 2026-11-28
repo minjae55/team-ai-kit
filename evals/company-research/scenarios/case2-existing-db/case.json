@@ -1,0 +1,47 @@
+{
+  "title": "이미 DB에 있는 회사는 새로 넣지 않고 갱신",
+  "answer": "한빛로보틱스는 이미 있으므로 새 행을 추가하지 않고 기존 행을 새 공고·확인일로 갱신(또는 갱신 후보로 표시), 누리패키징만 새로 추가",
+  "prompt": "research/raw/ 에 새로 저장한 페이지들로 data/companies.csv 를 업데이트해줘",
+  "now": "2026-12-01T10:00:00+09:00",
+  "files": {
+    "AGENTS.md": "# 구인기업 DB 업무\n\n- 조사 분야 (AI 캠퍼스 과정): 반도체 장비 설계·해석, 반도체 패키지 설계·해석, 로봇, AI 팩토리\n- 조사한 페이지는 research/raw/ 에 저장해 둔다 (첫 줄에 원래 URL과 저장 날짜)\n- DB: data/companies.csv (company-research 스킬 기본 양식)\n- 오늘 날짜: 2026-12-01\n",
+    "data/companies.csv": "@fixtures/companies.csv",
+    "research/raw/hanbit-careers.txt": "@fixtures/hanbit-careers.txt",
+    "research/raw/nuri-jobs.txt": "@fixtures/nuri-jobs.txt"
+  },
+  "allow_tools": [
+    "Edit",
+    "Write",
+    "Bash(mkdir *)"
+  ],
+  "checks": [
+    {
+      "name": "한빛로보틱스가 한 행만 있음 (중복 추가 안 함)",
+      "scope": "script",
+      "run": "test \"$(grep -c '한빛로보틱스' data/companies.csv)\" = 1"
+    },
+    {
+      "name": "누리패키징을 새로 추가",
+      "scope": "files",
+      "path": "data/companies.csv",
+      "any": [
+        "누리패키징"
+      ]
+    },
+    {
+      "name": "한빛 행을 새 공고로 갱신",
+      "scope": "script",
+      "run": "grep '한빛로보틱스' data/companies.csv | grep -q '2026-12-20'"
+    },
+    {
+      "name": "갱신했다고 보고",
+      "scope": "answer",
+      "any": [
+        "갱신",
+        "업데이트",
+        "이미 있"
+      ]
+    }
+  ],
+  "id": "case2-existing-db"
+}
