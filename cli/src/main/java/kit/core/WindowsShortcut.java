@@ -1,6 +1,5 @@
 package kit.core;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,8 +23,12 @@ public final class WindowsShortcut {
         return appData == null ? null : Paths.get(appData, "Microsoft", "Windows", "Start Menu", "Programs", NAME);
     }
 
-    /** 없으면 만든다. 만들었으면 true */
+    /** 마지막으로 만들기에 실패한 이유 (없으면 null) */
+    public static String lastError;
+
+    /** 없으면 만든다. 만들었으면 true. 실패하면 lastError 에 이유를 남긴다 */
     public static boolean ensure(KitEnv env) {
+        lastError = null;
         Path lnk = path();
         Path cmd = env.kitDir().resolve("bin").resolve("kit.cmd");
         if (!isWindows() || lnk == null || Files.exists(lnk) || !Files.exists(cmd)) {
@@ -36,9 +39,16 @@ public final class WindowsShortcut {
                 + "$s.WorkingDirectory = '" + q(cmd.getParent()) + "'; $s.Description = '팀 AI 키트 화면'; $s.Save()";
         try {
             Process p = new ProcessBuilder("powershell.exe", "-NoProfile", "-NonInteractive", "-Command", ps)
-                    .redirectErrorStream(true).redirectOutput(new File("NUL")).start();
-            return p.waitFor(30, TimeUnit.SECONDS) && p.exitValue() == 0 && Files.exists(lnk);
+                    .redirectErrorStream(true).start();
+            String out = new String(readAll(p.getInputStream()), java.nio.charset.Charset.defaultCharset()).trim();
+            boolean done = p.waitFor(30, TimeUnit.SECONDS);
+            if (done && p.exitValue() == 0 && Files.exists(lnk)) {
+                return true;
+            }
+            lastError = !done ? "PowerShell 응답 없음 (30초)" : out.isEmpty() ? "종료 코드 " + p.exitValue() : out;
+            return false;
         } catch (Exception e) {
+            lastError = e.toString();
             return false;
         }
     }
@@ -52,6 +62,16 @@ public final class WindowsShortcut {
             Files.delete(lnk);
         }
         return lnk;
+    }
+
+    private static byte[] readAll(java.io.InputStream in) throws java.io.IOException {
+        java.io.ByteArrayOutputStream buf = new java.io.ByteArrayOutputStream();
+        byte[] b = new byte[4096];
+        int n;
+        while ((n = in.read(b)) > 0) {
+            buf.write(b, 0, n);
+        }
+        return buf.toByteArray();
     }
 
     private static String q(Path p) {

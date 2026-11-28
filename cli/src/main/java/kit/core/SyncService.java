@@ -97,6 +97,8 @@ public final class SyncService {
         List<String> changes = new ArrayList<String>();
         if (!o.dryRun && WindowsShortcut.ensure(env)) {
             changes.add("시작 메뉴에 '팀 AI 키트' 바로가기를 만들었습니다");
+        } else if (WindowsShortcut.lastError != null) {
+            changes.add("시작 메뉴 바로가기를 만들지 못했습니다: " + WindowsShortcut.lastError);
         }
         for (String name : added) {
             changes.add("새로 찾은 AI 도구에도 설치: " + name);
