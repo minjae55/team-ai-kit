@@ -44,7 +44,7 @@ Claude Code(데스크톱 앱의 Code 탭 포함)에 이렇게 말한다:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/minjae55/team-ai-kit/main/get.sh | bash
 ```
-Windows(PowerShell, Git for Windows 필요):
+Windows(PowerShell, Git for Windows 필요. 2026-11-28 Antigravity로 설치·스킬 실행 검증):
 ```powershell
 irm https://raw.githubusercontent.com/minjae55/team-ai-kit/main/get.ps1 | iex
 ```
@@ -74,7 +74,7 @@ kit watch --project <폴더>   # 알림 웹훅을 받아 incident-analysis로 �
 | Claude Code | `~/.claude/skills/` | `~/.claude/CLAUDE.md` (import) | ✅ 세션 시작 훅 | 실사용 검증 |
 | Codex | `~/.agents/skills/` | `~/.codex/AGENTS.md` (복사) | `kit sync` 직접 | 문서 기준 지원, 실사용 미검증 |
 | Gemini CLI | `~/.gemini/skills/` | `~/.gemini/GEMINI.md` (복사) | `kit sync` 직접 | 문서 기준 지원, 실사용 미검증 (`gemini`를 한 번 실행해 `~/.gemini`가 생긴 뒤 감지) |
-| Antigravity (구글 에이전트 IDE·앱) | `~/.gemini/config/skills/` (예전 IDE는 `~/.gemini/antigravity/skills/`) | `~/.gemini/GEMINI.md` (Gemini CLI와 같은 구역) | `kit sync`·자동 업데이트 때 새로 깔린 것 감지 | 문서 기준 지원, 실사용 미검증 |
+| Antigravity (구글 에이전트 IDE·앱) | `~/.gemini/config/skills/` (예전 IDE는 `~/.gemini/antigravity/skills/`) | `~/.gemini/GEMINI.md` (Gemini CLI와 같은 구역) | `kit sync`·자동 업데이트 때 새로 깔린 것 감지 | ✅ 실사용 검증 (2026-11-28, Windows: 링크만 주고 설치 → 새 대화에서 스킬 스크립트 실행·결과 일치) |
 | 웹 AI (claude.ai·ChatGPT·Gemini) | `kit export`로 올릴 묶음 생성 | 지침에 포함 | 바뀐 스킬 알림 (올리기는 사람) | 내보내기만 |
 - 키트가 만든 것만 건드린다. 같은 이름의 개인 스킬과 직접 쓴 지침은 그대로 둔다
 - 설계: [docs/cli-design.md](docs/cli-design.md)
