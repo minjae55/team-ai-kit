@@ -30,6 +30,8 @@ public final class LockFile {
     public String lastCheck;
     /** 내 PC에서 꺼 둔 팀 스킬. 설치·sync 때 건너뛴다 (팀 레포와 다른 팀원에게는 영향 없음) */
     public List<String> disabled = new ArrayList<String>();
+    /** 설치 때 --tools 로 일부러 뺀 도구. 나중에 sync 가 새로 찾은 도구에 자동 설치할 때 이 도구들은 건너뛴다 */
+    public List<String> skipTools = new ArrayList<String>();
     public Map<String, ToolState> tools = new LinkedHashMap<String, ToolState>();
 
     @JsonIgnoreProperties(ignoreUnknown = true)

@@ -38,7 +38,7 @@ public class InstallCommand extends Common implements Callable<Integer> {
             return 1;
         }
         if (picked.isEmpty()) {
-            error("감지된 AI 도구가 없습니다 (~/.claude, ~/.codex). --tools 로 지정하세요");
+            error("감지된 AI 도구가 없습니다 (~/.claude, ~/.codex, ~/.gemini). --tools 로 지정하세요");
             return 1;
         }
         stdout.println(dryRun ? "[미리보기] 설치" : "설치");
@@ -51,6 +51,14 @@ public class InstallCommand extends Common implements Callable<Integer> {
         }
         for (ToolAdapter t : picked) {
             inst.installTool(t, lock, copy);
+            lock.skipTools.remove(t.id());
+        }
+        if (tools != null && !tools.trim().isEmpty()) {
+            for (ToolAdapter a : ToolAdapter.all()) {   // 감지됐는데 일부러 뺀 도구는 sync 가 자동으로 넣지 않게 기록
+                if (a.detect(env) && !picked.contains(a) && !lock.tools.containsKey(a.id()) && !lock.skipTools.contains(a.id())) {
+                    lock.skipTools.add(a.id());
+                }
+            }
         }
         if (dryRun) {
             stdout.println("미리보기 끝. 아무것도 바꾸지 않았습니다");

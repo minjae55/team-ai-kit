@@ -273,6 +273,22 @@ class KitCliTest {
     }
 
     @Test
+    void sync_installs_to_ai_tool_added_later_but_not_to_one_left_out_on_purpose() throws IOException {
+        Files.createDirectories(home.resolve(".codex"));
+        assertEquals(0, kit("install", "--tools", "claude"));          // Codex는 일부러 뺌
+        Files.createDirectories(home.resolve(".gemini"));               // 나중에 Gemini CLI 설치
+        captured.reset();
+        assertEquals(0, kit("sync"));
+        assertTrue(output().contains("새로 찾은 AI 도구에도 설치: Gemini CLI"), output());
+        assertTrue(Files.exists(home.resolve(".gemini/skills/incident-analysis/SKILL.md")));
+        assertFalse(Files.exists(home.resolve(".agents/skills")), "일부러 뺀 Codex는 건너뜀");
+        assertTrue(LockFile.readOrNull(home.resolve(".kit/kit.lock.json")).tools.containsKey("gemini"));
+        captured.reset();
+        assertEquals(0, kit("sync"));
+        assertFalse(output().contains("새로 찾은"), "두 번째부터는 조용히");
+    }
+
+    @Test
     void only_selected_tool_is_installed() {
         assertEquals(0, kit("install", "--tools", "claude"));
         assertTrue(Files.exists(home.resolve(".claude/skills/incident-analysis")));

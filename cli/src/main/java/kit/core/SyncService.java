@@ -84,9 +84,20 @@ public final class SyncService {
                 inst.installTool(t, lock, "copy".equals(lock.mode));
             }
         }
+        // 설치 뒤에 새로 깔린 AI 도구(예: Gemini CLI)에도 자동으로 설치한다. 설치 때 일부러 뺀 도구는 건너뛴다
+        List<String> added = new ArrayList<String>();
+        for (ToolAdapter t : ToolAdapter.all()) {
+            if (t.detect(env) && !lock.tools.containsKey(t.id()) && !lock.skipTools.contains(t.id())) {
+                inst.installTool(t, lock, "copy".equals(lock.mode));
+                added.add(t.displayName());
+            }
+        }
 
         boolean cliChanged = ChangeSummary.cliChanged(env.repoDir(), beforeCommit, toRef);
         List<String> changes = new ArrayList<String>();
+        for (String name : added) {
+            changes.add("새로 찾은 AI 도구에도 설치: " + name);
+        }
         for (String line : ChangeSummary.lines(env.repoDir(), beforeCommit, toRef,
                 beforeSkills, ChangeSummary.skillsAt(env.repoDir(), toRef))) {
             if (!line.startsWith("kit 명령 자체가")) {
