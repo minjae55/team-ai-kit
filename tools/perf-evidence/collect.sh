@@ -3,7 +3,7 @@
 # 사용: collect.sh <label> <증거 폴더> <JFR 폴더>
 set -u
 LABEL="$1"; OUT="$2"; JFRDIR="$3"
-REPO=/Users/ming/study/stylehub-b2b-perf
+REPO="${PERF_REPO:?측정할 프로젝트 경로를 PERF_REPO 환경 변수로 지정하세요}"
 JDK=/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home/bin
 HERE="$(cd "$(dirname "$0")" && pwd)"
 mkdir -p "$OUT" "$JFRDIR"
