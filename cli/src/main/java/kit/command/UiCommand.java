@@ -24,7 +24,7 @@ public class UiCommand extends Common implements Callable<Integer> {
         int p = server.start(port);
         String url = "http://127.0.0.1:" + p + "/?t=" + server.token();
         stdout.println("kit 화면: " + url);
-        stdout.println("끝내려면 Ctrl+C");
+        stdout.println("이 창을 닫거나 Ctrl+C 를 누르면 화면도 꺼집니다");
         if (!noOpen) {
             open(url);
         }
@@ -39,9 +39,26 @@ public class UiCommand extends Common implements Callable<Integer> {
 
     private void open(String url) {
         String os = System.getProperty("os.name", "").toLowerCase();
-        String[] cmd = os.contains("mac") ? new String[]{"open", url}
-                : os.contains("win") ? new String[]{"rundll32", "url.dll,FileProtocolHandler", url}
-                : new String[]{"xdg-open", url};
+        if (os.contains("win")) {
+            // Windows: Java 내장 기능으로 기본 브라우저를 열고, 안 되면 start 명령으로
+            try {
+                if (java.awt.Desktop.isDesktopSupported() && java.awt.Desktop.getDesktop().isSupported(java.awt.Desktop.Action.BROWSE)) {
+                    java.awt.Desktop.getDesktop().browse(new java.net.URI(url));
+                    return;
+                }
+            } catch (Exception | Error ignored) {
+                // 아래 start 로
+            }
+            try {
+                new ProcessBuilder("cmd", "/c", "start", "\"\"", url).start();
+                return;
+            } catch (Exception ignored) {
+                // 아래 안내로
+            }
+            stdout.println("브라우저를 열지 못했습니다. 위 주소를 브라우저에 붙여 넣으세요");
+            return;
+        }
+        String[] cmd = os.contains("mac") ? new String[]{"open", url} : new String[]{"xdg-open", url};
         try {
             new ProcessBuilder(cmd).inheritIO().start();
         } catch (Exception e) {

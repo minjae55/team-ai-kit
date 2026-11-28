@@ -95,6 +95,9 @@ public final class SyncService {
 
         boolean cliChanged = ChangeSummary.cliChanged(env.repoDir(), beforeCommit, toRef);
         List<String> changes = new ArrayList<String>();
+        if (!o.dryRun && WindowsShortcut.ensure(env)) {
+            changes.add("시작 메뉴에 '팀 AI 키트' 바로가기를 만들었습니다");
+        }
         for (String name : added) {
             changes.add("새로 찾은 AI 도구에도 설치: " + name);
         }

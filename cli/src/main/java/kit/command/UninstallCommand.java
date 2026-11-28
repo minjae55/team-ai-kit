@@ -37,6 +37,7 @@ public class UninstallCommand extends Common implements Callable<Integer> {
             return 0;
         }
         new kit.core.ClaudeHooks(env).disable();
+        removeWindowsShortcut(dryRun);
         Files.deleteIfExists(env.lockFile());
         if (purge) {
             stdout.println("  키트 폴더 삭제 " + env.kitDir());
@@ -44,5 +45,12 @@ public class UninstallCommand extends Common implements Callable<Integer> {
         }
         stdout.println("완료");
         return 0;
+    }
+
+    private void removeWindowsShortcut(boolean dry) throws java.io.IOException {
+        java.nio.file.Path removed = kit.core.WindowsShortcut.remove(dry);
+        if (removed != null) {
+            stdout.println("  시작 메뉴 바로가기 삭제 " + removed);
+        }
     }
 }

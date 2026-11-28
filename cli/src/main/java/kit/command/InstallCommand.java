@@ -68,6 +68,9 @@ public class InstallCommand extends Common implements Callable<Integer> {
             stdout.println("미리보기 끝. 아무것도 바꾸지 않았습니다");
             return 0;
         }
+        if (kit.core.WindowsShortcut.ensure(env)) {
+            stdout.println("  시작 메뉴에 '팀 AI 키트' 바로가기를 만들었습니다 (누르면 화면이 열림)");
+        }
         lock.version = ver;
         lock.commit = Git.shortCommit(env.repoDir());
         lock.installedAt = now();
