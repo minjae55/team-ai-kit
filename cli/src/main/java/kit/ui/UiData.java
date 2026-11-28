@@ -45,6 +45,10 @@ public final class UiData {
         m.put("previous", lock == null ? null : lock.previous);
         m.put("lastCheck", lock == null ? null : lock.lastCheck);
         m.put("auto", new kit.core.ClaudeHooks(env).enabled());
+        if (repo) {
+            fetchInBackground(env.repoDir());   // GitHub의 새 버전을 확인 (화면을 막지 않게 뒤에서, 5분에 한 번)
+        }
+        m.put("checking", fetching);
         String latest = repo ? Git.latestTag(env.repoDir()) : null;
         m.put("latest", latest);
         boolean update = lock != null && latest != null && !latest.equals(lock.version);
@@ -393,5 +397,29 @@ public final class UiData {
             out.add(n);
         }
         return out;
+    }
+
+    private static volatile long lastFetch;
+    private static volatile boolean fetching;
+
+    /** 받아 둔 저장소에 GitHub의 새 태그를 가져온다. 끝나면 화면이 다시 읽어 "업데이트가 나왔어요"를 보여 준다 */
+    static void fetchInBackground(Path repo) {
+        long now = System.currentTimeMillis();
+        if (fetching || now - lastFetch < 5 * 60_000L) {
+            return;
+        }
+        fetching = true;
+        Thread t = new Thread(() -> {
+            try {
+                Git.run(repo, "fetch", "--quiet", "--tags", "origin");
+            } catch (Exception ignored) {
+                // 오프라인이면 받아 둔 것만으로 보여 준다
+            } finally {
+                lastFetch = System.currentTimeMillis();
+                fetching = false;
+            }
+        }, "kit-fetch");
+        t.setDaemon(true);
+        t.start();
     }
 }

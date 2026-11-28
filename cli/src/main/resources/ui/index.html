@@ -230,7 +230,8 @@ function renderHome() {
   $("meName").textContent = S.user || "사용자"; $("meVer").textContent = "팀 AI 키트 " + (S.version || "미설치");
   $("banner").innerHTML = S.updateAvailable
     ? `<div class="banner"><span class="new">NEW</span><div style="flex:1"><b>${esc(S.latest)} 업데이트가 나왔어요</b><div class="sub">${(S.updatePreview || []).filter(l => !l.startsWith("  ") && l !== "변경 내역:").map(esc).join(" · ")}</div></div><button class="primary" onclick="act('업데이트', '/api/sync', {}, this)">업데이트</button></div>`
-    : `<div class="banner"><span class="new" style="background:var(--green)">최신</span><div style="flex:1"><b>${esc(S.version || "")} 사용 중</b><div class="sub">${esc((S.news[0] || {items: [""]}).items[0] ? "" : "")}팀 스킬과 공통 원칙이 최신이에요</div></div><button class="ghost" onclick="go('settings')">새 소식 보기 →</button></div>`;
+    : `<div class="banner"><span class="new" style="background:var(--green)">최신</span><div style="flex:1"><b>${esc(S.version || "")} 사용 중</b><div class="sub">${esc((S.news[0] || {items: [""]}).items[0] ? "" : "")}팀 스킬과 공통 원칙이 최신이에요</div></div><button class="ghost" onclick="act('업데이트 확인', '/api/sync', {}, this)">${S.checking ? "새 버전 확인 중…" : "업데이트 확인"}</button></div>`;
+  if (S.checking && !window._recheck) { window._recheck = setTimeout(() => { window._recheck = null; load(); }, 4000); }
   const tiles = S.skills.filter(k => k.enabled).map(k => `
     <div class="tile" onclick="openSkill(${jsq(k.name)})"><div class="tico">${svg(iconFor(k.name))}</div><b>${esc(k.name)}</b><div class="s"><span>${esc(k.description.length > 26 ? k.description.slice(0, 26) + "…" : k.description)}</span><span class="go">→</span></div></div>`);
   const cand = S.recommendations.filter(r => r.kind === "skill").slice(0, Math.max(0, 4 - tiles.length)).map(r => `
@@ -334,7 +335,7 @@ function renderSettings() {
     const icon = {ok: "✅", warn: "⚠️", error: "❌", info: "·"}[h.level] || "·";
     const btn = h.installTool ? ` <button style="padding:3px 10px" onclick="act(${jsq(h.installTool + ' 설치')}, '/api/install', {tool:${jsq(h.installTool)}}, this)">설치</button>` : "";
     return `<div style="padding:5px 0">${icon} ${esc(h.text)}${btn}</div>`;
-  }).join("") + `<div class="mut" style="margin-top:10px">설치 ${esc(S.version || "-")} · 받아 둔 최신 ${esc(S.latest || "-")} ${S.updateAvailable ? `<button style="padding:3px 10px;margin-left:6px" class="primary" onclick="act('업데이트', '/api/sync', {}, this)">업데이트</button>` : ""}</div>`;
+  }).join("") + `<div class="mut" style="margin-top:10px">설치 ${esc(S.version || "-")} · 받아 둔 최신 ${esc(S.latest || "-")} <button style="padding:3px 10px;margin-left:6px" class="${S.updateAvailable ? "primary" : ""}" onclick="act('업데이트', '/api/sync', {}, this)">${S.updateAvailable ? "업데이트" : "업데이트 확인"}</button></div>`;
   $("auto").innerHTML = `
     <div style="display:flex;align-items:center;gap:12px"><div style="flex:1" class="sub">Claude 세션을 열 때 6시간에 한 번 자동으로 업데이트하고, 스킬을 쓰면 사용 횟수를 기록해요. 요청 내용은 남기지 않아요.</div>
       <div class="sw ${S.auto ? "on" : ""}" role="switch" aria-checked="${S.auto}" aria-label="자동 업데이트" onclick="act('자동 업데이트 ${S.auto ? "끄기" : "켜기"}', '/api/auto', {on:${!S.auto}})"></div></div>
