@@ -162,7 +162,10 @@ def run_case(case_dir: str, skill: str, args) -> dict:
     result = grade(case, answer, commands, workdir=work)  # files·script 검사는 AI가 작업한 폴더에서
     # 환경 검사: 실패하면 스킬이 틀린 게 아니라 시험 환경 문제다 (결과를 믿을 수 없으므로 불통과 처리)
     outside = outside_skill_paths(commands, skill, work)
+    call_failed = bool(meta.get("is_error")) or bool(re.search(r"hit your .*limit|usage limit|rate limit|overloaded", answer, re.I))
     env_checks = [
+        {"name": "환경: AI 호출 성공", "scope": "env", "ok": not call_failed,
+         "detail": ("AI 호출 실패 (사용량 한도·오류): " + answer[:120]) if call_failed else ""},
         {"name": "환경: 시험용 스킬 복사본을 사용함", "scope": "env", "ok": not outside,
          "detail": "작업 폴더 밖의 설치본을 불렀음 (--isolated 로 실행하세요): " + outside[0][:150] if outside else ""},
     ]
@@ -188,6 +191,21 @@ def run_case(case_dir: str, skill: str, args) -> dict:
     if config_dir:
         shutil.rmtree(config_dir, ignore_errors=True)
     return result
+
+
+def record_verified(skill: str, results: list, model):
+    """시나리오별 최근 결과를 evals/<스킬>/verified.json 에 남긴다. PR에 함께 올리면 팀원 kit list·ui에 "검증 N/M"으로 보인다."""
+    path = os.path.join(ROOT, "evals", skill, "verified.json")
+    data = json.load(open(path, encoding="utf-8")) if os.path.exists(path) else {"skill": skill, "cases": {}}
+    today = time.strftime("%Y-%m-%d")
+    for r in results:
+        if r.get("env_problem"):
+            continue   # 시험 환경 문제(사용량 한도, 설치본 사용 등)는 스킬 검증 결과로 남기지 않는다
+        data["cases"][r["case"]] = {"passed": bool(r["passed"]), "date": today, "model": model or "기본",
+                                    "env_problem": bool(r.get("env_problem"))}
+    data["cases"] = dict(sorted(data["cases"].items()))
+    json.dump(data, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+    open(path, "a", encoding="utf-8").write("\n")
 
 
 def main():
@@ -235,6 +253,7 @@ def main():
         print(f"  → {'통과' if r['passed'] else '불통과'}  ({r.get('seconds')}초" + (f", ${cost:.3f}" if cost else "") + ")")
     if args.dry_run:
         return
+    record_verified(args.skill, results, args.model)
     report = os.path.join(out_dir, f"{stamp}-{args.skill}.json")
     json.dump({"skill": args.skill, "time": stamp, "results": results}, open(report, "w", encoding="utf-8"),
               ensure_ascii=False, indent=2)

@@ -17,7 +17,7 @@ import picocli.CommandLine.Option;
         subcommands = {UiCommand.class, InstallCommand.class, SyncCommand.class, DoctorCommand.class, ListCommand.class,
                 SkillCommand.class, kit.command.AutoCommand.class, kit.command.PinCommands.Pin.class,
                 kit.command.PinCommands.Unpin.class, kit.command.PinCommands.Rollback.class,
-                kit.command.TrackCommand.class, kit.command.ExportCommand.class, kit.command.InitCommand.class, UninstallCommand.class})
+                kit.command.TrackCommand.class, kit.command.ExportCommand.class, kit.command.InitCommand.class, kit.command.WatchCommand.class, UninstallCommand.class})
 public class KitCommand implements Runnable {
 
     @Option(names = "--home", hidden = true, description = "홈 폴더 대신 쓸 경로 (테스트용)")

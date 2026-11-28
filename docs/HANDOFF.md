@@ -80,7 +80,7 @@
 | 3 ✅ | 자동 sync, 버전 고정과 롤백, 훅 기반 사용 추적 | 스킬을 수정하면 팀원 환경에 자동 반영되고 사용 기록이 남음 (2026-11-27 v0.5.0: Claude SessionStart 훅으로 6시간마다 sync, kit 명령 자기 갱신, pin/rollback, PostToolUse(Skill)·UserPromptExpansion 훅으로 ~/.kit/usage.jsonl 기록. 팀 단위 집계와 Codex 훅은 미구현: Codex만 쓰는 팀원은 수동 sync) |
 | 4 ✅ | eval 파이프라인 | 스킬 PR이 eval을 통과해야만 배포됨 (2026-11-27 v0.6.0: 장애 당시 기록을 고정 데이터로 만든 시나리오 3개, 스킬 스크립트의 KIT_EVAL_FIXTURES 모드, 채점기와 과거 실제 답변 5개로 채점기 검증, CI evals.yml. 6fc7cf8: 생성형 스킬용 `files`·`script` 검사, 시나리오별 허용 도구, 시나리오 없는 스킬은 CI 실패. 지금은 키 없이 도는 검사(형식, 채점기, 시나리오 필수)만 CI에서 돌고, AI eval은 내 PC에서 실행) |
 | 5 | 팀원 온보딩과 팀 단위 운영 | 2명 이상이 실제로 사용. ① 회사 GitHub 조직(비공개)으로 이전, CODEOWNERS로 스킬 승인자 지정, CI에 회사 계정 키 등록(AI eval) + 브랜치 보호(PR 필수, eval 통과 필수). 팀원이 고친 스킬도 시험을 거쳐야만 배포되게 하는 것이 목적 ② 설치 간소화(빌드된 jar 배포, 팀원 PC에 JDK 불필요: tools/release.sh + dist/kit.jar 준비됨, 첫 적용은 다음 배포 v0.7.0) ③ 성능 개선 스킬 묶음(query-analysis, k6-scenario-generator, perf-report. 시나리오와 함께) ④ 팀 단위 사용·평가 집계 ⑤ Gemini 어댑터, Codex 훅 |
-| 6 | 자동 실행 | 알림 webhook → 사람 없이 `claude -p`로 분석 → 회사 채널로 결과 전송 (3절 자동 실행). 회사 계정 인증·라이선스 확인(8절 2번)이 먼저 |
+| 6 (진행) | 자동 실행 | 알림 webhook → 사람 없이 `claude -p`로 분석 → 결과 전송. 2026-11-28 `kit watch` 구현(토큰 보호 웹훅, 쿨다운·하루 한도, 읽기 전용 도구, 비밀값 읽기 차단, 결과 파일·데스크톱 알림·Slack 선택). 남은 것: stylehub Grafana 연락처에 연결해 실제 알림으로 시험, 회사 계정 인증·라이선스 확인(8절 2번) |
 | 7 | 전 직군 확대 | 프론트엔드를 포함한 모든 개발자와 비개발자가 사용. 비개발자는 터미널 없이 Claude 앱 조직 배포(회사 플랜 지원 여부 확인 필요)로 같은 스킬 원본을 받음 |
 
 ## 8. 미확인 항목 (POC가 필요하며, 지원된다고 단정하지 않음)

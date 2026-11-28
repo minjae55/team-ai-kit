@@ -277,7 +277,7 @@ function renderLibrary() {
     .sort((a, b) => (order[a.usage] - order[b.usage]) || (b.used30 - a.used30));   // 정리 후보 먼저, 그다음 많이 쓴 순
   $("skills").innerHTML = ks.map(k => `
     <div class="card" style="display:flex;flex-direction:column;gap:10px">
-      <div style="display:flex;align-items:center;gap:12px"><div class="tico" style="margin:0">${svg(iconFor(k.name))}</div><div style="flex:1;min-width:0"><b style="font-size:16px">${esc(k.name)}</b><div class="mut">${k.verifiedCases ? "검증 상황 " + k.verifiedCases + "개 · " + esc(k.verifiedDate || "") : "검증 기록 없음"}</div></div>
+      <div style="display:flex;align-items:center;gap:12px"><div class="tico" style="margin:0">${svg(iconFor(k.name))}</div><div style="flex:1;min-width:0"><b style="font-size:16px">${esc(k.name)}</b><div class="mut">${k.verifiedTotal ? `<span style="color:${k.verifiedPassed === k.verifiedTotal ? "var(--green)" : "var(--amber)"}">검증 ${k.verifiedPassed}/${k.verifiedTotal}</span> · ` + esc(k.verifiedDate || "") : k.verifiedCases ? "검증 상황 " + k.verifiedCases + "개 · " + esc(k.verifiedDate || "") : "검증 기록 없음"}</div></div>
         <div class="sw ${k.enabled ? "on" : ""}" role="switch" aria-checked="${k.enabled}" aria-label="${esc(k.name)} 켜기" onclick="act(${jsq(k.name + (k.enabled ? ' 끄기' : ' 켜기'))}, '/api/skill', {name:${jsq(k.name)}, on:${!k.enabled}})"></div></div>
       <div class="sub">${esc(k.description)}</div>
       <div>${usageLine(k)}</div>

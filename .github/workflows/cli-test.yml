@@ -1,0 +1,25 @@
+name: CLI 테스트
+
+# kit 명령(cli/)의 단위 테스트. 브랜치 보호의 필수 검사로 쓰므로 PR에서는 항상 돈다
+on:
+  pull_request:
+  push:
+    branches: [main]
+    paths: ["cli/**", "install.sh", "get.sh"]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: CLI 테스트
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: 테스트
+        working-directory: cli
+        run: sh gradlew --quiet test
+      - name: 설치 스크립트 문법
+        run: bash -n install.sh && bash -n get.sh

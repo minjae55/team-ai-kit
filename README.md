@@ -59,6 +59,7 @@ kit auto on     # 자동 업데이트 + 스킬 사용 기록 켜기 (Claude Code
 kit rollback    # 업데이트 후 문제가 생기면 직전 버전으로 되돌리고 고정 (해제: kit unpin)
 kit init        # 지금 프로젝트를 훑어 AI 작업 지침(AGENTS.md) 초안 만들기
 kit export      # 웹 AI(claude.ai·ChatGPT·Gemini)에 올릴 스킬 묶음 만들기, 바뀐 스킬 알림
+kit watch --project <폴더>   # 알림 웹훅을 받아 incident-analysis로 자동 원인 분석 (아래 참고)
 ```
 - 지원 도구
 
@@ -78,3 +79,14 @@ kit export      # 웹 AI(claude.ai·ChatGPT·Gemini)에 올릴 스킬 묶음 만
 - `tools/dashboard/`: 개인 AI 작업 대시보드 (`python3 tools/dashboard/build.py --open`, 내 PC 전용)
 
 자세한 배경과 로드맵: [docs/HANDOFF.md](docs/HANDOFF.md)
+
+## 알림 자동 분석 (`kit watch`)
+Grafana·Alertmanager 알림이 오면 사람 없이 `incident-analysis`로 원인을 분석해 `~/.kit/alerts/`에 남기고 데스크톱 알림(선택: Slack)을 띄운다.
+```bash
+kit watch --project ~/study/stylehub-b2b-perf --listen-all     # Grafana가 Docker 안에 있으면 --listen-all
+kit watch --project <폴더> --dry-run                            # AI를 부르지 않고 연결만 시험
+```
+- 화면에 나오는 웹훅 주소(토큰 포함)를 Grafana 연락처(contact point)의 Webhook URL로 넣는다. 토큰이 틀린 요청은 거부한다
+- 안전장치: 읽기 도구와 팀 스킬의 읽기 전용 스크립트만 허용, 비밀값 파일(.env, *.cnf 등)은 읽기도 막음, 같은 알림은 30분에 한 번(`--cooldown`), 24시간 최대 10번(`--max-per-day`), 한 번에 하나씩
+- 분석 한 번마다 구독 사용량이 든다. Slack으로 보내려면 웹훅 주소를 파일에 넣고 `--slack-webhook-file <경로>` (주소는 화면에 출력하지 않음)
+

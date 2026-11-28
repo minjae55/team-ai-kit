@@ -36,6 +36,10 @@ public class ListCommand extends Common implements Callable<Integer> {
         stdout.println();
         if (!tracking) {
             stdout.println("스킬 사용 기록: 꺼져 있음 (kit auto on 으로 켜면 스킬별 사용 횟수와 마지막 사용일을 보여 줍니다)");
+            for (String name : new Installer(env, null, true).repoSkills()) {
+                kit.core.Verified v = kit.core.Verified.read(env.repoDir(), name);
+                stdout.println(String.format("  %-24s %s", name, v == null ? "검증 기록 없음" : v.label()));
+            }
             return;
         }
         stdout.println("스킬 사용 (최근 30일 " + sum.total + "회)");
@@ -53,7 +57,9 @@ public class ListCommand extends Common implements Callable<Integer> {
             if (c == 0 && sum.coversDays(30)) {
                 unused++;
             }
-            stdout.println(String.format("  %-24s %3d회 %4s  %s%s%s", name, c, pct, last, off, mark));
+            kit.core.Verified v = kit.core.Verified.read(env.repoDir(), name);
+            String ver = v == null ? "검증 기록 없음" : v.label();
+            stdout.println(String.format("  %-24s %3d회 %4s  %-14s %s%s%s", name, c, pct, last, ver, off, mark));
         }
         if (unused > 0) {
             stdout.println("30일 동안 안 쓴 스킬 " + unused + "개: 필요 없으면 kit skill disable <이름> 으로 꺼 두세요");

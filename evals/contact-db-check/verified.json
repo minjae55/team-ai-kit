@@ -1,0 +1,23 @@
+{
+  "skill": "contact-db-check",
+  "cases": {
+    "case1-planted-issues": {
+      "passed": true,
+      "date": "2026-11-28",
+      "model": "기본",
+      "env_problem": false
+    },
+    "case2-english-headers": {
+      "passed": true,
+      "date": "2026-11-28",
+      "model": "기본",
+      "env_problem": false
+    },
+    "case3-clean-data": {
+      "passed": true,
+      "date": "2026-11-28",
+      "model": "기본",
+      "env_problem": false
+    }
+  }
+}

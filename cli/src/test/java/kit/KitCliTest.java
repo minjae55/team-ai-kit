@@ -210,6 +210,14 @@ class KitCliTest {
         String out = output();
         assertTrue(out.contains("스킬 사용 (최근 30일 3회)"), out);
         assertTrue(out.matches("(?s).*incident-analysis\\s+2회\\s+67%.*"), out);
+
+        Path ev = home.resolve(".kit/repo/evals/incident-analysis");
+        write(ev.resolve("scenarios/c1/case.json"), "{}");
+        write(ev.resolve("scenarios/c2/case.json"), "{}");
+        write(ev.resolve("verified.json"), "{\"cases\":{\"c1\":{\"passed\":true,\"date\":\"2026-11-28\"},\"c2\":{\"passed\":false,\"date\":\"2026-11-27\"},\"gone\":{\"passed\":true,\"date\":\"2026-11-29\"}}}");
+        captured.reset();
+        assertEquals(0, kit("list"));
+        assertTrue(output().contains("검증 1/2 · 11-28"), "지워진 시나리오는 세지 않음: " + output());
     }
 
     @Test

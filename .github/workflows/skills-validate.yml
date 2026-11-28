@@ -1,8 +1,8 @@
 name: 스킬 형식 검사
 
+# 브랜치 보호의 필수 검사로 쓰므로 PR에서는 경로와 상관없이 항상 돈다 (가벼움)
 on:
   pull_request:
-    paths: ["kit/skills/**", "tools/validate_skills.py", ".github/workflows/skills-validate.yml"]
   push:
     branches: [main]
     paths: ["kit/skills/**", "tools/validate_skills.py", ".github/workflows/skills-validate.yml"]
@@ -10,6 +10,7 @@ on:
 
 jobs:
   validate:
+    name: 형식 검사
     runs-on: ubuntu-latest
     steps:
       - name: 코드 체크아웃

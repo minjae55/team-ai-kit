@@ -1,0 +1,23 @@
+{
+  "skill": "company-research",
+  "cases": {
+    "case1-saved-pages": {
+      "passed": true,
+      "date": "2026-11-28",
+      "model": "기본",
+      "env_problem": false
+    },
+    "case2-existing-db": {
+      "passed": true,
+      "date": "2026-11-28",
+      "model": "기본",
+      "env_problem": false
+    },
+    "case3-no-public-contact": {
+      "passed": true,
+      "date": "2026-11-28",
+      "model": "기본",
+      "env_problem": false
+    }
+  }
+}

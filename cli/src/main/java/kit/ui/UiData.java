@@ -201,8 +201,14 @@ public final class UiData {
             // 정리 후보: 기록을 30일 넘게 했는데 그동안 한 번도 안 쓴 스킬. 기록이 짧으면 판단하지 않는다
             s.put("usage", !tracking ? "off" : count > 0 ? "used" : usage.coversDays(30) ? "unused" : "short");
             s.put("enabled", lock == null || !lock.disabled.contains(name));
+            kit.core.Verified v = kit.core.Verified.read(env.repoDir(), name);
+            if (v != null) {
+                s.put("verifiedPassed", v.passed);
+                s.put("verifiedTotal", v.total);
+                s.put("verifiedDate", v.date);
+            }
             Path results = env.repoDir().resolve("evals").resolve(name).resolve("results.json");
-            if (Files.exists(results)) {
+            if (v == null && Files.exists(results)) {
                 JsonNode root = JSON.readTree(results.toFile());
                 Set<String> cases = new TreeSet<String>();
                 String date = null;

@@ -1,0 +1,23 @@
+{
+  "skill": "mail-campaign",
+  "cases": {
+    "case1-skip-sent-and-optout": {
+      "passed": true,
+      "date": "2026-11-28",
+      "model": "기본",
+      "env_problem": false
+    },
+    "case2-other-campaign-optout-file": {
+      "passed": true,
+      "date": "2026-11-28",
+      "model": "기본",
+      "env_problem": false
+    },
+    "case3-template-column-missing": {
+      "passed": true,
+      "date": "2026-11-28",
+      "model": "기본",
+      "env_problem": false
+    }
+  }
+}
