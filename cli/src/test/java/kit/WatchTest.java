@@ -40,6 +40,19 @@ class WatchTest {
     }
 
     @Test
+    void reads_db_and_metrics_settings_from_project_agents_md() throws Exception {
+        Path p = Files.createDirectories(tmp.resolve("proj"));
+        Files.write(p.resolve("AGENTS.md"), ("```bash\nexport INCIDENT_DB_CONTAINER=stylehub-perf-mysql\n"
+                + "export INCIDENT_DB_CNF=monitoring/.my.cnf   # 읽기 전용\nexport INCIDENT_DB_NAME=stylehub\n```\n"
+                + "지표: `PROM_URL=http://localhost:9090`\nexport INCIDENT_DB_HOST=(확인 필요)\n").getBytes(StandardCharsets.UTF_8));
+        java.util.Map<String, String> env = AlertWatch.projectEnv(p);
+        assertEquals("stylehub-perf-mysql", env.get("INCIDENT_DB_CONTAINER"));
+        assertEquals(p.resolve("monitoring/.my.cnf").toString(), env.get("INCIDENT_DB_CNF"), "상대 경로는 프로젝트 기준");
+        assertEquals("http://localhost:9090", env.get("PROM_URL"));
+        assertNull(env.get("INCIDENT_DB_HOST"), "자리 표시는 건너뜀");
+    }
+
+    @Test
     void same_alert_runs_once_per_cooldown_and_daily_cap_applies() throws Exception {
         AlertWatch.Options o = new AlertWatch.Options();
         o.cooldownMinutes = 30;

@@ -132,14 +132,70 @@ public final class AlertWatch {
         String denied = String.join(",",
                 "Edit", "Write", "NotebookEdit", "WebFetch", "WebSearch",
                 "Read(**/.env*)", "Read(**/*.cnf)", "Read(**/application-local*)", "Read(**/*secret*)", "Read(**/*.pem)");
-        return new String[]{o.claude, "-p", prompt, "--output-format", "json", "--max-turns", "30",
+        return new String[]{resolveExecutable(o.claude, withToolPaths(System.getenv("PATH"), env.home())), "-p", prompt, "--output-format", "json", "--max-turns", "30",
                 "--permission-mode", "dontAsk", "--allowedTools", allowed, "--disallowedTools", denied};
+    }
+
+    /**
+     * 프로젝트 AGENTS.md 의 "export INCIDENT_DB_…=값", "PROM_URL=값" 줄을 읽어 환경 변수로 넘긴다.
+     * 값은 경로·이름뿐이고(접속 정보 파일 내용은 읽지 않음), 상대 경로는 프로젝트 기준으로 바꾼다.
+     */
+    public static Map<String, String> projectEnv(Path project) throws IOException {
+        Map<String, String> env = new HashMap<String, String>();
+        for (String name : new String[]{"AGENTS.md", "CLAUDE.md"}) {
+            Path f = project.resolve(name);
+            if (!Files.isRegularFile(f)) {
+                continue;
+            }
+            java.util.regex.Matcher m = java.util.regex.Pattern
+                    .compile("(?m)(?:^\\s*(?:export\\s+)?|`)(INCIDENT_DB_[A-Z_]+|PROM_URL)=([^\\s`#]+)")
+                    .matcher(new String(Files.readAllBytes(f), StandardCharsets.UTF_8));
+            while (m.find()) {
+                String v = m.group(2).replaceAll("^[\"']|[\"']$", "");
+                if (v.startsWith("(") || v.isEmpty()) {
+                    continue;   // "(확인 필요…)" 같은 자리 표시는 건너뜀
+                }
+                if (m.group(1).equals("INCIDENT_DB_CNF") && !v.startsWith("/")) {
+                    v = project.resolve(v).normalize().toString();
+                }
+                env.putIfAbsent(m.group(1), v);
+            }
+        }
+        return env;
+    }
+
+    /** 이름만 주면 PATH(흔한 설치 위치 포함)에서 실행 파일을 찾는다. 못 찾으면 그대로 돌려준다 */
+    static String resolveExecutable(String name, String path) {
+        if (name.contains("/")) {
+            return name;
+        }
+        for (String dir : path.split(":")) {
+            java.io.File f = new java.io.File(dir, name);
+            if (f.isFile() && f.canExecute()) {
+                return f.getAbsolutePath();
+            }
+        }
+        return name;
+    }
+
+    /** 백그라운드·서비스로 띄우면 PATH가 짧아 docker 등을 못 찾는다. 흔한 설치 위치를 뒤에 붙인다 */
+    static String withToolPaths(String path, Path home) {
+        StringBuilder sb = new StringBuilder(path == null ? "/usr/bin:/bin" : path);
+        String[] extra = {home.resolve(".docker/bin").toString(), "/Applications/Docker.app/Contents/Resources/bin",
+                "/usr/local/bin", "/opt/homebrew/bin", home.resolve(".local/bin").toString(), home.resolve(".kit/bin").toString()};
+        for (String e : extra) {
+            if (!(":" + sb + ":").contains(":" + e + ":") && Files.isDirectory(java.nio.file.Paths.get(e))) {
+                sb.append(':').append(e);
+            }
+        }
+        return sb.toString();
     }
 
     static String prompt(Alert a) {
         String now = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX").format(new Date());
         return "(현재 시각: " + now + ")\n\n아래 알림이 방금 왔다. incident-analysis 스킬로 원인을 분석해줘. "
-                + "사람이 없는 자동 실행이라 읽기만 하고, 재시작·설정 변경·DB 쓰기는 제안만 해.\n\n" + a.text;
+                + "사람이 없는 자동 실행이라 읽기만 하고, 재시작·설정 변경·DB 쓰기는 제안만 해. "
+                + "DB·지표 접속 환경 변수(INCIDENT_DB_*, PROM_URL)는 이미 설정돼 있으니 명령 앞에 붙이지 말고 스크립트를 전체 경로로 바로 실행해.\n\n" + a.text;
     }
 
     /** 분석 하나를 돌리고 결과 파일 경로를 돌려준다 */
@@ -155,8 +211,11 @@ public final class AlertWatch {
             result = "(연습 실행: AI를 부르지 않았습니다. 실제로는 아래 요청을 보냅니다)\n\n" + p;
         } else {
             Path log = Files.createTempFile("kit-watch-", ".json");
-            Process pr = new ProcessBuilder(command(p)).directory(o.project.toFile())
-                    .redirectErrorStream(true).redirectOutput(log.toFile()).start();
+            ProcessBuilder pb = new ProcessBuilder(command(p)).directory(o.project.toFile())
+                    .redirectErrorStream(true).redirectOutput(log.toFile());
+            pb.environment().putAll(projectEnv(o.project));   // 스킬 스크립트 접속 설정 (명령 앞에 붙이면 허용 목록에 안 맞음)
+            pb.environment().put("PATH", withToolPaths(pb.environment().get("PATH"), env.home()));
+            Process pr = pb.start();
             if (!pr.waitFor(o.timeoutMinutes, TimeUnit.MINUTES)) {
                 pr.destroyForcibly();
                 result = "분석 시간 초과 (" + o.timeoutMinutes + "분)";
