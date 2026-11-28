@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'kit'
-version = '0.10.0'
+version = '0.10.1'
 
 java {
     // 개발은 JDK 17로 한다
