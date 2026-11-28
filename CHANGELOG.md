@@ -3,6 +3,10 @@
 버전 태그를 붙일 때마다 맨 위에 한 절을 추가한다. `kit sync`가 새 버전의 절을 팀원에게 보여 준다.
 쓰는 법: 팀원이 알아야 할 것만, 사람이 읽는 말로. 분류는 `새 스킬`, `바뀐 스킬`, `공통 지식`, `kit 명령`.
 
+## v0.10.6 (2026-11-28)
+- Windows: 시작 메뉴에 "팀 AI 키트" 바로가기가 생긴다. 누르면 kit 화면이 열리고, 함께 뜬 창을 닫으면 꺼진다 (터미널 불필요)
+- Windows: `kit ui`가 기본 브라우저를 제대로 연다
+
 ## v0.10.5 (2026-11-28)
 - Windows 설치 지원: Antigravity 같은 AI 도구에 저장소 링크를 주고 "설치해줘"라고 하면 PowerShell에서 알아서 설치한다 (Git for Windows·Java 필요). 직접 하려면 `irm https://raw.githubusercontent.com/minjae55/team-ai-kit/main/get.ps1 | iex`
 - Windows에서는 스킬을 링크 대신 복사로 설치하고, PowerShell·CMD에서도 `kit` 명령을 쓸 수 있다
