@@ -41,6 +41,10 @@ public class InstallCommand extends Common implements Callable<Integer> {
             error("감지된 AI 도구가 없습니다 (Claude Code, Codex, Gemini CLI, Antigravity). --tools 로 지정하세요");
             return 1;
         }
+        if (!copy && System.getProperty("os.name", "").toLowerCase().contains("win")) {
+            copy = true;   // Windows는 링크(심볼릭 링크)에 관리자 권한·개발자 모드가 필요해서 기본을 복사로
+            stdout.println("Windows: 스킬을 링크 대신 복사로 설치합니다 (업데이트 때마다 다시 복사)");
+        }
         stdout.println(dryRun ? "[미리보기] 설치" : "설치");
         Installer inst = new Installer(env, out(), dryRun);
         String ver = inst.prepareRepo(version);

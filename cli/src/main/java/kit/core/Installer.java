@@ -116,7 +116,14 @@ public final class Installer {
                 if (copy) {
                     copyTree(src, target);
                 } else {
-                    Files.createSymbolicLink(target, src);
+                    try {
+                        Files.createSymbolicLink(target, src);
+                    } catch (IOException | UnsupportedOperationException e) {
+                        // Windows는 관리자 권한이나 개발자 모드가 없으면 링크를 못 만든다 → 복사로 대신 (sync 때마다 다시 복사돼 최신 유지)
+                        out.warn("링크를 만들 수 없어 복사로 설치: " + name + " (" + e.getClass().getSimpleName() + ")");
+                        copyTree(src, target);
+                        mode = "copy";   // 다음 sync 부터 복사 방식으로 갱신 (링크 방식이면 복사본을 개인 스킬로 보고 안 건드림)
+                    }
                 }
             }
             nowManaged.add(name);
