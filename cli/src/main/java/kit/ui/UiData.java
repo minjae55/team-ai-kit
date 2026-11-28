@@ -66,6 +66,7 @@ public final class UiData {
         m.put("notes", notes(sessions));
         m.put("recommendations", new Recommender(env).recommend(sessions, dismissed()));
         m.put("metrics", new Metrics(env).read());
+        m.put("usageDaily", usageDaily(8));
         return m;
     }
 
@@ -131,7 +132,26 @@ public final class UiData {
             t.put("id", a.id());
             t.put("name", a.displayName());
             t.put("detected", a.detect(env));
-            t.put("installed", lock != null && lock.tools.containsKey(a.id()));
+            boolean installed = lock != null && lock.tools.containsKey(a.id());
+            t.put("installed", installed);
+            t.put("skillsDir", env.display(a.skillsDir(env)));
+            t.put("contextFile", env.display(a.contextFile(env)));
+            if (installed) {
+                LockFile.ToolState st = lock.tools.get(a.id());
+                t.put("skills", st.skills.size());
+                try {
+                    t.put("rules", st.contextFile != null && ManagedBlock.has(env.home().getFileSystem().getPath(st.contextFile)));
+                } catch (IOException e) {
+                    t.put("rules", false);
+                }
+            }
+            boolean auto;
+            try {
+                auto = "claude".equals(a.id()) && new kit.core.ClaudeHooks(env).enabled();
+            } catch (IOException e) {
+                auto = false;
+            }
+            t.put("autoUpdate", auto);
             out.add(t);
         }
         return out;
@@ -194,6 +214,9 @@ public final class UiData {
             String full = fullDescription(env.skillsSource().resolve(name).resolve("SKILL.md"));
             s.put("description", description(env.skillsSource().resolve(name).resolve("SKILL.md")));
             s.put("examples", examples(full));
+            String body = body(env.skillsSource().resolve(name).resolve("SKILL.md"));
+            s.put("summary", summary(body, full));
+            s.put("body", body);
             int[] mine = rated.get(name);
             s.put("myUp", mine == null ? 0 : mine[0]);
             s.put("myDown", mine == null ? 0 : mine[1]);
@@ -229,6 +252,35 @@ public final class UiData {
             out.add(s);
         }
         return out;
+    }
+
+    /** SKILL.md 본문 (frontmatter 제외) */
+    static String body(Path skillMd) throws IOException {
+        if (!Files.exists(skillMd)) {
+            return "";
+        }
+        String text = new String(Files.readAllBytes(skillMd), StandardCharsets.UTF_8);
+        if (text.startsWith("---")) {
+            int end = text.indexOf("\n---", 3);
+            if (end > 0) {
+                text = text.substring(text.indexOf('\n', end + 1) + 1);
+            }
+        }
+        return text.trim();
+    }
+
+    /** 한 줄 요약: 본문의 "> 요약:" 줄, 없으면 설명 첫 문장을 짧게 */
+    static String summary(String body, String description) {
+        for (String line : body.split("\\R")) {
+            String t = line.trim();
+            if (t.startsWith("> 요약:")) {
+                return t.substring("> 요약:".length()).trim();
+            }
+        }
+        String d = description;
+        int dot = d.indexOf(". ");
+        d = dot > 0 ? d.substring(0, dot) : d;
+        return d.length() > 40 ? d.substring(0, 40) + "…" : d;
     }
 
     static String description(Path skillMd) throws IOException {
@@ -396,6 +448,44 @@ public final class UiData {
             n.put("reflected", false);
             out.add(n);
         }
+        return out;
+    }
+
+    /** 최근 days일의 날짜별 스킬 사용 횟수와 그 앞 days일 합계 (AI 사용 현황 그래프용) */
+    private Map<String, Object> usageDaily(int days) throws IOException {
+        Map<String, Object> out = new LinkedHashMap<String, Object>();
+        java.time.ZoneId zone = java.time.ZoneId.systemDefault();
+        java.time.LocalDate today = java.time.LocalDate.now(zone);
+        int[] counts = new int[days];
+        int prev = 0;
+        Path f = env.kitDir().resolve("usage.jsonl");
+        if (Files.exists(f)) {
+            for (String line : Files.readAllLines(f, StandardCharsets.UTF_8)) {
+                try {
+                    String t = JSON.readTree(line).path("time").asText("");
+                    java.time.LocalDate d = java.time.Instant.parse(t).atZone(zone).toLocalDate();
+                    long ago = java.time.temporal.ChronoUnit.DAYS.between(d, today);
+                    if (ago >= 0 && ago < days) {
+                        counts[days - 1 - (int) ago]++;
+                    } else if (ago >= days && ago < 2L * days) {
+                        prev++;
+                    }
+                } catch (Exception ignored) {
+                    // 깨진 줄은 건너뜀
+                }
+            }
+        }
+        List<String> labels = new ArrayList<String>();
+        List<Integer> values = new ArrayList<Integer>();
+        for (int i = 0; i < days; i++) {
+            java.time.LocalDate d = today.minusDays(days - 1 - i);
+            labels.add(d.getMonthValue() + "/" + d.getDayOfMonth());
+            values.add(counts[i]);
+        }
+        out.put("labels", labels);
+        out.put("values", values);
+        out.put("previousTotal", prev);
+        out.put("tracking", new kit.core.ClaudeHooks(env).enabled() || Files.exists(f));
         return out;
     }
 

@@ -5,69 +5,92 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AI Kit</title>
 <style>
-:root{--bg:#f3f5fb;--panel:#ffffff;--ink:#111827;--sub:#4b5563;--mut:#8b93a1;--line:#e6e9f2;--soft:#f1f4fb;
-  --blue:#2f6fed;--blue2:#5b8cff;--blue-bg:#e8f0ff;--blue-ink:#1f4fc4;--green:#16a34a;--green-bg:#e7f6ed;--red:#dc2626;--red-bg:#fdecec;--amber:#b7791f;--amber-bg:#fdf3e1;--violet:#7c5cff;
-  --shadow:0 1px 2px rgba(17,24,39,.04),0 8px 24px rgba(17,24,39,.06);--r:18px}
-@media (prefers-color-scheme:dark){:root{--bg:#0f1219;--panel:#171b24;--ink:#eef1f7;--sub:#b6bdcb;--mut:#7c8494;--line:#262c38;--soft:#1e2430;
-  --blue:#5b8cff;--blue2:#7ea4ff;--blue-bg:#1b2742;--blue-ink:#a9c2ff;--green:#4ade80;--green-bg:#13281c;--red:#f87171;--red-bg:#331b1b;--amber:#f2b552;--amber-bg:#30260f;--shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25)}}
+:root{--bg:#eef2fb;--bg2:#f6f4fd;--panel:#ffffff;--ink:#111827;--sub:#4b5563;--mut:#8b93a1;--line:#e6e9f2;--soft:#f1f4fb;
+  --blue:#3b6ef5;--blue2:#7ea4ff;--blue-bg:#e8efff;--blue-ink:#2350c8;--green:#16a34a;--green-bg:#e7f6ed;--red:#dc2626;--red-bg:#fdecec;--amber:#b7791f;--amber-bg:#fdf3e1;--violet:#7c5cff;--violet-bg:#efebff;--teal:#0e9f8f;--teal-bg:#e3f6f3;
+  --shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px rgba(59,110,245,.07);--r:20px}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1219;--bg2:#121522;--panel:#171b24;--ink:#eef1f7;--sub:#b6bdcb;--mut:#7c8494;--line:#262c38;--soft:#1e2430;
+  --blue:#6b93ff;--blue2:#8fb0ff;--blue-bg:#1b2742;--blue-ink:#a9c2ff;--green:#4ade80;--green-bg:#13281c;--red:#f87171;--red-bg:#331b1b;--amber:#f2b552;--amber-bg:#30260f;--violet-bg:#241d3d;--teal:#34d3c0;--teal-bg:#0f2a27;--shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.25)}}
 *{box-sizing:border-box}
-html,body{margin:0;height:100%}
-body{background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+html,body{margin:0;min-height:100%}
+body{background:radial-gradient(1200px 600px at 85% -10%,rgba(126,164,255,.25),transparent 60%),linear-gradient(180deg,var(--bg),var(--bg2));background-attachment:fixed;color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif}
 svg.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
-button{font:inherit;font-size:13px;padding:8px 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+button{font:inherit;font-size:13px;padding:8px 14px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
 button:hover{background:var(--soft)}
 button.primary{background:var(--blue);border-color:var(--blue);color:#fff}
-button.ghost{border:none;background:none;color:var(--blue);padding:4px 6px}
+button.primary:hover{filter:brightness(1.05)}
+button.ghost{border:none;background:none;color:var(--blue);padding:4px 6px;font-weight:600}
 button:disabled{opacity:.5;cursor:default}
-.app{display:grid;grid-template-columns:232px minmax(0,1fr);min-height:100vh}
-.side{background:var(--panel);border-right:1px solid var(--line);padding:22px 16px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh}
-.logo{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:700;padding:4px 10px 22px}
-.nav a{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;color:var(--sub);text-decoration:none;font-size:14px;font-weight:500;cursor:pointer}
+code{font:12px ui-monospace,Menlo,monospace;background:var(--soft);padding:1px 6px;border-radius:6px}
+.app{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:100vh;gap:8px}
+.side{position:sticky;top:0;height:100vh;padding:18px 0 18px 18px;display:flex;flex-direction:column}
+.logo{display:flex;align-items:center;gap:8px;font-size:20px;font-weight:800;padding:6px 12px 0;color:var(--ink)}
+.logo svg{color:var(--blue)}
+.mascot{position:relative;height:96px;margin:6px 0 -30px;z-index:2;pointer-events:none}
+.mascot svg{position:absolute;left:52px;bottom:0;width:128px;height:96px}
+.sidecard{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:42px 12px 12px;display:flex;flex-direction:column;position:relative;z-index:1}
+.nav a{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;color:var(--sub);text-decoration:none;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:2px}
 .nav a:hover{background:var(--soft)}
 .nav a.on{background:var(--blue-bg);color:var(--blue-ink)}
-.me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px;border-radius:14px;background:var(--soft)}
-.av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--blue2),var(--blue));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex:none}
-.main{padding:24px 32px 48px;max-width:1180px;width:100%}
-.top{display:flex;justify-content:flex-end;align-items:center;gap:14px;margin-bottom:8px}
-.search{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 16px;width:320px;color:var(--mut)}
+.me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px;border-radius:16px;background:var(--soft)}
+.av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--blue2),var(--blue));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex:none}
+.main{padding:22px 30px 56px;max-width:1180px;width:100%}
+.top{display:flex;justify-content:flex-end;align-items:center;gap:14px;margin-bottom:6px}
+.search{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:10px 18px;width:340px;color:var(--mut);box-shadow:var(--shadow)}
 .search input{border:none;outline:none;background:none;font:inherit;font-size:14px;color:var(--ink);width:100%}
-.hero{position:relative;overflow:hidden;padding:18px 4px 26px}
-.hero h1{font-size:30px;margin:0 0 6px;font-weight:700;letter-spacing:-.5px}
+.bell{position:relative;width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--panel);border:1px solid var(--line);cursor:pointer;color:var(--sub);box-shadow:var(--shadow)}
+.bell .badge{position:absolute;top:8px;right:9px;width:9px;height:9px;border-radius:50%;background:var(--red);border:2px solid var(--panel);display:none}
+.hero{position:relative;padding:20px 4px 22px}
+.hero h1{font-size:32px;margin:0 0 6px;font-weight:800;letter-spacing:-.6px}
 .hero p{margin:0;color:var(--sub);font-size:16px}
-.hero::after{content:'';position:absolute;right:-60px;top:-40px;width:520px;height:220px;background:radial-gradient(closest-side,rgba(91,140,255,.28),transparent),radial-gradient(closest-side at 70% 60%,rgba(124,92,255,.18),transparent);filter:blur(6px);pointer-events:none}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:20px 22px}
-.h2{display:flex;justify-content:space-between;align-items:center;margin:26px 0 12px}
-.h2 b{font-size:18px}
-.banner{display:flex;align-items:center;gap:16px;background:linear-gradient(90deg,var(--blue-bg),var(--panel));border:1px solid var(--line);border-radius:var(--r);padding:16px 20px;box-shadow:var(--shadow)}
-.new{background:var(--blue);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:8px}
-.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
-.tile{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:18px;cursor:pointer;display:flex;flex-direction:column;gap:6px;transition:transform .12s,box-shadow .12s}
-.tile:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(47,111,237,.14)}
-.tico{width:44px;height:44px;border-radius:12px;background:var(--blue-bg);color:var(--blue);display:flex;align-items:center;justify-content:center;margin-bottom:6px}
+.h2{display:flex;justify-content:space-between;align-items:center;margin:28px 0 12px}
+.h2 b{font-size:19px;letter-spacing:-.3px}
+.banner{display:flex;align-items:center;gap:16px;background:linear-gradient(90deg,var(--blue-bg),var(--panel) 70%);border:1px solid var(--line);border-radius:var(--r);padding:16px 20px;box-shadow:var(--shadow)}
+.new{background:var(--blue);color:#fff;font-size:12px;font-weight:800;padding:5px 11px;border-radius:999px;letter-spacing:.3px}
+.x{border:none;background:none;color:var(--mut);font-size:18px;padding:2px 6px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;align-items:start}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:20px;cursor:pointer;display:flex;flex-direction:column;gap:6px;transition:transform .12s,box-shadow .12s}
+.tile:hover{transform:translateY(-2px);box-shadow:0 14px 32px rgba(59,110,245,.14)}
+.tico{width:48px;height:48px;border-radius:14px;background:var(--blue-bg);color:var(--blue);display:flex;align-items:center;justify-content:center;margin-bottom:8px;flex:none}
+.tico.violet{background:var(--violet-bg);color:var(--violet)}.tico.teal{background:var(--teal-bg);color:var(--teal)}.tico.amber{background:var(--amber-bg);color:var(--amber)}
 .tile b{font-size:16px}
-.tile .s{font-size:13px;color:var(--mut);display:flex;justify-content:space-between;align-items:center;gap:6px}
-.go{width:26px;height:26px;border-radius:50%;background:var(--blue-bg);color:var(--blue);display:inline-flex;align-items:center;justify-content:center;flex:none}
-.g2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin-top:16px}
+.one{font-size:13px;color:var(--mut)}
+.more{display:none;margin-top:8px;padding-top:10px;border-top:1px dashed var(--line);font-size:13px;color:var(--sub)}
+.open > .more,.open .more.mine{display:block}
+.chev{transition:transform .15s;color:var(--mut);font-size:12px}
+.open .chev{transform:rotate(90deg)}
+.g2{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:16px;margin-top:16px}
 @media (max-width:980px){.app{grid-template-columns:1fr}.side{display:none}.g2{grid-template-columns:1fr}.search{width:100%}}
-.act{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
-.act:first-child{border-top:none}
+.row{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--line);cursor:pointer}
+.item:first-child .row{border-top:none}
+.item .more{margin:0 0 10px 21px}
 .dot{width:9px;height:9px;border-radius:50%;flex:none}
 .mut{color:var(--mut);font-size:12px}.sub{color:var(--sub);font-size:13px}
 .chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:3px 10px;border-radius:999px;background:var(--soft);color:var(--sub);white-space:nowrap}
-.chip.blue{background:var(--blue-bg);color:var(--blue-ink)}.chip.green{background:var(--green-bg);color:var(--green)}.chip.red{background:var(--red-bg);color:var(--red)}
+.chip.blue{background:var(--blue-bg);color:var(--blue-ink)}.chip.green{background:var(--green-bg);color:var(--green)}.chip.red{background:var(--red-bg);color:var(--red)}.chip.amber{background:var(--amber-bg);color:var(--amber)}
+.bars{display:flex;align-items:flex-end;gap:10px;height:120px;margin-top:14px}
+.bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+.bar i{display:block;width:100%;max-width:34px;border-radius:9px 9px 4px 4px;background:linear-gradient(180deg,var(--blue2),var(--blue));opacity:.85;min-height:4px}
+.bar i.today{opacity:1;box-shadow:0 6px 16px rgba(59,110,245,.35)}
+.bar span{font-size:11px;color:var(--mut)}
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:4px}
 .metric{padding:6px 12px;border-left:1px solid var(--line)}.metric:first-child{border-left:none}
 .metric .v{font-size:24px;font-weight:700}
 .sw{position:relative;width:42px;height:24px;border-radius:12px;background:var(--line);cursor:pointer;flex:none;transition:background .15s}
 .sw::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .15s}
 .sw.on{background:var(--blue)}.sw.on::after{left:21px}
-.grid-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.grid-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;align-items:start}
 .empty{border:1px dashed var(--line);border-radius:14px;padding:20px;text-align:center;color:var(--sub);font-size:13px}
-.rate{display:flex;gap:6px;flex:none}
+.rate{display:flex;gap:6px;flex-wrap:wrap}
 .rate button{padding:4px 9px;font-size:12px}
 .rate button.sel{background:var(--blue-bg);border-color:var(--blue);color:var(--blue-ink)}
 #modal{position:fixed;inset:0;background:rgba(15,18,25,.45);display:none;align-items:center;justify-content:center;padding:20px;z-index:10}
-#modal .card{max-width:520px;width:100%}
+#modal .card{max-width:760px;width:100%;max-height:86vh;overflow:auto}
+.mdx h1,.mdx h2,.mdx h3{margin:18px 0 8px;letter-spacing:-.3px}.mdx h1{font-size:20px}.mdx h2{font-size:17px}.mdx h3{font-size:15px}
+.mdx p,.mdx li{font-size:14px;color:var(--sub)}.mdx ul,.mdx ol{padding-left:20px}
+.mdx pre{background:var(--soft);border-radius:12px;padding:12px;overflow:auto;font:12px/1.5 ui-monospace,Menlo,monospace}
+.mdx table{border-collapse:collapse;font-size:13px;margin:8px 0;width:100%}.mdx td,.mdx th{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.mdx blockquote{margin:8px 0;padding:8px 12px;border-left:3px solid var(--blue);background:var(--blue-bg);border-radius:8px;color:var(--blue-ink)}
 #toast{position:fixed;right:22px;bottom:22px;max-width:520px;z-index:11;display:none}
 #toast pre{margin:8px 0 0;font:12px/1.5 ui-monospace,Menlo,monospace;white-space:pre-wrap;max-height:260px;overflow:auto;color:var(--sub)}
 .page{display:none}.page.on{display:block}
@@ -76,47 +99,83 @@ button:disabled{opacity:.5;cursor:default}
 <body>
 <div class="app">
   <aside class="side">
-    <div class="logo"><svg viewBox="0 0 32 32" width="30" height="30"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7ea4ff"/><stop offset="1" stop-color="#2f6fed"/></linearGradient></defs><path d="M16 3l11 6.5v13L16 29 5 22.5v-13z" fill="url(#lg)"/><circle cx="16" cy="16" r="4.5" fill="#fff" opacity=".9"/></svg>AI Kit</div>
-    <nav class="nav" id="nav">
-      <a data-p="home" class="on"><svg class="i" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>홈</a>
-      <a data-p="library"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>스킬 라이브러리</a>
-      <a data-p="activity"><svg class="i" viewBox="0 0 24 24"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>활동 기록</a>
-      <a data-p="settings"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>설정</a>
-    </nav>
-    <div class="me"><div class="av" id="meAv">·</div><div style="min-width:0"><div style="font-size:14px;font-weight:600" id="meName">-</div><div class="mut" id="meVer">팀 AI 키트</div></div></div>
+    <div class="logo"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><ellipse cx="6" cy="9" rx="2.2" ry="2.8"/><ellipse cx="10" cy="5.5" rx="2.2" ry="2.8"/><ellipse cx="14.5" cy="5.5" rx="2.2" ry="2.8"/><ellipse cx="18.5" cy="9" rx="2.2" ry="2.8"/><path d="M12.2 10.5c-3.3 0-6.2 3.6-6.2 6.4 0 2 1.6 3.1 3.4 3.1 1.2 0 1.9-.6 2.8-.6s1.6.6 2.8.6c1.8 0 3.4-1.1 3.4-3.1 0-2.8-2.9-6.4-6.2-6.4z"/></svg>AI Kit</div>
+    <div class="mascot" aria-hidden="true">
+      <svg viewBox="0 0 128 96">
+        <path d="M30 40 L24 12 L46 28 Z" fill="#9aa0a8"/><path d="M98 40 L104 12 L82 28 Z" fill="#9aa0a8"/>
+        <path d="M31 36 L27 18 L41 29 Z" fill="#f4b8c4"/><path d="M97 36 L101 18 L87 29 Z" fill="#f4b8c4"/>
+        <ellipse cx="64" cy="58" rx="42" ry="34" fill="#fbfbfc" stroke="#d9dce3" stroke-width="1.5"/>
+        <path d="M30 44 C34 26 50 22 60 24 C56 34 44 40 30 50 Z" fill="#9aa0a8"/>
+        <path d="M98 44 C94 28 82 22 70 24 C74 32 86 38 98 50 Z" fill="#6f747c"/>
+        <path d="M46 56 q6 -6 12 0" stroke="#3b3f46" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path d="M70 56 q6 -6 12 0" stroke="#3b3f46" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <ellipse cx="44" cy="66" rx="6" ry="3.5" fill="#f7c6d0" opacity=".8"/><ellipse cx="84" cy="66" rx="6" ry="3.5" fill="#f7c6d0" opacity=".8"/>
+        <path d="M61 63 h6 l-3 3 z" fill="#e58aa0"/>
+        <path d="M64 66 q-4 5 -9 2 M64 66 q4 5 9 2" stroke="#3b3f46" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M30 62 h-14 M31 67 h-13 M98 62 h14 M97 67 h13" stroke="#b9bdc5" stroke-width="1.4" stroke-linecap="round"/>
+        <ellipse cx="40" cy="90" rx="14" ry="8" fill="#fbfbfc" stroke="#d9dce3" stroke-width="1.5"/><ellipse cx="88" cy="90" rx="14" ry="8" fill="#fbfbfc" stroke="#d9dce3" stroke-width="1.5"/>
+        <path d="M36 88 v4 M41 87 v5 M46 88 v4 M84 88 v4 M89 87 v5 M94 88 v4" stroke="#d9dce3" stroke-width="1.2" stroke-linecap="round"/>
+        <path d="M112 18 l8 -6 M114 28 l10 -2" stroke="#7ea4ff" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="sidecard">
+      <nav class="nav" id="nav">
+        <a data-p="home" class="on"><svg class="i" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>홈</a>
+        <a data-p="library"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>스킬 라이브러리</a>
+        <a data-p="agents"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="7" width="16" height="12" rx="4"/><path d="M12 7V4M9 13h.01M15 13h.01M9.5 16.5h5"/></svg>AI 에이전트</a>
+        <a data-p="activity"><svg class="i" viewBox="0 0 24 24"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>활동 기록</a>
+        <a data-p="settings"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>설정</a>
+      </nav>
+      <div class="me"><div class="av" id="meAv">·</div><div style="min-width:0"><div style="font-size:14px;font-weight:700" id="meName">-</div><div class="mut" id="meVer">팀 AI 키트</div></div></div>
+    </div>
   </aside>
 
   <main class="main">
     <div class="top">
-      <label class="search"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" placeholder="스킬, 활동을 검색해 보세요…" autocomplete="off"></label>
+      <label class="search"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" placeholder="스킬, 기능을 검색해 보세요…" autocomplete="off"></label>
+      <div class="bell" title="팀 소식" onclick="openNews(0)"><svg class="i" viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg><span class="badge" id="bellBadge"></span></div>
       <div class="av" id="topAv">·</div>
     </div>
 
     <section class="page on" id="p-home">
-      <div class="hero"><h1 id="hello">안녕하세요 👋</h1><p>오늘도 AI와 함께 더 스마트하게 일해 보세요.</p></div>
+      <div class="hero"><h1 id="hello">안녕하세요 👋</h1><p>오늘도 AI와 함께 더 스마트한 업무를 시작해 보세요.</p></div>
       <div id="banner"></div>
       <div class="h2"><b>빠른 실행</b><button class="ghost" onclick="go('library')">전체 보기 →</button></div>
       <div class="tiles" id="tiles"></div>
       <div class="g2">
         <div class="card">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><b style="font-size:16px">최근 활동</b><button class="ghost" onclick="go('activity')">전체 보기 →</button></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><b style="font-size:17px">최근 활동</b><button class="ghost" onclick="go('activity')">전체 보기 →</button></div>
           <div id="recent"></div>
         </div>
-        <div class="card" id="system"></div>
+        <div class="card" id="usageCard"></div>
       </div>
+      <div id="systemWrap"></div>
       <div class="h2"><b>✨ 스킬로 만들면 좋을 작업</b><button class="ghost" onclick="go('library')">전체 보기 →</button></div>
       <div id="homeRecs"></div>
     </section>
 
     <section class="page" id="p-library">
-      <div class="hero"><h1>스킬 라이브러리</h1><p>팀이 검증해서 배포한 스킬이에요. 끄면 내 AI에서만 빠지고, 다시 켜면 돌아와요.</p></div>
+      <div class="hero"><h1>스킬 라이브러리</h1><p>팀이 검증해서 배포한 스킬이에요. 카드를 누르면 설명이 펼쳐지고, 끄면 내 AI에서만 빠져요.</p></div>
       <div class="grid-cards" id="skills"></div>
       <div class="h2"><b>✨ 스킬로 만들면 좋을 반복 작업</b><span class="mut">최근 14일 기록 · AI 호출 없이 분석</span></div>
       <div id="recs"></div>
     </section>
 
+    <section class="page" id="p-agents">
+      <div class="hero"><h1>AI 에이전트</h1><p>이 PC의 AI 도구에 팀 스킬과 공통 원칙이 연결된 상태예요. 새 도구를 깔면 다음 업데이트 때 자동으로 연결돼요.</p></div>
+      <div class="grid-cards" id="agents"></div>
+      <div class="h2"><b>웹 AI · 자동 분석</b></div>
+      <div class="grid-cards">
+        <div class="card item" onclick="toggle(this,event)"><div style="display:flex;align-items:center;gap:12px"><div class="tico violet" style="margin:0">🌐</div><div style="flex:1"><b>웹 AI에서 쓰기</b><div class="one">claude.ai · ChatGPT · Gemini에 올릴 묶음 만들기</div></div><span class="chev">▶</span></div>
+          <div class="more">웹 AI는 자동으로 갱신할 수 없어서, 올릴 묶음을 만들고 바뀐 스킬을 알려 드려요. 웹에서는 내 PC 스크립트(DB 조회 등)를 실행할 수 없어요.
+            <div style="margin-top:10px"><button class="primary" onclick="event.stopPropagation();act('웹 AI용 묶음 만들기', '/api/export', {}, this)">묶음 만들기 · 바뀐 스킬 확인</button></div></div></div>
+        <div class="card item" onclick="toggle(this,event)"><div style="display:flex;align-items:center;gap:12px"><div class="tico teal" style="margin:0">🔔</div><div style="flex:1"><b>알림 자동 분석</b><div class="one">Grafana 알림이 오면 원인을 자동으로 분석</div></div><span class="chev">▶</span></div>
+          <div class="more">터미널에서 <code>kit watch --project &lt;프로젝트 폴더&gt; --listen-all</code>을 켜 두고, 화면에 나온 주소를 Grafana 연락처(webhook)에 넣으면 돼요. 읽기 전용으로 분석하고, 같은 알림은 30분에 한 번만 분석해요. 결과는 <code>~/.kit/alerts/</code>에 남아요.</div></div>
+      </div>
+    </section>
+
     <section class="page" id="p-activity">
-      <div class="hero"><h1>활동 기록</h1><p>내가 개선한 것과 AI로 한 작업이에요. 스킬을 쓴 결과는 평가해 주세요.</p></div>
+      <div class="hero"><h1>활동 기록</h1><p>내가 개선한 것과 AI로 한 작업이에요. 누르면 자세히 보이고, 스킬을 쓴 결과는 평가해 주세요.</p></div>
       <div class="card"><div id="activity"></div></div>
       <div class="h2"><b>📒 AI 실수 노트</b><span class="mut">AI가 틀렸거나 계속 실패한 곳 · 고치면 팀 전체가 같은 실수를 안 해요</span></div>
       <div class="card"><div id="notes"></div></div>
@@ -125,21 +184,17 @@ button:disabled{opacity:.5;cursor:default}
     <section class="page" id="p-settings">
       <div class="hero"><h1>설정</h1><p>설치 상태와 버전, 팀 소식을 확인해요.</p></div>
       <div class="g2" style="margin-top:0">
+        <div class="card"><b style="font-size:16px">팀 새 소식</b><div class="mut" style="margin:2px 0 6px">누르면 바뀐 내용이 펼쳐져요</div><div id="news"></div></div>
         <div class="card"><b style="font-size:16px">점검</b><div id="health" style="margin-top:10px"></div></div>
-        <div class="card"><b style="font-size:16px">팀 새 소식</b><div id="news" style="margin-top:10px"></div></div>
       </div>
       <div class="g2">
         <div class="card"><b style="font-size:16px">자동 업데이트 · 사용 기록</b><div id="auto" style="margin-top:10px"></div></div>
-        <div class="card"><b style="font-size:16px">웹 AI에서 쓰기 (claude.ai · ChatGPT · Gemini)</b>
-          <div class="sub" style="margin-top:8px">웹 AI는 자동으로 갱신할 수 없어서, 올릴 묶음을 만들고 바뀐 스킬을 알려 드려요. 올리는 법은 각 폴더의 올리는법.txt에 있어요. 웹에서는 내 PC 스크립트(DB 조회 등)를 실행할 수 없어요.</div>
-          <div style="margin-top:10px"><button class="primary" onclick="act('웹 AI용 묶음 만들기', '/api/export', {}, this)">묶음 만들기 · 바뀐 스킬 확인</button></div></div>
+        <div class="card"><b style="font-size:16px">버전 고정 · 되돌리기</b><div id="pin" style="margin-top:10px"></div></div>
         <div class="card"><b style="font-size:16px">초기화</b>
           <div class="sub" style="margin-top:8px">키트가 설치한 것(팀 스킬 연결, 공통 원칙 구역, 자동 업데이트 훅)을 지워 설치 전으로 되돌려요. 직접 만든 개인 스킬과 직접 쓴 지침은 그대로 둬요. 지울 목록을 먼저 보여 드려요.</div>
           <div style="margin-top:10px"><button onclick="resetKit(this)" style="color:var(--red)">초기화…</button></div></div>
-        <div class="card"><b style="font-size:16px">버전 고정 · 되돌리기</b><div id="pin" style="margin-top:10px"></div></div>
-      </div>
-      <div class="card" style="margin-top:16px"><b style="font-size:16px">파일 위치</b>
-        <div class="sub" style="margin-top:8px;line-height:1.9">설치 기록 <code>~/.kit/kit.lock.json</code> · 내 평가 <code>~/.kit/ratings.json</code> · 화면 설정(시스템 현황 지표, 개선 기록 폴더) <code>~/.kit/ui.json</code></div>
+        <div class="card"><b style="font-size:16px">파일 위치</b>
+          <div class="sub" style="margin-top:8px;line-height:1.9">설치 기록 <code>~/.kit/kit.lock.json</code><br>내 평가 <code>~/.kit/ratings.json</code><br>사용 기록 <code>~/.kit/usage.jsonl</code><br>화면 설정 <code>~/.kit/ui.json</code></div></div>
       </div>
     </section>
   </main>
@@ -153,7 +208,26 @@ const TOKEN = "__KIT_TOKEN__";
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const jsq = s => esc(JSON.stringify(String(s == null ? "" : s)));
-const md = s => esc(s).replace(/`([^`]+)`/g, '<code style="font-size:12px;background:var(--soft);padding:1px 5px;border-radius:5px">$1</code>');
+const inline = s => esc(s).replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
+/** 스킬 본문 같은 Markdown을 간단히 HTML로 (제목, 목록, 표, 코드, 인용) */
+function mdToHtml(src) {
+  const lines = String(src || "").split(/\r?\n/), out = [];
+  let i = 0, list = null;
+  const close = () => { if (list) { out.push(`</${list}>`); list = null; } };
+  while (i < lines.length) {
+    const l = lines[i];
+    if (/^```/.test(l)) { close(); const buf = []; i++; while (i < lines.length && !/^```/.test(lines[i])) buf.push(lines[i++]); out.push(`<pre>${esc(buf.join("\n"))}</pre>`); i++; continue; }
+    if (/^\s*\|.*\|\s*$/.test(l)) { close(); const rows = []; while (i < lines.length && /^\s*\|.*\|\s*$/.test(lines[i])) rows.push(lines[i++]);
+      const cells = r => r.trim().replace(/^\||\|$/g, "").split("|").map(c => c.trim());
+      out.push("<table>" + rows.filter(r => !/^\s*\|[\s:|-]+\|\s*$/.test(r)).map((r, k) => "<tr>" + cells(r).map(c => k === 0 ? `<th>${inline(c)}</th>` : `<td>${inline(c)}</td>`).join("") + "</tr>").join("") + "</table>"); continue; }
+    const h = l.match(/^(#{1,3})\s+(.*)/); if (h) { close(); out.push(`<h${h[1].length}>${inline(h[2])}</h${h[1].length}>`); i++; continue; }
+    if (/^>\s?/.test(l)) { close(); out.push(`<blockquote>${inline(l.replace(/^>\s?/, ""))}</blockquote>`); i++; continue; }
+    const li = l.match(/^\s*(?:[-*]|\d+\.)\s+(.*)/);
+    if (li) { const t = /^\s*\d+\./.test(l) ? "ol" : "ul"; if (list !== t) { close(); out.push(`<${t}>`); list = t; } out.push(`<li>${inline(li[1])}</li>`); i++; continue; }
+    close(); if (l.trim()) out.push(`<p>${inline(l)}</p>`); i++;
+  }
+  close(); return `<div class="mdx">${out.join("")}</div>`;
+}
 const ICONS = {
   incident: '<path d="M3 12h4l3-8 4 16 3-8h4"/>',
   query: '<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/>',
@@ -161,9 +235,14 @@ const ICONS = {
   doc: '<path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
   code: '<path d="M8 6l-6 6 6 6M16 6l6 6-6 6"/>',
   commit: '<circle cx="12" cy="12" r="3"/><path d="M3 12h6M15 12h6"/>',
+  test: '<path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3"/>',
+  mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+  people: '<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M16 11a3 3 0 1 0 0-6M21 20c0-2.6-1.6-4.8-4-5.6"/>',
   spark: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>'
 };
-const iconFor = name => ICONS[/incident|장애/.test(name) ? "incident" : /query|sql|쿼리/.test(name) ? "query" : /perf|성능/.test(name) ? "perf" : /doc|문서|블로그/.test(name) ? "doc" : /commit|커밋|pr/i.test(name) ? "commit" : /review|리뷰|code|코드/.test(name) ? "code" : "spark"];
+const iconFor = n => ICONS[/incident|장애/.test(n) ? "incident" : /query|sql|쿼리/.test(n) ? "query" : /perf|k6|성능/.test(n) ? "perf" : /test|테스트/.test(n) ? "test"
+  : /mail|메일/.test(n) ? "mail" : /contact|company|연락|기업/.test(n) ? "people" : /doc|문서|보고/.test(n) ? "doc" : /commit|커밋|pr/i.test(n) ? "commit" : /review|리뷰|code|코드/.test(n) ? "code" : "spark"];
+const tone = n => /incident|perf|k6/.test(n) ? "" : /query|test/.test(n) ? "teal" : /review|commit/.test(n) ? "violet" : "amber";
 const svg = p => `<svg class="i" viewBox="0 0 24 24">${p}</svg>`;
 function ago(t) {
   if (!t) return "";
@@ -184,6 +263,9 @@ async function act(title, path, body, btn) {
   catch (e) { toast("⚠️ " + title, e.message); }
   finally { if (btn) { btn.disabled = false; btn.textContent = btn.dataset.l; } load(); }
 }
+/** 펼치기: 한 줄 → 누르면 2~3줄 (버튼·스위치·링크를 누른 건 무시) */
+function toggle(el, e) { if (e && e.target.closest("button,.sw,a,input,code")) return; el.classList.toggle("open"); }
+function modal(html) { $("modalBody").innerHTML = html + `<div style="text-align:right;margin-top:16px"><button onclick="$('modal').style.display='none'">닫기</button></div>`; $("modal").style.display = "flex"; }
 async function resetKit(btn) {
   btn.disabled = true;
   try {
@@ -195,8 +277,7 @@ async function resetKit(btn) {
     document.querySelector("main").innerHTML = `<div class="card" style="max-width:640px;margin:60px auto">
       <b style="font-size:18px">${r.code === 0 ? "초기화했어요" : "초기화 중 문제가 있었어요"}</b>
       <pre class="sub" style="white-space:pre-wrap;margin-top:12px">${esc(r.output || r.error || "")}</pre>
-      <div class="sub" style="margin-top:12px">새 AI 세션부터 팀 스킬이 빠져요. 이 창은 닫아도 돼요.<br>다시 쓰려면 설치를 한 번 더 하면 돼요: <code>curl -fsSL https://raw.githubusercontent.com/minjae55/team-ai-kit/main/get.sh | bash</code>
-      ${purge ? "" : "<br>또는 터미널에서 <code>kit install</code>"}</div></div>`;
+      <div class="sub" style="margin-top:12px">새 AI 세션부터 팀 스킬이 빠져요. 이 창은 닫아도 돼요.<br>다시 쓰려면 AI 도구에 "https://github.com/minjae55/team-ai-kit 설치해줘"라고 하면 돼요.</div></div>`;
   } catch (e) { toast("⚠️ 초기화", e.message); }
   finally { btn.disabled = false; }
 }
@@ -211,37 +292,61 @@ let S = null, query = "";
 const match = (...xs) => !query || xs.join(" ").toLowerCase().includes(query);
 $("q").addEventListener("input", e => { query = e.target.value.trim().toLowerCase(); if (query && document.querySelector("#p-home.on")) go("library"); render(); });
 
+/** 스킬 "자세히": 사용 예시 + 스킬 본문 전체 */
 function openSkill(name) {
   const k = S.skills.find(x => x.name === name); if (!k) return;
-  const ex = k.examples.length ? k.examples : ["(이 스킬이 하는 일)을 해줘"];
-  $("modalBody").innerHTML = `
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div class="tico" style="margin:0">${svg(iconFor(k.name))}</div><div><b style="font-size:18px">${esc(k.name)}</b><div class="sub">${esc(k.description)}</div></div></div>
-    <div class="sub" style="margin:12px 0 6px">AI 도구에서 이렇게 말하면 이 스킬이 자동으로 실행돼요</div>
-    ${ex.map(e => `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px"><span style="flex:1">"${esc(e)}"</span><button onclick="navigator.clipboard.writeText(${jsq(e)});this.textContent='복사됨'">복사</button></div>`).join("")}
-    <div class="mut" style="margin-top:8px">직접 부르려면 Claude Code에서 <code>/${esc(k.name)}</code>, Codex에서 <code>$${esc(k.name)}</code></div>
-    <div style="text-align:right;margin-top:14px"><button onclick="$('modal').style.display='none'">닫기</button></div>`;
-  $("modal").style.display = "flex";
+  const ex = k.examples.length ? k.examples : [];
+  modal(`<div style="display:flex;align-items:center;gap:12px"><div class="tico ${tone(k.name)}" style="margin:0">${svg(iconFor(k.name))}</div><div><b style="font-size:19px">${esc(k.name)}</b><div class="sub">${esc(k.summary)}</div></div></div>
+    ${ex.length ? `<div class="sub" style="margin:14px 0 6px">AI 도구에서 이렇게 말하면 이 스킬이 자동으로 실행돼요</div>
+    ${ex.map(e => `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--line);border-radius:12px;margin-bottom:6px"><span style="flex:1">"${esc(e)}"</span><button onclick="navigator.clipboard.writeText(${jsq(e)});this.textContent='복사됨'">복사</button></div>`).join("")}` : ""}
+    <div class="mut" style="margin:6px 0 4px">직접 부르려면 Claude Code에서 <code>/${esc(k.name)}</code>, Codex에서 <code>$${esc(k.name)}</code></div>
+    <div style="border-top:1px solid var(--line);margin-top:14px;padding-top:4px">${mdToHtml(k.body)}</div>`);
+}
+function openNews(i) {
+  const n = (S && S.news || [])[i]; if (!n) { modal(`<b>팀 소식</b><div class="empty" style="margin-top:10px">소식이 없어요</div>`); return; }
+  modal(`<div style="display:flex;align-items:center;gap:10px"><span class="new">${esc(n.version)}</span><b style="font-size:18px">팀 소식</b><span class="mut">${esc(n.date)}</span></div>
+    <ul style="padding-left:20px;margin-top:12px">${n.items.map(x => `<li class="sub" style="margin-bottom:6px">${inline(x)}</li>`).join("")}</ul>
+    ${S.news.length > 1 ? `<div class="mut" style="margin-top:10px">지난 소식: ${S.news.slice(1).map((m, j) => `<button class="ghost" onclick="openNews(${j + 1})">${esc(m.version)}</button>`).join("")}</div>` : ""}`);
 }
 
 function renderHome() {
   $("hello").textContent = `안녕하세요${S.user ? ", " + S.user + "님" : ""}! 👋`;
-  const init = (S.user || "?").trim().slice(-2, -1) || (S.user || "?")[0];
   $("meAv").textContent = $("topAv").textContent = (S.user || "?")[0].toUpperCase();
-  $("meName").textContent = S.user || "사용자"; $("meVer").textContent = "팀 AI 키트 " + (S.version || "미설치");
-  $("banner").innerHTML = S.updateAvailable
-    ? `<div class="banner"><span class="new">NEW</span><div style="flex:1"><b>${esc(S.latest)} 업데이트가 나왔어요</b><div class="sub">${(S.updatePreview || []).filter(l => !l.startsWith("  ") && l !== "변경 내역:").map(esc).join(" · ")}</div></div><button class="primary" onclick="act('업데이트', '/api/sync', {}, this)">업데이트</button></div>`
-    : `<div class="banner"><span class="new" style="background:var(--green)">최신</span><div style="flex:1"><b>${esc(S.version || "")} 사용 중</b><div class="sub">${esc((S.news[0] || {items: [""]}).items[0] ? "" : "")}팀 스킬과 공통 원칙이 최신이에요</div></div><button class="ghost" onclick="act('업데이트 확인', '/api/sync', {}, this)">${S.checking ? "새 버전 확인 중…" : "업데이트 확인"}</button></div>`;
+  $("meName").textContent = (S.user || "사용자") + "님"; $("meVer").textContent = "팀 AI 키트 " + (S.version || "미설치");
+  const latestNews = S.news[0];
+  $("bellBadge").style.display = S.updateAvailable ? "block" : "none";
+  const hidden = sessionStorage.getItem("bannerHidden") === (S.updateAvailable ? S.latest : S.version);
+  const firstLine = n => n && n.items[0] ? n.items[0].replace(/`/g, "").slice(0, 60) + (n.items[0].length > 60 ? "…" : "") : "";
+  $("banner").innerHTML = hidden ? "" : S.updateAvailable
+    ? `<div class="banner"><span class="new">NEW</span><div style="flex:1;min-width:0"><b>${esc(S.latest)} 업데이트가 나왔어요!</b><div class="sub">${esc((S.updatePreview || []).filter(l => !l.startsWith("  ") && l !== "변경 내역:")[0] || "")}</div></div><button class="primary" onclick="act('업데이트', '/api/sync', {}, this)">업데이트</button><button class="x" title="닫기" onclick="sessionStorage.setItem('bannerHidden', ${jsq(S.latest)});renderHome()">✕</button></div>`
+    : `<div class="banner"><span class="new">NEW</span><div style="flex:1;min-width:0"><b>${esc(S.version || "")} 사용 중</b><div class="sub">${esc(firstLine(latestNews)) || "팀 스킬과 공통 원칙이 최신이에요"}</div></div><button class="ghost" onclick="openNews(0)">자세히 보기 →</button><button class="ghost" onclick="act('업데이트 확인', '/api/sync', {}, this)">${S.checking ? "확인 중…" : "업데이트 확인"}</button><button class="x" title="닫기" onclick="sessionStorage.setItem('bannerHidden', ${jsq(S.version)});renderHome()">✕</button></div>`;
   if (S.checking && !window._recheck) { window._recheck = setTimeout(() => { window._recheck = null; load(); }, 4000); }
-  const tiles = S.skills.filter(k => k.enabled).map(k => `
-    <div class="tile" onclick="openSkill(${jsq(k.name)})"><div class="tico">${svg(iconFor(k.name))}</div><b>${esc(k.name)}</b><div class="s"><span>${esc(k.description.length > 26 ? k.description.slice(0, 26) + "…" : k.description)}</span><span class="go">→</span></div></div>`);
-  const cand = S.recommendations.filter(r => r.kind === "skill").slice(0, Math.max(0, 4 - tiles.length)).map(r => `
-    <div class="tile" style="border-style:dashed" onclick="go('library')"><div class="tico" style="background:var(--amber-bg);color:var(--amber)">${svg(iconFor(r.id + r.title))}</div><b>${esc(r.title)}</b><div class="s"><span>스킬 후보 · ${r.prompts}번 반복</span><span class="go" style="background:var(--amber-bg);color:var(--amber)">+</span></div></div>`);
-  $("tiles").innerHTML = tiles.concat(cand).join("") || `<div class="empty">켜진 스킬이 없어요</div>`;
-  $("recent").innerHTML = S.activity.slice(0, 5).map(a => `
-    <div class="act"><span class="dot" style="background:${a.kind === "improve" ? "var(--green)" : "var(--blue)"}"></span><div style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(a.title)}</div><span class="mut">${esc(ago(a.time))}</span></div>`).join("") || `<div class="empty">최근 활동이 없어요</div>`;
+  const top = S.skills.filter(k => k.enabled).sort((a, b) => b.used30 - a.used30).slice(0, 4);
+  $("tiles").innerHTML = top.map(k => `
+    <div class="tile item" onclick="toggle(this,event)"><div class="tico ${tone(k.name)}">${svg(iconFor(k.name))}</div>
+      <div style="display:flex;align-items:center;gap:6px"><b style="flex:1">${esc(k.name)}</b><span class="chev">▶</span></div>
+      <div class="one">${esc(k.summary)}</div>
+      <div class="more">${esc(k.description)}<div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center"><span class="mut">${k.verifiedTotal ? "검증 " + k.verifiedPassed + "/" + k.verifiedTotal : ""}</span><button class="ghost" onclick="openSkill(${jsq(k.name)})">자세히 →</button></div></div>
+    </div>`).join("") || `<div class="empty">켜진 스킬이 없어요</div>`;
+  $("recent").innerHTML = S.activity.slice(0, 5).map(activityItem).join("") || `<div class="empty">최근 활동이 없어요</div>`;
+  renderUsage();
   renderSystem();
   const recs = S.recommendations.slice(0, 2);
   $("homeRecs").innerHTML = recs.length ? `<div class="grid-cards">${recs.map(recCard).join("")}</div>` : `<div class="empty">지금은 추천할 반복 작업이 없어요</div>`;
+}
+
+function renderUsage() {
+  const u = S.usageDaily || {values: [], labels: []};
+  const total = u.values.reduce((a, b) => a + b, 0), max = Math.max(1, ...u.values);
+  let delta = "";
+  if (u.previousTotal > 0) {
+    const pct = Math.round((total - u.previousTotal) / u.previousTotal * 100);
+    delta = `<span style="font-weight:800;color:${pct >= 0 ? "var(--green)" : "var(--red)"}">${pct >= 0 ? "↑" : "↓"} ${Math.abs(pct)}%</span>`;
+  } else if (total > 0) delta = `<span class="chip green">새로 시작</span>`;
+  $("usageCard").innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:17px">AI 사용 현황</b>${delta}</div>
+    <div class="mut">최근 ${u.values.length}일 팀 스킬 사용 ${total}회${u.previousTotal ? ` · 그 전 ${u.values.length}일 ${u.previousTotal}회` : ""}</div>
+    ${u.tracking === false ? `<div class="empty" style="margin-top:14px">사용 기록이 꺼져 있어요. 설정에서 켜면 여기에 그래프가 나와요.</div>` :
+    `<div class="bars">${u.values.map((v, i) => `<div class="bar" title="${esc(u.labels[i])}: ${v}회"><i class="${i === u.values.length - 1 ? "today" : ""}" style="height:${Math.max(4, v / max * 92)}%"></i><span>${esc(u.labels[i])}</span></div>`).join("")}</div>`}`;
 }
 
 function spark(points, color) {
@@ -253,106 +358,124 @@ function spark(points, color) {
 function fmt(v, unit) { if (v == null) return "-"; const n = Math.abs(v) >= 100 ? Math.round(v) : Math.round(v * 10) / 10; return n.toLocaleString() + unit; }
 function renderSystem() {
   const m = S.metrics || {};
-  if (!m.configured) {
-    $("system").innerHTML = `<b style="font-size:16px">시스템 현황</b><div class="empty" style="margin-top:12px">보여 줄 지표가 설정되지 않았어요.<br><code>~/.kit/ui.json</code>에 Prometheus 주소와 지표를 적으면 여기에 나와요.</div>`;
-    return;
-  }
+  if (!m.configured) { $("systemWrap").innerHTML = ""; return; }
   const status = m.reachable ? `<span class="chip green">● 정상 수집 중</span>` : `<span class="chip red">● 연결 안 됨</span>`;
-  $("system").innerHTML = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><b style="font-size:16px">${esc(m.title)}</b>${status}<span class="mut" style="margin-left:auto">최근 30분</span></div>
+  $("systemWrap").innerHTML = `<div class="card" style="margin-top:16px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><b style="font-size:16px">${esc(m.title)}</b>${status}<span class="mut" style="margin-left:auto">최근 30분</span></div>
     <div class="metrics">${m.items.map(it => {
       let delta = "";
       if (it.value != null && it.first != null && it.first !== 0) {
-        const pct = Math.round((it.value - it.first) / Math.abs(it.first) * 100);
-        const good = it.lowerIsBetter ? pct <= 0 : pct >= 0;
+        const pct = Math.round((it.value - it.first) / Math.abs(it.first) * 100), good = it.lowerIsBetter ? pct <= 0 : pct >= 0;
         delta = `<div style="font-size:12px;font-weight:600;color:${good ? "var(--green)" : "var(--red)"}">${pct > 0 ? "↑" : pct < 0 ? "↓" : "→"} ${Math.abs(pct)}%</div>`;
       }
       return `<div class="metric"><div class="mut">${esc(it.label)}</div><div class="v">${fmt(it.value, it.unit)}</div>${delta}${spark(it.points, "#5b8cff")}</div>`;
-    }).join("")}</div>`;
+    }).join("")}</div></div>`;
 }
 
 function recCard(r) {
-  return `<div class="card" style="display:flex;flex-direction:column;gap:8px">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div style="display:flex;align-items:center;gap:10px"><div class="tico" style="margin:0;width:38px;height:38px;background:var(--amber-bg);color:var(--amber)">${svg(iconFor(r.id + r.title))}</div><b style="font-size:15px">${esc(r.title)}</b></div><span class="chip ${r.kind === "skill" ? "blue" : ""}">${r.kind === "skill" ? "스킬 후보" : "팀 원칙 후보"}</span></div>
-    <div class="sub">${esc(r.description)}</div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip">🔁 ${r.prompts}번 요청</span><span class="chip">🗂 세션 ${r.sessions}개</span>${r.kind === "skill" && r.avgSteps ? `<span class="chip">🪜 요청당 약 ${r.avgSteps}단계</span>` : ""}</div>
-    ${r.examples.length ? `<div class="sub" style="border-left:2px solid var(--line);padding-left:10px">${r.examples.map(e => "\"" + esc(e) + "\"").join("<br>")}</div>` : ""}
-    <div style="display:flex;gap:8px;margin-top:auto">
-      ${r.kind === "skill" ? `<button class="primary" onclick="act(${jsq(r.title + ' 초안 만들기')}, '/api/draft', {id:${jsq(r.id)}}, this)">스킬 초안 만들기</button>`
-        : `<button class="primary" onclick="toast('📝 팀 원칙으로 제안하기', '팀 공통 원칙(kit/context/AGENTS.md)에 아래 한 줄을 추가하는 PR을 올려 주세요.\\n\\n- ' + ${jsq(r.description)})">원칙으로 제안</button>`}
-      <button onclick="act(${jsq(r.title + ' 숨기기')}, '/api/dismiss', {id:${jsq(r.id)}}, this)">나중에</button>
-    </div></div>`;
+  return `<div class="card item" onclick="toggle(this,event)">
+    <div style="display:flex;align-items:center;gap:10px"><div class="tico amber" style="margin:0;width:40px;height:40px">${svg(iconFor(r.id + r.title))}</div><div style="flex:1;min-width:0"><b style="font-size:15px">${esc(r.title)}</b><div class="one">${r.kind === "skill" ? "스킬 후보" : "팀 원칙 후보"} · ${r.prompts}번 반복</div></div><span class="chev">▶</span></div>
+    <div class="more">${esc(r.description)}
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><span class="chip">🔁 ${r.prompts}번 요청</span><span class="chip">🗂 세션 ${r.sessions}개</span>${r.kind === "skill" && r.avgSteps ? `<span class="chip">🪜 요청당 약 ${r.avgSteps}단계</span>` : ""}</div>
+      ${r.examples.length ? `<div style="border-left:2px solid var(--line);padding-left:10px;margin-top:8px">${r.examples.map(e => "\"" + esc(e) + "\"").join("<br>")}</div>` : ""}
+      <div style="display:flex;gap:8px;margin-top:10px">
+        ${r.kind === "skill" ? `<button class="primary" onclick="act(${jsq(r.title + ' 초안 만들기')}, '/api/draft', {id:${jsq(r.id)}}, this)">스킬 초안 만들기</button>`
+          : `<button class="primary" onclick="toast('📝 팀 원칙으로 제안하기', '팀 공통 원칙(kit/context/AGENTS.md)에 아래 한 줄을 추가하는 PR을 올려 주세요.\\n\\n- ' + ${jsq(r.description)})">원칙으로 제안</button>`}
+        <button onclick="act(${jsq(r.title + ' 숨기기')}, '/api/dismiss', {id:${jsq(r.id)}}, this)">나중에</button>
+      </div></div></div>`;
 }
 
 function usageLine(k) {
   if (k.usage === "off") return `<span class="mut">사용 기록 꺼짐 (설정에서 켜면 횟수·마지막 사용일이 보여요)</span>`;
   const last = k.lastUsed ? "마지막 " + new Date(k.lastUsed).toLocaleDateString("ko-KR", {month: "numeric", day: "numeric"}) : "쓴 적 없음";
-  const tag = k.usage === "unused" ? ` <span style="background:var(--red-bg);color:var(--red);border-radius:999px;padding:2px 8px;font-size:12px;white-space:nowrap" title="30일 넘게 기록했는데 한 번도 안 썼어요. 필요 없으면 꺼 두세요">정리 후보</span>` : "";
+  const tag = k.usage === "unused" ? ` <span class="chip red" title="30일 넘게 기록했는데 한 번도 안 썼어요. 필요 없으면 꺼 두세요">정리 후보</span>` : "";
   const bar = `<span style="display:inline-block;width:60px;height:6px;background:var(--line);border-radius:3px;vertical-align:middle;margin:0 6px"><span style="display:block;width:${Math.min(100, k.share30)}%;height:100%;background:var(--blue);border-radius:3px"></span></span>`;
-  return `<span class="mut">최근 30일 ${k.used30}회${bar}${k.share30}% · ${last}${tag}</span>`;
+  return `<span class="mut">최근 30일 ${k.used30}회${bar}${k.share30}% · ${last}</span>${tag}`;
 }
-
+function verified(k) {
+  return k.verifiedTotal ? `<span class="chip ${k.verifiedPassed === k.verifiedTotal ? "green" : "amber"}">검증 ${k.verifiedPassed}/${k.verifiedTotal}</span>` : `<span class="chip">검증 기록 없음</span>`;
+}
 function renderLibrary() {
   const order = {unused: 0, used: 1, short: 2, off: 3};
-  const ks = S.skills.filter(k => match(k.name, k.description))
-    .sort((a, b) => (order[a.usage] - order[b.usage]) || (b.used30 - a.used30));   // 정리 후보 먼저, 그다음 많이 쓴 순
+  const ks = S.skills.filter(k => match(k.name, k.description, k.summary))
+    .sort((a, b) => (order[a.usage] - order[b.usage]) || (b.used30 - a.used30));
   $("skills").innerHTML = ks.map(k => `
-    <div class="card" style="display:flex;flex-direction:column;gap:10px">
-      <div style="display:flex;align-items:center;gap:12px"><div class="tico" style="margin:0">${svg(iconFor(k.name))}</div><div style="flex:1;min-width:0"><b style="font-size:16px">${esc(k.name)}</b><div class="mut">${k.verifiedTotal ? `<span style="color:${k.verifiedPassed === k.verifiedTotal ? "var(--green)" : "var(--amber)"}">검증 ${k.verifiedPassed}/${k.verifiedTotal}</span> · ` + esc(k.verifiedDate || "") : k.verifiedCases ? "검증 상황 " + k.verifiedCases + "개 · " + esc(k.verifiedDate || "") : "검증 기록 없음"}</div></div>
+    <div class="card item" onclick="toggle(this,event)">
+      <div style="display:flex;align-items:center;gap:12px"><div class="tico ${tone(k.name)}" style="margin:0">${svg(iconFor(k.name))}</div>
+        <div style="flex:1;min-width:0"><b style="font-size:16px">${esc(k.name)}</b><div class="one">${esc(k.summary)}</div></div>
         <div class="sw ${k.enabled ? "on" : ""}" role="switch" aria-checked="${k.enabled}" aria-label="${esc(k.name)} 켜기" onclick="act(${jsq(k.name + (k.enabled ? ' 끄기' : ' 켜기'))}, '/api/skill', {name:${jsq(k.name)}, on:${!k.enabled}})"></div></div>
-      <div class="sub">${esc(k.description)}</div>
-      <div>${usageLine(k)}</div>
-      <div style="display:flex;justify-content:space-between;align-items:center"><span class="mut">내 평가 👍 ${k.myUp} · 👎 ${k.myDown}</span><button class="ghost" style="white-space:nowrap" onclick="openSkill(${jsq(k.name)})">사용법 보기 →</button></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:10px">${verified(k)}<span style="flex:1"></span><span class="chev">▶</span></div>
+      <div class="more">${esc(k.description)}
+        <div style="margin-top:8px">${usageLine(k)}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><span class="mut">내 평가 👍 ${k.myUp} · 👎 ${k.myDown}</span><button class="ghost" onclick="openSkill(${jsq(k.name)})">자세히 보기 →</button></div>
+      </div>
     </div>`).join("") || `<div class="empty">검색 결과가 없어요</div>`;
   const rs = S.recommendations.filter(r => match(r.title, r.description));
   $("recs").innerHTML = rs.length ? `<div class="grid-cards">${rs.map(recCard).join("")}</div>` : `<div class="empty">지금은 추천할 반복 작업이 없어요</div>`;
 }
 
+function renderAgents() {
+  const tools = S.tools || [];
+  $("agents").innerHTML = tools.map(t => {
+    const st = t.installed ? (t.rules === false ? `<span class="chip amber">● 원칙 연결 없음</span>` : `<span class="chip green">● 연결됨</span>`)
+      : t.detected ? `<span class="chip amber">● 있지만 미연결</span>` : `<span class="chip">이 PC에 없음</span>`;
+    const one = t.installed ? `스킬 ${t.skills}개 · 공통 원칙 ${t.rules === false ? "없음" : "연결"}${t.autoUpdate ? " · 자동 업데이트" : ""}` : t.detected ? "업데이트하거나 아래 버튼을 누르면 연결돼요" : "이 도구를 설치하면 다음 업데이트 때 자동으로 연결돼요";
+    return `<div class="card item" onclick="toggle(this,event)">
+      <div style="display:flex;align-items:center;gap:12px"><div class="tico ${t.installed ? "" : "amber"}" style="margin:0">${svg('<rect x="4" y="7" width="16" height="12" rx="4"/><path d="M12 7V4M9 13h.01M15 13h.01"/>')}</div>
+        <div style="flex:1;min-width:0"><b style="font-size:16px">${esc(t.name)}</b><div class="one">${esc(one)}</div></div>${st}</div>
+      <div class="more">스킬 폴더 <code>${esc(t.skillsDir)}</code><br>공통 원칙 <code>${esc(t.contextFile)}</code>
+        ${t.id === "claude" ? `<br>자동 업데이트: ${t.autoUpdate ? "켜짐 (세션을 열 때 6시간에 한 번)" : "꺼짐 (설정에서 켤 수 있어요)"}` : `<br>업데이트: 화면의 업데이트 버튼이나 "키트 업데이트해줘"`}
+        ${!t.installed && t.detected ? `<div style="margin-top:10px"><button class="primary" onclick="act(${jsq(t.name + ' 연결')}, '/api/install', {tool:${jsq(t.id)}}, this)">지금 연결</button></div>` : ""}</div>
+    </div>`;
+  }).join("") || `<div class="empty">AI 도구 정보를 불러오지 못했어요</div>`;
+}
+
 function rateButtons(a) {
   if (a.kind !== "ai" || !a.skills || !a.skills.length) return "";
   const sk = a.skills[0], sel = v => a.rating === v ? "sel" : "";
-  return `<div class="rate">
+  return `<div class="rate" style="margin-top:8px">
     <button class="${sel("up")}" title="도움이 됐어요" onclick="act('평가', '/api/rate', {session:${jsq(a.id)}, skill:${jsq(sk)}, rating:'up'})">👍</button>
     <button class="${sel("down")}" title="별로였어요" onclick="act('평가', '/api/rate', {session:${jsq(a.id)}, skill:${jsq(sk)}, rating:'down'})">👎</button>
     <button class="${sel("wrong")}" onclick="const n=prompt('실제 원인이나 정답은 무엇이었나요? (AI 실수 노트에 기록돼요)'); if(n!==null) act('AI가 틀렸어요', '/api/rate', {session:${jsq(a.id)}, skill:${jsq(sk)}, rating:'wrong', note:n})">AI가 틀렸어요</button>
   </div>`;
 }
+function activityItem(a) {
+  return `<div class="item" onclick="toggle(this,event)"><div class="row"><span class="dot" style="background:${a.kind === "improve" ? "var(--green)" : "var(--blue)"}"></span><div style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(a.title)}</div><span class="mut">${esc(ago(a.time))}</span><span class="chev">▶</span></div>
+    <div class="more">${esc(a.detail)}${a.project ? `<div class="mut">${esc(a.project)}</div>` : ""}${rateButtons(a)}</div></div>`;
+}
 function renderActivity() {
   const list = S.activity.filter(a => match(a.title, a.detail, a.project));
-  $("activity").innerHTML = list.map(a => `
-    <div class="act" style="align-items:flex-start;padding:14px 0">
-      <span class="dot" style="margin-top:7px;background:${a.kind === "improve" ? "var(--green)" : "var(--blue)"}"></span>
-      <div style="flex:1;min-width:0"><div style="font-weight:600">${esc(a.title)}</div><div class="sub">${esc(a.detail)}</div><div class="mut">${esc(ago(a.time))}${a.project ? " · " + esc(a.project) : ""}</div></div>
-      ${rateButtons(a)}
-    </div>`).join("") || `<div class="empty">기록이 없어요</div>`;
+  $("activity").innerHTML = list.map(activityItem).join("") || `<div class="empty">기록이 없어요</div>`;
   $("notes").innerHTML = S.notes.map(n => `
-    <div class="act"><span style="font-size:18px" title="${n.source === "auto" ? "자동 발견" : "직접 등록"}">${n.source === "auto" ? "🤖" : "🙋"}</span>
-      <div style="flex:1;min-width:0"><div style="font-size:14px">${esc(n.text)}</div>${n.actual ? `<div class="mut">실제: ${esc(n.actual)}</div>` : ""}</div>
-      ${n.reflected ? `<span class="chip green">스킬에 반영</span>` : `<span class="chip">아직</span>`}</div>`).join("") || `<div class="empty">기록된 실수가 없어요</div>`;
+    <div class="item" onclick="toggle(this,event)"><div class="row"><span style="font-size:18px">${n.source === "auto" ? "🤖" : "🙋"}</span>
+      <div style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(n.text)}</div>${n.reflected ? `<span class="chip green">스킬에 반영</span>` : `<span class="chip">아직</span>`}<span class="chev">▶</span></div>
+      <div class="more">${esc(n.text)}${n.actual ? `<div style="margin-top:6px">실제: ${esc(n.actual)}</div>` : ""}<div class="mut" style="margin-top:6px">${n.source === "auto" ? "같은 작업이 계속 실패해서 자동으로 찾았어요" : "직접 남긴 기록이에요"}</div></div></div>`).join("") || `<div class="empty">기록된 실수가 없어요</div>`;
 }
 
 function renderSettings() {
   $("health").innerHTML = S.health.map(h => {
     const icon = {ok: "✅", warn: "⚠️", error: "❌", info: "·"}[h.level] || "·";
     const btn = h.installTool ? ` <button style="padding:3px 10px" onclick="act(${jsq(h.installTool + ' 설치')}, '/api/install', {tool:${jsq(h.installTool)}}, this)">설치</button>` : "";
-    return `<div style="padding:5px 0">${icon} ${esc(h.text)}${btn}</div>`;
+    return `<div style="padding:5px 0;font-size:14px">${icon} ${esc(h.text)}${btn}</div>`;
   }).join("") + `<div class="mut" style="margin-top:10px">설치 ${esc(S.version || "-")} · 받아 둔 최신 ${esc(S.latest || "-")} <button style="padding:3px 10px;margin-left:6px" class="${S.updateAvailable ? "primary" : ""}" onclick="act('업데이트', '/api/sync', {}, this)">${S.updateAvailable ? "업데이트" : "업데이트 확인"}</button></div>`;
   $("auto").innerHTML = `
     <div style="display:flex;align-items:center;gap:12px"><div style="flex:1" class="sub">Claude 세션을 열 때 6시간에 한 번 자동으로 업데이트하고, 스킬을 쓰면 사용 횟수를 기록해요. 요청 내용은 남기지 않아요.</div>
       <div class="sw ${S.auto ? "on" : ""}" role="switch" aria-checked="${S.auto}" aria-label="자동 업데이트" onclick="act('자동 업데이트 ${S.auto ? "끄기" : "켜기"}', '/api/auto', {on:${!S.auto}})"></div></div>
-    <div class="mut" style="margin-top:8px">${S.auto ? "켜짐" : "꺼짐"}${S.lastCheck ? " · 마지막 확인 " + esc(ago(S.lastCheck)) : ""} · 바꾸면 ~/.claude/settings.json에 키트 훅만 넣고 빼요</div>`;
+    <div class="mut" style="margin-top:8px">${S.auto ? "켜짐" : "꺼짐"}${S.lastCheck ? " · 마지막 확인 " + esc(ago(S.lastCheck)) : ""}</div>`;
   $("pin").innerHTML = S.pinned
     ? `<div class="sub"><b>${esc(S.pinned)}</b>에 고정돼 있어요. 자동 업데이트도 이 버전에 머물러요.</div><div style="margin-top:10px"><button class="primary" onclick="act('고정 해제', '/api/unpin', {}, this)">고정 풀고 최신으로</button></div>`
     : `<div class="sub">최신 버전을 따라가요.${S.previous ? ` 업데이트 후 문제가 생기면 직전 버전 <b>${esc(S.previous)}</b>로 되돌릴 수 있어요.` : ""}</div>
        <div style="margin-top:10px">${S.previous ? `<button onclick="if(confirm('${esc(S.previous)}로 되돌리고 고정할까요?')) act('되돌리기', '/api/rollback', {}, this)">${esc(S.previous)}로 되돌리기</button>` : `<span class="mut">되돌릴 직전 버전 기록이 아직 없어요</span>`}</div>`;
   $("news").innerHTML = S.news.map((n, i) => `
-    <div style="display:flex;gap:10px;padding:7px 0"><span class="chip ${i === 0 ? "blue" : ""}" style="height:24px">${esc(n.version)}</span><div style="font-size:13px">${n.items.map(md).join("<br>")}<div class="mut">${esc(n.date)}</div></div></div>`).join("") || `<div class="mut">소식이 없어요</div>`;
+    <div class="item" onclick="toggle(this,event)"><div class="row"><span class="chip ${i === 0 ? "blue" : ""}">${esc(n.version)}</span><div style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px">${inline((n.items[0] || "").replace(/\*\*/g, ""))}</div><span class="chev">▶</span></div>
+      <div class="more">${n.items.slice(0, 3).map(inline).join("<br>")}<div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px"><span class="mut">${esc(n.date)}${n.items.length > 3 ? ` · 외 ${n.items.length - 3}개` : ""}</span><button class="ghost" onclick="openNews(${i})">자세히 →</button></div></div></div>`).join("") || `<div class="mut">소식이 없어요</div>`;
 }
 
-function render() { if (!S) return; renderHome(); renderLibrary(); renderActivity(); renderSettings(); }
+function render() { if (!S) return; renderHome(); renderLibrary(); renderAgents(); renderActivity(); renderSettings(); }
 async function load() {
-  if (location.protocol === "file:" || TOKEN.startsWith("__")) { $("hello").textContent = "터미널에서 kit ui 명령으로 열어야 데이터가 보여요"; return; }
-  try { S = await api("/api/state"); render(); }
-  catch (e) { $("hello").textContent = "불러오지 못했어요: " + e.message + " (kit ui 를 다시 실행해 보세요)"; }
+  if (location.protocol === "file:" || TOKEN.startsWith("__")) { $("hello").textContent = "kit ui 명령(또는 시작 메뉴의 팀 AI 키트)으로 열어야 데이터가 보여요"; return; }
+  const open = [...document.querySelectorAll(".item.open")].map(el => el.textContent.slice(0, 40));
+  try { S = await api("/api/state"); render(); document.querySelectorAll(".item").forEach(el => { if (open.includes(el.textContent.slice(0, 40))) el.classList.add("open"); }); }
+  catch (e) { $("hello").textContent = "불러오지 못했어요: " + e.message + " (화면을 다시 열어 보세요)"; }
 }
 load();
 </script>
