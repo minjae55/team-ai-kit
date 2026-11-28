@@ -12,13 +12,22 @@ import picocli.CommandLine.Option;
 
 @Command(name = "kit",
         mixinStandardHelpOptions = true,
-        version = "kit 0.5.0",
+        versionProvider = KitCommand.Version.class,
         description = "팀 AI 키트: 팀 스킬과 공통 지식을 AI 도구(Claude Code, Codex, Gemini CLI)에 설치하고 최신으로 유지한다. 웹 AI용 묶음도 만든다(kit export)",
         subcommands = {UiCommand.class, InstallCommand.class, SyncCommand.class, DoctorCommand.class, ListCommand.class,
                 SkillCommand.class, kit.command.AutoCommand.class, kit.command.PinCommands.Pin.class,
                 kit.command.PinCommands.Unpin.class, kit.command.PinCommands.Rollback.class,
                 kit.command.TrackCommand.class, kit.command.ExportCommand.class, kit.command.InitCommand.class, kit.command.WatchCommand.class, UninstallCommand.class})
 public class KitCommand implements Runnable {
+
+    /** kit --version: jar 의 Implementation-Version (배포 때 tools/release.sh 가 넣음) */
+    static class Version implements picocli.CommandLine.IVersionProvider {
+        @Override
+        public String[] getVersion() {
+            String v = KitCommand.class.getPackage().getImplementationVersion();
+            return new String[]{"kit " + (v == null ? "개발 빌드" : v)};
+        }
+    }
 
     @Option(names = "--home", hidden = true, description = "홈 폴더 대신 쓸 경로 (테스트용)")
     public String home;
