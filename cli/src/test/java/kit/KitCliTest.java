@@ -289,6 +289,21 @@ class KitCliTest {
     }
 
     @Test
+    void antigravity_shares_gemini_rules_without_duplicating_and_gets_its_own_skills_folder() throws IOException {
+        Files.createDirectories(home.resolve(".gemini/config"));   // Antigravity 2.0 (그리고 ~/.gemini 가 있으니 Gemini CLI도 감지)
+        assertEquals(0, kit("install"));
+        assertTrue(Files.exists(home.resolve(".gemini/config/skills/incident-analysis/SKILL.md")), "Antigravity 스킬 폴더");
+        assertTrue(Files.exists(home.resolve(".gemini/skills/incident-analysis/SKILL.md")), "Gemini CLI 스킬 폴더");
+        String rules = new String(Files.readAllBytes(home.resolve(".gemini/GEMINI.md")), StandardCharsets.UTF_8);
+        String marker = rules.split("\n")[0];
+        assertEquals(rules.indexOf(marker), rules.lastIndexOf(marker), "공통 원칙은 한 번만: " + rules.substring(0, Math.min(200, rules.length())));
+        assertEquals(0, kit("uninstall"));
+        assertFalse(Files.exists(home.resolve(".gemini/config/skills/incident-analysis")));
+        Path gm = home.resolve(".gemini/GEMINI.md");
+        assertTrue(!Files.exists(gm) || !new String(Files.readAllBytes(gm), StandardCharsets.UTF_8).contains("팀"), "키트가 만든 파일은 지워지거나 구역이 빠짐");
+    }
+
+    @Test
     void only_selected_tool_is_installed() {
         assertEquals(0, kit("install", "--tools", "claude"));
         assertTrue(Files.exists(home.resolve(".claude/skills/incident-analysis")));

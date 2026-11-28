@@ -70,6 +70,7 @@ kit watch --project <폴더>   # 알림 웹훅을 받아 incident-analysis로 �
 | Claude Code | `~/.claude/skills/` | `~/.claude/CLAUDE.md` (import) | ✅ 세션 시작 훅 | 실사용 검증 |
 | Codex | `~/.agents/skills/` | `~/.codex/AGENTS.md` (복사) | `kit sync` 직접 | 문서 기준 지원, 실사용 미검증 |
 | Gemini CLI | `~/.gemini/skills/` | `~/.gemini/GEMINI.md` (복사) | `kit sync` 직접 | 문서 기준 지원, 실사용 미검증 (`gemini`를 한 번 실행해 `~/.gemini`가 생긴 뒤 감지) |
+| Antigravity (구글 에이전트 IDE·앱) | `~/.gemini/config/skills/` (예전 IDE는 `~/.gemini/antigravity/skills/`) | `~/.gemini/GEMINI.md` (Gemini CLI와 같은 구역) | `kit sync`·자동 업데이트 때 새로 깔린 것 감지 | 문서 기준 지원, 실사용 미검증 |
 | 웹 AI (claude.ai·ChatGPT·Gemini) | `kit export`로 올릴 묶음 생성 | 지침에 포함 | 바뀐 스킬 알림 (올리기는 사람) | 내보내기만 |
 - 키트가 만든 것만 건드린다. 같은 이름의 개인 스킬과 직접 쓴 지침은 그대로 둔다
 - 설계: [docs/cli-design.md](docs/cli-design.md)
